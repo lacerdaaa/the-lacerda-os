@@ -2,6 +2,11 @@
   box-sizing: border-box;
 }
 
+:root {
+  --cursor-retro: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNicgaGVpZ2h0PScxNicgc2hhcGUtcmVuZGVyaW5nPSdjcmlzcEVkZ2VzJz48cGF0aCBmaWxsPScjMDAwJyBkPSdNMSAxdjEwaDJWOGwzIDMgMS0xLTMtM2gzVjVINFYxeicvPjxwYXRoIGZpbGw9JyNmZmYnIGQ9J00yIDJ2N2gxVjZoMkwyIDN6Jy8+PC9zdmc+") 1 1, auto;
+  --cursor-retro-pointer: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNicgaGVpZ2h0PScxNicgc2hhcGUtcmVuZGVyaW5nPSdjcmlzcEVkZ2VzJz48cGF0aCBmaWxsPScjMDAwJyBkPSdNMSAxdjEwaDJWOGwzIDMgMS0xLTMtM2gzVjVINFYxeicvPjxwYXRoIGZpbGw9JyNmZmYnIGQ9J00yIDJ2N2gxVjZoMkwyIDN6Jy8+PC9zdmc+") 1 1, pointer;
+}
+
 html,
 body {
   width: 100%;
@@ -13,4 +18,17 @@ body {
   font-family: 'Chicago', 'Charcoal', 'Geneva', 'MS Sans Serif', 'Tahoma', sans-serif;
   background: #181818;
   image-rendering: crisp-edges;
+}
+
+body,
+body * {
+  cursor: var(--cursor-retro);
+}
+
+a,
+button,
+[role='button'],
+.window-titlebar,
+.resize-handle {
+  cursor: var(--cursor-retro-pointer);
 }
