@@ -459,7 +459,7 @@ GitHub: github.com/lacerdaaa`;
     this.githubProjectsError.set(null);
 
     try {
-      const response = await fetch('https://api.github.com/users/lacerdaaa/repos?sort=updated&per_page=12');
+      const response = await fetch('https://api.github.com/users/lacerdaaa/repos?sort=updated&per_page=100');
       if (!response.ok) {
         throw new Error(`GitHub API returned ${response.status}`);
       }
@@ -467,6 +467,19 @@ GitHub: github.com/lacerdaaa`;
       const repos = await response.json() as GithubRepoResponse[];
       const normalized = repos
         .filter((repo) => !repo.fork && !repo.archived)
+        .sort((a, b) => {
+          const aHasStars = a.stargazers_count > 0 ? 1 : 0;
+          const bHasStars = b.stargazers_count > 0 ? 1 : 0;
+          if (aHasStars !== bHasStars) {
+            return bHasStars - aHasStars;
+          }
+
+          if (a.stargazers_count !== b.stargazers_count) {
+            return b.stargazers_count - a.stargazers_count;
+          }
+
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        })
         .map((repo) => ({
           id: repo.id,
           name: repo.name,
