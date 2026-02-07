@@ -169,15 +169,20 @@
   border-bottom: 1px solid #1f1f1f;
   box-shadow: inset 1px 1px 0 #d8d8d8, inset -1px -1px 0 #787878;
   background: #d9d9d9;
-  color: #000;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  font-weight: 700;
+  position: relative;
 }
 
-.workspace-item.file .workspace-icon {
-  background: #efefef;
+.dock-icon {
+  width: 34px;
+  height: 28px;
+  display: block;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #666;
+  border-bottom: 1px solid #666;
+  box-shadow: inset 1px 1px 0 #e4e4e4, inset -1px -1px 0 #7a7a7a;
+  background: #d8d8d8;
+  position: relative;
 }
 
 .workspace-label {
@@ -185,6 +190,111 @@
   line-height: 1.15;
   text-align: center;
   text-shadow: 1px 1px #005454;
+}
+
+.workspace-icon::before,
+.workspace-icon::after,
+.dock-icon::before,
+.dock-icon::after {
+  content: '';
+  position: absolute;
+}
+
+.workspace-icon[data-icon='finder']::before,
+.dock-icon[data-icon='finder']::before {
+  left: 7px;
+  top: 5px;
+  width: 22px;
+  height: 20px;
+  border: 1px solid #222;
+  background: linear-gradient(90deg, #8fd2ff 0 50%, #6db8f3 50% 100%);
+}
+
+.workspace-icon[data-icon='finder']::after,
+.dock-icon[data-icon='finder']::after {
+  left: 12px;
+  top: 11px;
+  width: 2px;
+  height: 2px;
+  background: #000;
+  box-shadow: 8px 0 #000;
+}
+
+.workspace-icon[data-icon='terminal']::before,
+.dock-icon[data-icon='terminal']::before {
+  left: 6px;
+  top: 5px;
+  width: 24px;
+  height: 20px;
+  border: 1px solid #173000;
+  background: #001200;
+}
+
+.workspace-icon[data-icon='terminal']::after,
+.dock-icon[data-icon='terminal']::after {
+  left: 10px;
+  top: 11px;
+  content: '>_';
+  color: #3aff7f;
+  font-family: 'Courier New', monospace;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.workspace-icon[data-icon='projects']::before,
+.dock-icon[data-icon='projects']::before {
+  left: 6px;
+  top: 10px;
+  width: 24px;
+  height: 14px;
+  border: 1px solid #7a5a00;
+  background: #f7c75f;
+}
+
+.workspace-icon[data-icon='projects']::after,
+.dock-icon[data-icon='projects']::after {
+  left: 8px;
+  top: 6px;
+  width: 10px;
+  height: 5px;
+  border: 1px solid #7a5a00;
+  border-bottom: 0;
+  background: #ffd980;
+}
+
+.workspace-icon[data-icon='notes']::before,
+.workspace-icon[data-icon='textviewer']::before,
+.workspace-icon[data-icon='file']::before,
+.dock-icon[data-icon='notes']::before,
+.dock-icon[data-icon='textviewer']::before {
+  left: 9px;
+  top: 5px;
+  width: 20px;
+  height: 22px;
+  border: 1px solid #666;
+  background:
+    linear-gradient(135deg, transparent 0 76%, #cfcfcf 76% 100%),
+    repeating-linear-gradient(#fff 0 4px, #e8eefb 4px 5px);
+}
+
+.workspace-icon[data-icon='about']::before,
+.dock-icon[data-icon='about']::before {
+  left: 10px;
+  top: 6px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #173f86;
+  background: #4d8fe6;
+}
+
+.workspace-icon[data-icon='about']::after,
+.dock-icon[data-icon='about']::after {
+  left: 16px;
+  top: 10px;
+  content: 'i';
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .window {
@@ -543,20 +653,6 @@ textarea {
   border-bottom: 1px solid #fff;
 }
 
-.dock-item span {
-  width: 34px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-right: 1px solid #666;
-  border-bottom: 1px solid #666;
-  background: #d8d8d8;
-  font-size: 10px;
-  font-weight: 700;
-}
-
 .dock-item small {
   font-size: 10px;
   line-height: 1;
@@ -569,7 +665,7 @@ textarea {
   background: #000;
 }
 
-.dock-item.minimized span {
+.dock-item.minimized .dock-icon {
   opacity: 0.6;
 }
 
@@ -581,7 +677,7 @@ textarea {
   background: #b7b7b7;
 }
 
-.dock-item.active span {
+.dock-item.active .dock-icon {
   border-top: 1px solid #555;
   border-left: 1px solid #555;
   border-right: 1px solid #fff;

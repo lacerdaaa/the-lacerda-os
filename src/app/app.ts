@@ -384,6 +384,18 @@ GitHub: github.com/lacerdaaa`;
     );
   }
 
+  protected getAppIconKey(appId: AppId): string {
+    return appId;
+  }
+
+  protected getWorkspaceIconKey(item: WorkspaceItem): string {
+    if (item.kind === 'file') {
+      return 'file';
+    }
+
+    return this.getAppIconKey(item.appId);
+  }
+
   protected getProjectUpdatedLabel(updatedAt: string): string {
     return updatedAt.slice(0, 10);
   }

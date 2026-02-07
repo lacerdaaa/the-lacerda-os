@@ -26,7 +26,11 @@
                 [style.grid-row]="item.row"
                 (click)="openWorkspaceItem(item)"
               >
-                <span class="workspace-icon">{{ item.code }}</span>
+                <span
+                  class="workspace-icon"
+                  [attr.data-icon]="getWorkspaceIconKey(item)"
+                  aria-hidden="true"
+                ></span>
                 <span class="workspace-label">{{ item.name }}</span>
               </button>
             }
@@ -221,7 +225,11 @@ Next milestones:
             [class.minimized]="isAppMinimized(app.appId)"
             (click)="openApp(app.appId)"
           >
-            <span>{{ app.code }}</span>
+            <span
+              class="dock-icon"
+              [attr.data-icon]="getAppIconKey(app.appId)"
+              aria-hidden="true"
+            ></span>
             <small>{{ app.name }}</small>
           </button>
         }
