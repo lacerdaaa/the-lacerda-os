@@ -65,6 +65,7 @@ interface ContextMenuItem {
     | 'open-terminal'
     | 'open-books'
     | 'reset-dock'
+    | 'themes'
     | 'theme-classic'
     | 'theme-sunset'
     | 'theme-grid';
@@ -79,6 +80,13 @@ interface ContextMenuState {
   y: number;
   appId: AppId | null;
   fileName: string | null;
+  items: ContextMenuItem[];
+}
+
+interface ContextSubmenuState {
+  visible: boolean;
+  x: number;
+  y: number;
   items: ContextMenuItem[];
 }
 
@@ -281,6 +289,12 @@ GitHub: github.com/lacerdaaa`;
     y: 0,
     appId: null,
     fileName: null,
+    items: []
+  });
+  protected readonly contextSubmenu = signal<ContextSubmenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
     items: []
   });
 
@@ -527,9 +541,7 @@ GitHub: github.com/lacerdaaa`;
     this.openContextMenuAt(event.clientX, event.clientY, null, null, [
       { id: 'open-terminal', label: 'Abrir Terminal' },
       { id: 'open-books', label: 'Abrir Books' },
-      { id: 'theme-classic', label: this.getThemeContextLabel('classic') },
-      { id: 'theme-sunset', label: this.getThemeContextLabel('sunset') },
-      { id: 'theme-grid', label: this.getThemeContextLabel('grid') },
+      { id: 'themes', label: 'Temas >' },
       { id: 'reset-dock', label: 'Restaurar dock padrao' }
     ]);
   }
@@ -581,6 +593,32 @@ GitHub: github.com/lacerdaaa`;
     ]);
   }
 
+  protected onContextMenuItemEnter(item: ContextMenuItem, event: MouseEvent): void {
+    if (item.id !== 'themes') {
+      this.closeThemeSubmenu();
+      return;
+    }
+
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+
+    const bounds = target.getBoundingClientRect();
+    const submenuWidth = 184;
+    const submenuHeight = 100;
+    const margin = 6;
+    const clampedX = Math.min(bounds.right + 4, window.innerWidth - submenuWidth - margin);
+    const clampedY = Math.min(bounds.top - 2, window.innerHeight - submenuHeight - margin);
+
+    this.contextSubmenu.set({
+      visible: true,
+      x: Math.max(margin, clampedX),
+      y: Math.max(margin, clampedY),
+      items: this.getThemeMenuItems()
+    });
+  }
+
   protected handleContextMenuAction(actionId: ContextMenuItem['id']): void {
     const menu = this.contextMenu();
 
@@ -620,6 +658,8 @@ GitHub: github.com/lacerdaaa`;
         this.dockAppIds.set([...this.defaultDockAppIds]);
         this.persistDockToStorage();
         break;
+      case 'themes':
+        break;
       case 'theme-classic':
         this.setDesktopTheme('classic');
         break;
@@ -635,6 +675,7 @@ GitHub: github.com/lacerdaaa`;
   }
 
   protected closeContextMenu(): void {
+    this.closeThemeSubmenu();
     if (!this.contextMenu().visible) {
       return;
     }
@@ -645,6 +686,19 @@ GitHub: github.com/lacerdaaa`;
       y: 0,
       appId: null,
       fileName: null,
+      items: []
+    });
+  }
+
+  protected closeThemeSubmenu(): void {
+    if (!this.contextSubmenu().visible) {
+      return;
+    }
+
+    this.contextSubmenu.set({
+      visible: false,
+      x: 0,
+      y: 0,
       items: []
     });
   }
@@ -1202,6 +1256,7 @@ GitHub: github.com/lacerdaaa`;
     fileName: string | null,
     items: ContextMenuItem[]
   ): void {
+    this.closeThemeSubmenu();
     const menuWidth = 190;
     const menuHeight = Math.max(36, items.length * 30 + 8);
     const margin = 6;
@@ -1301,6 +1356,14 @@ GitHub: github.com/lacerdaaa`;
   private setDesktopTheme(theme: DesktopTheme): void {
     this.desktopTheme.set(theme);
     this.persistDesktopThemeToStorage();
+  }
+
+  private getThemeMenuItems(): ContextMenuItem[] {
+    return [
+      { id: 'theme-classic', label: this.getThemeContextLabel('classic') },
+      { id: 'theme-sunset', label: this.getThemeContextLabel('sunset') },
+      { id: 'theme-grid', label: this.getThemeContextLabel('grid') }
+    ];
   }
 
   private getThemeContextLabel(theme: DesktopTheme): string {

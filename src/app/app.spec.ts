@@ -336,6 +336,25 @@ describe('App', () => {
     expect(localStorage.getItem('lacos.desktop.theme')).toBe('sunset');
   });
 
+  it('should open theme submenu on hover in context menu', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    const mouseEvent = {
+      currentTarget: {
+        getBoundingClientRect: () => ({ right: 120, top: 80 })
+      }
+    } as unknown as MouseEvent;
+
+    app.onContextMenuItemEnter({ id: 'themes', label: 'Temas' }, mouseEvent);
+    expect(app.contextSubmenu().visible).toBe(true);
+    expect(app.contextSubmenu().items.some((item: { id: string }) => item.id === 'theme-classic')).toBe(true);
+
+    app.onContextMenuItemEnter({ id: 'open-terminal', label: 'Abrir Terminal' }, mouseEvent);
+    expect(app.contextSubmenu().visible).toBe(false);
+  });
+
   it('should restore desktop theme from storage', () => {
     localStorage.setItem('lacos.desktop.theme', 'grid');
     const fixture = TestBed.createComponent(App);

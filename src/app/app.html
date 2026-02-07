@@ -274,12 +274,35 @@ Next milestones:
               class="context-menu-item"
               [class.danger]="item.danger"
               [disabled]="item.disabled"
+              (mouseenter)="onContextMenuItemEnter(item, $event)"
               (click)="handleContextMenuAction(item.id)"
             >
               {{ item.label }}
             </button>
           }
         </div>
+
+        @if (contextSubmenu().visible) {
+          <div
+            class="context-menu context-submenu"
+            [style.left.px]="contextSubmenu().x"
+            [style.top.px]="contextSubmenu().y"
+            (click)="$event.stopPropagation()"
+            (mouseleave)="closeThemeSubmenu()"
+          >
+            @for (item of contextSubmenu().items; track item.id) {
+              <button
+                type="button"
+                class="context-menu-item"
+                [class.danger]="item.danger"
+                [disabled]="item.disabled"
+                (click)="handleContextMenuAction(item.id)"
+              >
+                {{ item.label }}
+              </button>
+            }
+          </div>
+        }
       }
 
       @if (isBooting()) {
