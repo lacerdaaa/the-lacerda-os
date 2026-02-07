@@ -4,6 +4,8 @@
 
 :root {
   --cursor-retro-default: url('/cursors/retro-default.svg') 1 1, auto;
+  --cursor-retro-default-boost: url('/cursors/retro-default-boost.svg') 1 1, auto;
+  --cursor-retro-default-active: var(--cursor-retro-default);
   --cursor-retro-pointer: url('/cursors/retro-pointer.svg') 8 2, pointer;
   --cursor-retro-text: url('/cursors/retro-text.svg') 16 16, text;
   --cursor-retro-move: url('/cursors/retro-move.svg') 16 16, move;
@@ -25,7 +27,11 @@ body {
 
 body,
 body * {
-  cursor: var(--cursor-retro-default);
+  cursor: var(--cursor-retro-default-active);
+}
+
+body.cursor-boost {
+  --cursor-retro-default-active: var(--cursor-retro-default-boost);
 }
 
 a,

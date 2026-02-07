@@ -150,6 +150,9 @@ export class App implements OnDestroy {
   private readonly dockStorageKey = 'lacos.dock.apps';
   private readonly desktopThemeStorageKey = 'lacos.desktop.theme';
   private readonly mobileLayoutMaxWidth = 900;
+  private readonly cursorBoostClassName = 'cursor-boost';
+  private readonly cursorBoostSpeedThreshold = 1800;
+  private readonly cursorBoostDurationMs = 140;
   private readonly terminalVirtualPath = '/Users/eduardo/Desktop';
   private readonly terminalCommandNames = [
     'help',
@@ -325,6 +328,8 @@ GitHub: github.com/lacerdaaa`;
   private terminalSnakeLosses = 0;
   private terminalSnakeBestScore = 0;
   private snakeTickIntervalId: number | null = null;
+  private cursorBoostTimeoutId: number | null = null;
+  private lastPointerSample: { x: number; y: number; time: number } | null = null;
   private readonly clockInterval = window.setInterval(() => {
     this.timeLabel.set(this.formatTime());
   }, 30000);
@@ -341,6 +346,7 @@ GitHub: github.com/lacerdaaa`;
     window.clearInterval(this.clockInterval);
     this.clearBootTimers();
     this.stopSnakeTicker();
+    this.clearCursorBoost();
   }
 
   protected openApp(appId: AppId): void {
@@ -1611,6 +1617,8 @@ GitHub: github.com/lacerdaaa`;
 
   @HostListener('window:pointermove', ['$event'])
   protected onPointerMove(event: PointerEvent): void {
+    this.trackCursorBoost(event);
+
     if (this.dragState) {
       const draggedWindow = this.windows().find(
         (windowState) => windowState.id === this.dragState?.windowId
@@ -1692,6 +1700,53 @@ GitHub: github.com/lacerdaaa`;
   protected onPointerEnd(): void {
     this.dragState = null;
     this.resizeState = null;
+  }
+
+  private trackCursorBoost(event: PointerEvent): void {
+    const sampleTime = event.timeStamp || performance.now();
+    if (!Number.isFinite(sampleTime)) {
+      return;
+    }
+
+    if (!this.lastPointerSample) {
+      this.lastPointerSample = { x: event.clientX, y: event.clientY, time: sampleTime };
+      return;
+    }
+
+    const deltaX = event.clientX - this.lastPointerSample.x;
+    const deltaY = event.clientY - this.lastPointerSample.y;
+    const deltaTime = Math.max(1, sampleTime - this.lastPointerSample.time);
+    const traveled = Math.hypot(deltaX, deltaY);
+    const speed = (traveled * 1000) / deltaTime;
+
+    if (speed >= this.cursorBoostSpeedThreshold) {
+      this.enableCursorBoost();
+    }
+
+    this.lastPointerSample = { x: event.clientX, y: event.clientY, time: sampleTime };
+  }
+
+  private enableCursorBoost(): void {
+    document.body.classList.add(this.cursorBoostClassName);
+
+    if (this.cursorBoostTimeoutId !== null) {
+      window.clearTimeout(this.cursorBoostTimeoutId);
+    }
+
+    this.cursorBoostTimeoutId = window.setTimeout(() => {
+      document.body.classList.remove(this.cursorBoostClassName);
+      this.cursorBoostTimeoutId = null;
+    }, this.cursorBoostDurationMs);
+  }
+
+  private clearCursorBoost(): void {
+    if (this.cursorBoostTimeoutId !== null) {
+      window.clearTimeout(this.cursorBoostTimeoutId);
+      this.cursorBoostTimeoutId = null;
+    }
+
+    this.lastPointerSample = null;
+    document.body.classList.remove(this.cursorBoostClassName);
   }
 
   private createWindow(appId: AppId): WindowState {
