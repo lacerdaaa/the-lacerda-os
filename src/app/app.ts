@@ -57,7 +57,17 @@ interface BookItem {
 }
 
 interface ContextMenuItem {
-  id: 'open' | 'pin' | 'unpin' | 'open-file' | 'open-terminal' | 'open-books' | 'reset-dock';
+  id:
+    | 'open'
+    | 'pin'
+    | 'unpin'
+    | 'open-file'
+    | 'open-terminal'
+    | 'open-books'
+    | 'reset-dock'
+    | 'theme-classic'
+    | 'theme-sunset'
+    | 'theme-grid';
   label: string;
   danger?: boolean;
   disabled?: boolean;
@@ -119,6 +129,8 @@ interface SnakePosition {
   y: number;
 }
 
+type DesktopTheme = 'classic' | 'sunset' | 'grid';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
@@ -128,6 +140,7 @@ export class App implements OnDestroy {
   protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
   private readonly pinnedRepoNames = ['pressum-core-service', 'fynansee-core', 'auto-trace'];
   private readonly dockStorageKey = 'lacos.dock.apps';
+  private readonly desktopThemeStorageKey = 'lacos.desktop.theme';
   private readonly terminalVirtualPath = '/Users/eduardo/Desktop';
   private readonly terminalCommandNames = [
     'help',
@@ -247,6 +260,7 @@ GitHub: github.com/lacerdaaa`;
   protected readonly isBooting = signal(true);
   protected readonly bootVisibleLines = signal(0);
   protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
+  protected readonly desktopTheme = signal<DesktopTheme>('classic');
   protected readonly timeLabel = signal(this.formatTime());
   protected readonly terminalPrompt = 'eduardo@lacOs:~$';
   protected readonly terminalLines = signal<string[]>([
@@ -300,6 +314,7 @@ GitHub: github.com/lacerdaaa`;
   }, 30000);
 
   constructor() {
+    this.restoreDesktopThemeFromStorage();
     this.restoreDockFromStorage();
     this.openApp('about');
     this.beginBootSequence();
@@ -511,6 +526,10 @@ GitHub: github.com/lacerdaaa`;
     event.preventDefault();
     this.openContextMenuAt(event.clientX, event.clientY, null, null, [
       { id: 'open-terminal', label: 'Abrir Terminal' },
+      { id: 'open-books', label: 'Abrir Books' },
+      { id: 'theme-classic', label: this.getThemeContextLabel('classic') },
+      { id: 'theme-sunset', label: this.getThemeContextLabel('sunset') },
+      { id: 'theme-grid', label: this.getThemeContextLabel('grid') },
       { id: 'reset-dock', label: 'Restaurar dock padrao' }
     ]);
   }
@@ -600,6 +619,15 @@ GitHub: github.com/lacerdaaa`;
       case 'reset-dock':
         this.dockAppIds.set([...this.defaultDockAppIds]);
         this.persistDockToStorage();
+        break;
+      case 'theme-classic':
+        this.setDesktopTheme('classic');
+        break;
+      case 'theme-sunset':
+        this.setDesktopTheme('sunset');
+        break;
+      case 'theme-grid':
+        this.setDesktopTheme('grid');
         break;
     }
 
@@ -1267,6 +1295,44 @@ GitHub: github.com/lacerdaaa`;
       localStorage.setItem(this.dockStorageKey, JSON.stringify(this.dockAppIds()));
     } catch {
       // Ignore storage errors in private mode or blocked storage environments.
+    }
+  }
+
+  private setDesktopTheme(theme: DesktopTheme): void {
+    this.desktopTheme.set(theme);
+    this.persistDesktopThemeToStorage();
+  }
+
+  private getThemeContextLabel(theme: DesktopTheme): string {
+    const marker = this.desktopTheme() === theme ? '[x]' : '[ ]';
+    switch (theme) {
+      case 'classic':
+        return `${marker} Tema classico`;
+      case 'sunset':
+        return `${marker} Tema sunset`;
+      case 'grid':
+        return `${marker} Tema grid`;
+      default:
+        return `${marker} Tema`;
+    }
+  }
+
+  private persistDesktopThemeToStorage(): void {
+    try {
+      localStorage.setItem(this.desktopThemeStorageKey, this.desktopTheme());
+    } catch {
+      // Ignore storage errors in private mode or blocked storage environments.
+    }
+  }
+
+  private restoreDesktopThemeFromStorage(): void {
+    try {
+      const raw = localStorage.getItem(this.desktopThemeStorageKey);
+      if (raw === 'classic' || raw === 'sunset' || raw === 'grid') {
+        this.desktopTheme.set(raw);
+      }
+    } catch {
+      // Ignore malformed local storage payloads and keep defaults.
     }
   }
 

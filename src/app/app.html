@@ -1,6 +1,6 @@
 <div class="retro-stage">
   <div class="retro-screen">
-    <div class="desktop-shell" (contextmenu)="openPageContextMenu($event)">
+    <div class="desktop-shell" [attr.data-theme]="desktopTheme()" (contextmenu)="openPageContextMenu($event)">
       <header class="menu-bar">
     <div class="menu-left">
       <button type="button" class="os-mark" (click)="openApp('finder')">lacOs</button>

@@ -316,4 +316,32 @@ describe('App', () => {
     app.handleContextMenuAction('unpin');
     expect(app.dockAppIds().includes('books')).toBe(false);
   });
+
+  it('should change desktop theme through context action', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.contextMenu.set({
+      visible: true,
+      x: 0,
+      y: 0,
+      appId: null,
+      fileName: null,
+      items: []
+    });
+    app.handleContextMenuAction('theme-sunset');
+
+    expect(app.desktopTheme()).toBe('sunset');
+    expect(localStorage.getItem('lacos.desktop.theme')).toBe('sunset');
+  });
+
+  it('should restore desktop theme from storage', () => {
+    localStorage.setItem('lacos.desktop.theme', 'grid');
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    expect(app.desktopTheme()).toBe('grid');
+  });
 });
