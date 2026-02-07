@@ -329,9 +329,11 @@ Next milestones:
 
       @if (isMobileAccessBlocked()) {
         <section class="mobile-access-block" aria-label="Acesso restrito em mobile">
-          <h2>lacOs requer tela maior</h2>
-          <p>Este projeto foi feito para desktop e o layout fica pequeno em dispositivos moveis.</p>
-          <p>Abra em notebook/desktop ou aumente a janela para continuar.</p>
+          <article class="mobile-error-modal" role="alertdialog" aria-labelledby="mobile-error-title">
+            <h2 id="mobile-error-title">[ERRO] Acesso bloqueado</h2>
+            <p>o projeto atualmente so funciona em dispositivos desktop :(</p>
+            <p>acesse em um computador ou ative o modo computador no seu navegador</p>
+          </article>
         </section>
       }
     </div>

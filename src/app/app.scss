@@ -963,26 +963,25 @@ textarea {
   display: grid;
   place-content: center;
   padding: 16px;
-  text-align: center;
-  background: rgba(0, 0, 0, 0.86);
-  color: #d9fff2;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.mobile-error-modal {
+  width: min(480px, calc(100vw - 32px));
+  padding: 10px;
+  background: var(--retro-panel);
+  border: 1px solid #3f3f3f;
+}
+
+.mobile-error-modal h2 {
+  margin: 0 0 6px;
+  padding: 3px 6px;
+  color: #fff;
+  background: #000080;
 }
 
 @media (max-width: 900px) {
-  :host {
-    padding: 6px;
-  }
-
-  .retro-stage {
-    width: calc(100vw - 12px);
-    padding: 6px;
-  }
-
   .dock {
-    display: none;
-  }
-
-  .menu-right {
     display: none;
   }
 }
