@@ -1,0 +1,60 @@
+<div class="desktop-shell">
+  <header class="menu-bar">
+    <div class="menu-left">
+      <button type="button" class="os-mark">OS8</button>
+      @for (item of menuItems; track item) {
+        <button type="button" class="menu-item">{{ item }}</button>
+      }
+    </div>
+    <div class="menu-right">
+      <span>Portfolio Mode</span>
+      <span>Saturday 23:56</span>
+    </div>
+  </header>
+
+  <main class="desktop-surface">
+    <aside class="desktop-icons" aria-label="Desktop icons">
+      @for (shortcut of desktopShortcuts; track shortcut.name) {
+        <button type="button" class="desktop-icon">
+          <span class="icon-badge">{{ shortcut.code }}</span>
+          <span class="icon-label">{{ shortcut.name }}</span>
+        </button>
+      }
+    </aside>
+
+    <section class="window-layer" aria-label="Window layer">
+      <article class="window">
+        <header class="window-titlebar">
+          <div class="window-controls" aria-hidden="true">
+            <span class="control red"></span>
+            <span class="control amber"></span>
+            <span class="control green"></span>
+          </div>
+          <p>Welcome.app</p>
+        </header>
+
+        <div class="window-content">
+          <h1>macOS8 Portfolio</h1>
+          <p>
+            This shell is the foundation of your virtual operating system.
+            Next step is a full window manager with real app state.
+          </p>
+          <div class="window-pills">
+            <span>Angular</span>
+            <span>Standalone Components</span>
+            <span>Virtual Desktop</span>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="dock" aria-label="App dock">
+    @for (app of dockApps; track app.name) {
+      <button type="button" class="dock-item" [class.active]="app.active">
+        <span>{{ app.code }}</span>
+        <small>{{ app.name }}</small>
+      </button>
+    }
+  </footer>
+</div>
