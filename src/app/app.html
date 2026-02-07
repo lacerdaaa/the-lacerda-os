@@ -110,11 +110,6 @@
                       github.com/lacerdaaa
                     </a>
                   </p>
-                  <div class="window-pills">
-                    <span>Angular</span>
-                    <span>Window Manager</span>
-                    <span>Virtual Desktop</span>
-                  </div>
                 }
 
                 @case ('projects') {
@@ -170,17 +165,24 @@
 
                 @case ('terminal') {
                   <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <div class="terminal-output">
-                    @for (line of terminalLines(); track $index) {
-                      <p>{{ line }}</p>
-                    }
+                  <div class="terminal-shell">
+                    <div class="terminal-status">
+                      <span>VT102 Session</span>
+                      <span>9600 baud</span>
+                    </div>
+                    <div class="terminal-output" aria-live="polite">
+                      @for (line of terminalLines(); track $index) {
+                        <p>{{ line }}</p>
+                      }
+                    </div>
                     <form class="terminal-input-row" (submit)="$event.preventDefault(); submitTerminalCommand()">
-                      <label for="terminal-command">welcome@lacOs:~$</label>
+                      <label for="terminal-command">{{ terminalPrompt }}</label>
                       <input
                         id="terminal-command"
                         type="text"
                         [value]="terminalInput()"
                         (input)="updateTerminalInput($event)"
+                        (keydown)="onTerminalKeydown($event)"
                         autocomplete="off"
                         spellcheck="false"
                         placeholder="Type a command"

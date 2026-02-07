@@ -38,7 +38,7 @@ describe('App', () => {
     app.skipBootSequence();
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('lacOs Portfolio');
+    expect(compiled.querySelector('h1')?.textContent).toContain('about me');
   });
 
   it('should show at least one window', () => {
@@ -68,6 +68,47 @@ describe('App', () => {
 
     const windows = app.windows();
     expect(windows.some((windowState: { appId: string }) => windowState.appId === 'notes')).toBe(true);
+  });
+
+  it('should navigate terminal command history with arrow keys', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.terminalInput.set('about');
+    app.submitTerminalCommand();
+    app.terminalInput.set('projects');
+    app.submitTerminalCommand();
+
+    app.onTerminalKeydown({
+      key: 'ArrowUp',
+      preventDefault: () => undefined
+    } as KeyboardEvent);
+    expect(app.terminalInput()).toBe('projects');
+
+    app.onTerminalKeydown({
+      key: 'ArrowUp',
+      preventDefault: () => undefined
+    } as KeyboardEvent);
+    expect(app.terminalInput()).toBe('about');
+
+    app.onTerminalKeydown({
+      key: 'ArrowDown',
+      preventDefault: () => undefined
+    } as KeyboardEvent);
+    expect(app.terminalInput()).toBe('projects');
+  });
+
+  it('should print workspace text file content with cat command', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.runTerminalCommand('cat about-me.txt');
+
+    const terminalLog = app.terminalLines().join('\n');
+    expect(terminalLog).toContain('--- about-me.txt ---');
+    expect(terminalLog).toContain('Eduardo Lacerda');
   });
 
   it('should minimize and reopen windows', () => {

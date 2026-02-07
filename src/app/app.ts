@@ -121,6 +121,34 @@ export class App implements OnDestroy {
   protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
   private readonly pinnedRepoNames = ['pressum-core-service', 'fynansee-core', 'auto-trace'];
   private readonly dockStorageKey = 'lacos.dock.apps';
+  private readonly terminalVirtualPath = '/Users/eduardo/Desktop';
+  private readonly terminalCommandNames = [
+    'help',
+    'about',
+    'projects',
+    'books',
+    'ls',
+    'cat <file>',
+    'open <app>',
+    'whoami',
+    'uname',
+    'pwd',
+    'date',
+    'echo <text>',
+    'history',
+    'neofetch',
+    'clear'
+  ];
+  private readonly terminalAppAliases: Record<string, AppId> = {
+    finder: 'finder',
+    notes: 'notes',
+    terminal: 'terminal',
+    projects: 'projects',
+    books: 'books',
+    about: 'about',
+    textviewer: 'textviewer',
+    text: 'textviewer'
+  };
   private readonly defaultDockAppIds: AppId[] = ['finder', 'notes', 'terminal', 'projects', 'books', 'about'];
   private readonly appRegistry: Record<AppId, DockApp> = {
     finder: { name: 'Finder', code: 'FD', appId: 'finder' },
@@ -209,9 +237,11 @@ GitHub: github.com/lacerdaaa`;
   protected readonly bootVisibleLines = signal(0);
   protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
   protected readonly timeLabel = signal(this.formatTime());
+  protected readonly terminalPrompt = 'eduardo@lacOs:~$';
   protected readonly terminalLines = signal<string[]>([
-    'lacOs Terminal v0.1',
-    'Type "help" to list commands.'
+    'lacOs Monitor ROM v2.3',
+    '64K RAM SYSTEM 38911 BASIC BYTES FREE',
+    'READY. Type "help".'
   ]);
   protected readonly terminalInput = signal('');
   protected readonly openedFileName = signal('about-me.txt');
@@ -235,6 +265,9 @@ GitHub: github.com/lacerdaaa`;
   private bootIntervalId: number | null = null;
   private bootFinishTimeoutId: number | null = null;
   private githubProjectsLoaded = false;
+  private terminalCommandHistory: string[] = [];
+  private terminalHistoryIndex = -1;
+  private terminalDraftInput = '';
   private readonly clockInterval = window.setInterval(() => {
     this.timeLabel.set(this.formatTime());
   }, 30000);
@@ -610,7 +643,7 @@ GitHub: github.com/lacerdaaa`;
   protected getWindowContentTitle(appId: AppId): string {
     switch (appId) {
       case 'about':
-        return 'lacOs Portfolio';
+        return 'about me';
       case 'projects':
         return 'Featured Projects';
       case 'books':
@@ -633,25 +666,55 @@ GitHub: github.com/lacerdaaa`;
     this.terminalInput.set(target?.value ?? '');
   }
 
+  protected onTerminalKeydown(event: KeyboardEvent): void {
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.navigateTerminalHistory(true);
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.navigateTerminalHistory(false);
+      return;
+    }
+
+    if (event.ctrlKey && event.key.toLowerCase() === 'l') {
+      event.preventDefault();
+      this.terminalLines.set([]);
+      return;
+    }
+  }
+
   protected submitTerminalCommand(): void {
     const rawCommand = this.terminalInput().trim();
     if (!rawCommand) {
       return;
     }
 
-    this.appendTerminalLines([`welcome@lacOs:~$ ${rawCommand}`]);
+    this.appendTerminalLines([`${this.terminalPrompt} ${rawCommand}`]);
+    this.storeTerminalHistory(rawCommand);
+    this.terminalHistoryIndex = -1;
+    this.terminalDraftInput = '';
     this.runTerminalCommand(rawCommand);
     this.terminalInput.set('');
   }
 
   protected runTerminalCommand(rawCommand: string): void {
-    const command = rawCommand.trim().toLowerCase();
-    const [keyword, ...rest] = command.split(/\s+/);
+    const sanitizedCommand = rawCommand.trim();
+    if (!sanitizedCommand) {
+      return;
+    }
+
+    const [keywordToken, ...rest] = sanitizedCommand.split(/\s+/);
+    const keyword = keywordToken.toLowerCase();
+    const argumentText = sanitizedCommand.slice(keywordToken.length).trim();
 
     switch (keyword) {
       case 'help':
         this.appendTerminalLines([
-          'Commands: help, about, projects, books, open <app>, clear'
+          'Available commands:',
+          ...this.terminalCommandNames.map((commandName) => `  - ${commandName}`)
         ]);
         return;
       case 'about':
@@ -669,6 +732,19 @@ GitHub: github.com/lacerdaaa`;
           'Books.app has a retro bookshelf with your selected readings.'
         ]);
         return;
+      case 'ls':
+      case 'dir':
+        this.appendTerminalLines(this.getWorkspaceListingLines());
+        return;
+      case 'cat':
+      case 'type':
+        if (!argumentText) {
+          this.appendTerminalLines(['Usage: cat <about-me.txt|ideas.txt>']);
+          return;
+        }
+
+        this.printTerminalFile(argumentText);
+        return;
       case 'open':
         if (rest.length === 0) {
           this.appendTerminalLines(['Usage: open <finder|notes|terminal|projects|books|about|textviewer>']);
@@ -677,11 +753,40 @@ GitHub: github.com/lacerdaaa`;
 
         this.openAppFromTerminal(rest[0]);
         return;
+      case 'whoami':
+        this.appendTerminalLines(['eduardo']);
+        return;
+      case 'uname':
+        this.appendTerminalLines(['lacOs 0.8 (virtual 68k)']);
+        return;
+      case 'pwd':
+        this.appendTerminalLines([this.terminalVirtualPath]);
+        return;
+      case 'date':
+        this.appendTerminalLines([new Date().toString()]);
+        return;
+      case 'echo':
+        this.appendTerminalLines([argumentText]);
+        return;
+      case 'history':
+        this.appendTerminalLines(this.getTerminalHistoryLines());
+        return;
+      case 'neofetch':
+        this.appendTerminalLines([
+          'lacOs',
+          'Kernel: virtual.angular',
+          'Uptime: session active',
+          'Shell: retrosh 0.8',
+          'Resolution: 4:3 CRT',
+          'Theme: Teal Classic'
+        ]);
+        return;
       case 'clear':
+      case 'cls':
         this.terminalLines.set([]);
         return;
       default:
-        this.appendTerminalLines([`Unknown command: ${rawCommand}`]);
+        this.appendTerminalLines([`Command not found: ${rawCommand}`]);
     }
   }
 
@@ -815,17 +920,7 @@ GitHub: github.com/lacerdaaa`;
 
   private openAppFromTerminal(rawTarget: string): void {
     const target = rawTarget.toLowerCase();
-    const appAliases: Record<string, AppId> = {
-      finder: 'finder',
-      notes: 'notes',
-      terminal: 'terminal',
-      projects: 'projects',
-      books: 'books',
-      about: 'about',
-      textviewer: 'textviewer'
-    };
-
-    const appId = appAliases[target];
+    const appId = this.terminalAppAliases[target];
     if (!appId) {
       this.appendTerminalLines([
         `Unknown app: ${rawTarget}`,
@@ -911,6 +1006,85 @@ GitHub: github.com/lacerdaaa`;
       const nextHistory = [...history, ...lines];
       return nextHistory.slice(-80);
     });
+  }
+
+  private navigateTerminalHistory(previous: boolean): void {
+    const total = this.terminalCommandHistory.length;
+    if (total === 0) {
+      return;
+    }
+
+    if (previous) {
+      if (this.terminalHistoryIndex === -1) {
+        this.terminalDraftInput = this.terminalInput();
+      }
+
+      if (this.terminalHistoryIndex < total - 1) {
+        this.terminalHistoryIndex += 1;
+      }
+    } else {
+      if (this.terminalHistoryIndex === -1) {
+        return;
+      }
+
+      this.terminalHistoryIndex -= 1;
+      if (this.terminalHistoryIndex === -1) {
+        this.terminalInput.set(this.terminalDraftInput);
+        return;
+      }
+    }
+
+    const commandIndex = total - 1 - this.terminalHistoryIndex;
+    this.terminalInput.set(this.terminalCommandHistory[commandIndex] ?? '');
+  }
+
+  private storeTerminalHistory(command: string): void {
+    const lastCommand = this.terminalCommandHistory[this.terminalCommandHistory.length - 1];
+    if (lastCommand === command) {
+      return;
+    }
+
+    this.terminalCommandHistory = [...this.terminalCommandHistory, command].slice(-40);
+  }
+
+  private getWorkspaceListingLines(): string[] {
+    const appEntries = this.workspaceItems
+      .filter((item): item is WorkspaceAppItem => item.kind === 'app')
+      .map((item) => `${item.name}.app`);
+    const fileEntries = this.workspaceItems
+      .filter((item): item is WorkspaceFileItem => item.kind === 'file')
+      .map((item) => item.fileName);
+
+    return [
+      `${this.terminalVirtualPath}:`,
+      [...appEntries, ...fileEntries].join('  ')
+    ];
+  }
+
+  private printTerminalFile(fileName: string): void {
+    const normalizedTarget = fileName.toLowerCase();
+    const fileItem = this.workspaceItems.find(
+      (item) =>
+        item.kind === 'file' &&
+        (item.fileName.toLowerCase() === normalizedTarget || item.name.toLowerCase() === normalizedTarget)
+    );
+
+    if (!fileItem || fileItem.kind !== 'file') {
+      this.appendTerminalLines([`cat: ${fileName}: No such file`]);
+      return;
+    }
+
+    this.appendTerminalLines([`--- ${fileItem.fileName} ---`, fileItem.content]);
+  }
+
+  private getTerminalHistoryLines(): string[] {
+    if (this.terminalCommandHistory.length === 0) {
+      return ['No command history yet.'];
+    }
+
+    const visibleHistory = this.terminalCommandHistory.slice(-12);
+    const startIndex = this.terminalCommandHistory.length - visibleHistory.length + 1;
+    return visibleHistory.map((command, index) => `${startIndex + index}: ${command}`);
   }
 
   @HostListener('window:pointermove', ['$event'])
