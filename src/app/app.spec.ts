@@ -3,6 +3,7 @@ import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [App],
     }).compileComponents();
@@ -145,5 +146,33 @@ describe('App', () => {
     app.openApp('books');
     const booksWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'books');
     expect(booksWindow).toBeTruthy();
+  });
+
+  it('should pin and unpin apps from dock via context action', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+
+    app.dockAppIds.set(['finder']);
+    app.contextMenu.set({
+      visible: true,
+      x: 0,
+      y: 0,
+      appId: 'books',
+      fileName: null,
+      items: []
+    });
+    app.handleContextMenuAction('pin');
+    expect(app.dockAppIds().includes('books')).toBe(true);
+
+    app.contextMenu.set({
+      visible: true,
+      x: 0,
+      y: 0,
+      appId: 'books',
+      fileName: null,
+      items: []
+    });
+    app.handleContextMenuAction('unpin');
+    expect(app.dockAppIds().includes('books')).toBe(false);
   });
 });

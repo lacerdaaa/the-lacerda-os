@@ -56,6 +56,22 @@ interface BookItem {
   cover: string;
 }
 
+interface ContextMenuItem {
+  id: 'open' | 'pin' | 'unpin' | 'open-file' | 'open-terminal' | 'open-books' | 'reset-dock';
+  label: string;
+  danger?: boolean;
+  disabled?: boolean;
+}
+
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  appId: AppId | null;
+  fileName: string | null;
+  items: ContextMenuItem[];
+}
+
 interface WindowState {
   id: number;
   appId: AppId;
@@ -104,6 +120,17 @@ interface WindowBounds {
 export class App implements OnDestroy {
   protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
   private readonly pinnedRepoNames = ['pressum-core-service', 'fynansee-core', 'auto-trace'];
+  private readonly dockStorageKey = 'macos8.dock.apps';
+  private readonly defaultDockAppIds: AppId[] = ['finder', 'notes', 'terminal', 'projects', 'books', 'about'];
+  private readonly appRegistry: Record<AppId, DockApp> = {
+    finder: { name: 'Finder', code: 'FD', appId: 'finder' },
+    notes: { name: 'Notes', code: 'NT', appId: 'notes' },
+    terminal: { name: 'Terminal', code: 'TM', appId: 'terminal' },
+    projects: { name: 'Projects', code: 'PR', appId: 'projects' },
+    books: { name: 'Books', code: 'BK', appId: 'books' },
+    about: { name: 'About', code: 'AB', appId: 'about' },
+    textviewer: { name: 'Text Viewer', code: 'TX', appId: 'textviewer' }
+  };
   private readonly aboutMeFileText = `Eduardo Lacerda
 
 Location: Campinas, Sao Paulo, Brazil
@@ -121,15 +148,6 @@ Education:
 - Goal: Computer Science or Information Systems bachelor's degree
 
 GitHub: github.com/lacerdaaa`;
-
-  protected readonly dockApps: DockApp[] = [
-    { name: 'Finder', code: 'FD', appId: 'finder' },
-    { name: 'Notes', code: 'NT', appId: 'notes' },
-    { name: 'Terminal', code: 'TM', appId: 'terminal' },
-    { name: 'Projects', code: 'PR', appId: 'projects' },
-    { name: 'Books', code: 'BK', appId: 'books' },
-    { name: 'About', code: 'AB', appId: 'about' }
-  ];
 
   protected readonly workspaceItems: WorkspaceItem[] = [
     { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },
@@ -180,6 +198,7 @@ GitHub: github.com/lacerdaaa`;
   ];
 
   protected readonly windows = signal<WindowState[]>([]);
+  protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
   protected readonly timeLabel = signal(this.formatTime());
   protected readonly terminalLines = signal<string[]>([
     'macOS8 Terminal v0.1',
@@ -191,6 +210,14 @@ GitHub: github.com/lacerdaaa`;
   protected readonly githubProjects = signal<GithubProject[]>([]);
   protected readonly githubProjectsLoading = signal(false);
   protected readonly githubProjectsError = signal<string | null>(null);
+  protected readonly contextMenu = signal<ContextMenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    appId: null,
+    fileName: null,
+    items: []
+  });
 
   private nextWindowId = 1;
   private zCounter = 10;
@@ -202,6 +229,7 @@ GitHub: github.com/lacerdaaa`;
   }, 30000);
 
   constructor() {
+    this.restoreDockFromStorage();
     this.openApp('about');
   }
 
@@ -399,6 +427,137 @@ GitHub: github.com/lacerdaaa`;
     this.openFile(item.fileName, item.content);
   }
 
+  protected getDockApps(): DockApp[] {
+    return this.dockAppIds()
+      .map((appId) => this.appRegistry[appId])
+      .filter((app): app is DockApp => !!app);
+  }
+
+  protected openPageContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+    this.openContextMenuAt(event.clientX, event.clientY, null, null, [
+      { id: 'open-terminal', label: 'Abrir Terminal' },
+      { id: 'open-books', label: 'Abrir Books' },
+      { id: 'reset-dock', label: 'Restaurar dock padrao' }
+    ]);
+  }
+
+  protected openDockContextMenu(appId: AppId, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const canUnpin = this.dockAppIds().length > 1;
+    this.openContextMenuAt(event.clientX, event.clientY, appId, null, [
+      { id: 'open', label: 'Abrir app' },
+      { id: 'unpin', label: 'Remover da dock', danger: true, disabled: !canUnpin }
+    ]);
+  }
+
+  protected openWorkspaceContextMenu(item: WorkspaceItem, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (item.kind === 'file') {
+      this.openContextMenuAt(event.clientX, event.clientY, null, item.fileName, [
+        { id: 'open-file', label: 'Abrir arquivo' }
+      ]);
+      return;
+    }
+
+    const pinned = this.isPinnedInDock(item.appId);
+    this.openContextMenuAt(event.clientX, event.clientY, item.appId, null, [
+      { id: 'open', label: 'Abrir app' },
+      { id: pinned ? 'unpin' : 'pin', label: pinned ? 'Remover da dock' : 'Fixar na dock' }
+    ]);
+  }
+
+  protected openWindowContextMenu(appId: AppId, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!this.canPinToDock(appId)) {
+      this.openContextMenuAt(event.clientX, event.clientY, appId, null, [
+        { id: 'open', label: 'Trazer para frente' }
+      ]);
+      return;
+    }
+
+    const pinned = this.isPinnedInDock(appId);
+    this.openContextMenuAt(event.clientX, event.clientY, appId, null, [
+      { id: 'open', label: 'Trazer para frente' },
+      { id: pinned ? 'unpin' : 'pin', label: pinned ? 'Remover da dock' : 'Fixar na dock' }
+    ]);
+  }
+
+  protected handleContextMenuAction(actionId: ContextMenuItem['id']): void {
+    const menu = this.contextMenu();
+
+    switch (actionId) {
+      case 'open':
+        if (menu.appId) {
+          this.openApp(menu.appId);
+        }
+        break;
+      case 'pin':
+        if (menu.appId) {
+          this.pinToDock(menu.appId);
+        }
+        break;
+      case 'unpin':
+        if (menu.appId) {
+          this.unpinFromDock(menu.appId);
+        }
+        break;
+      case 'open-file':
+        if (menu.fileName) {
+          const item = this.workspaceItems.find(
+            (workspaceItem) => workspaceItem.kind === 'file' && workspaceItem.fileName === menu.fileName
+          );
+          if (item && item.kind === 'file') {
+            this.openFile(item.fileName, item.content);
+          }
+        }
+        break;
+      case 'open-terminal':
+        this.openApp('terminal');
+        break;
+      case 'open-books':
+        this.openApp('books');
+        break;
+      case 'reset-dock':
+        this.dockAppIds.set([...this.defaultDockAppIds]);
+        this.persistDockToStorage();
+        break;
+    }
+
+    this.closeContextMenu();
+  }
+
+  protected closeContextMenu(): void {
+    if (!this.contextMenu().visible) {
+      return;
+    }
+
+    this.contextMenu.set({
+      visible: false,
+      x: 0,
+      y: 0,
+      appId: null,
+      fileName: null,
+      items: []
+    });
+  }
+
+  @HostListener('window:click')
+  protected onWindowClick(): void {
+    this.closeContextMenu();
+  }
+
+  @HostListener('window:keydown.escape')
+  protected onEscapePressed(): void {
+    this.closeContextMenu();
+  }
+
   protected isAppOpen(appId: AppId): boolean {
     return this.windows().some(
       (windowState) => windowState.appId === appId && !windowState.minimized
@@ -506,6 +665,94 @@ GitHub: github.com/lacerdaaa`;
         return;
       default:
         this.appendTerminalLines([`Unknown command: ${rawCommand}`]);
+    }
+  }
+
+  private openContextMenuAt(
+    x: number,
+    y: number,
+    appId: AppId | null,
+    fileName: string | null,
+    items: ContextMenuItem[]
+  ): void {
+    const menuWidth = 190;
+    const menuHeight = Math.max(36, items.length * 30 + 8);
+    const margin = 6;
+    const clampedX = Math.min(x, window.innerWidth - menuWidth - margin);
+    const clampedY = Math.min(y, window.innerHeight - menuHeight - margin);
+
+    this.contextMenu.set({
+      visible: true,
+      x: Math.max(margin, clampedX),
+      y: Math.max(margin, clampedY),
+      appId,
+      fileName,
+      items
+    });
+  }
+
+  private isPinnedInDock(appId: AppId): boolean {
+    return this.dockAppIds().includes(appId);
+  }
+
+  private canPinToDock(appId: AppId): boolean {
+    return appId !== 'textviewer';
+  }
+
+  private pinToDock(appId: AppId): void {
+    if (!this.canPinToDock(appId) || this.isPinnedInDock(appId)) {
+      return;
+    }
+
+    this.dockAppIds.update((appIds) => [...appIds, appId]);
+    this.persistDockToStorage();
+  }
+
+  private unpinFromDock(appId: AppId): void {
+    if (!this.isPinnedInDock(appId)) {
+      return;
+    }
+
+    this.dockAppIds.update((appIds) => {
+      if (appIds.length <= 1) {
+        return appIds;
+      }
+
+      return appIds.filter((id) => id !== appId);
+    });
+    this.persistDockToStorage();
+  }
+
+  private persistDockToStorage(): void {
+    try {
+      localStorage.setItem(this.dockStorageKey, JSON.stringify(this.dockAppIds()));
+    } catch {
+      // Ignore storage errors in private mode or blocked storage environments.
+    }
+  }
+
+  private restoreDockFromStorage(): void {
+    try {
+      const raw = localStorage.getItem(this.dockStorageKey);
+      if (!raw) {
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        return;
+      }
+
+      const allowed = new Set<AppId>(['finder', 'notes', 'terminal', 'projects', 'books', 'about']);
+      const restored = parsed.filter(
+        (appId): appId is AppId => typeof appId === 'string' && allowed.has(appId as AppId)
+      );
+
+      if (restored.length > 0) {
+        this.dockAppIds.set(restored);
+      }
+    } catch {
+      // Ignore malformed local storage payloads and keep defaults.
     }
   }
 

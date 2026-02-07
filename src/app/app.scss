@@ -745,6 +745,50 @@ textarea {
   border-bottom: 1px solid #fff;
 }
 
+.context-menu {
+  position: fixed;
+  width: 184px;
+  padding: 4px;
+  display: grid;
+  gap: 2px;
+  background: var(--retro-panel);
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #3f3f3f;
+  border-bottom: 1px solid #3f3f3f;
+  box-shadow: inset 1px 1px 0 var(--retro-panel-hi), inset -1px -1px 0 var(--retro-panel-lo);
+  z-index: 4000;
+}
+
+.context-menu-item {
+  border: 0;
+  background: transparent;
+  color: #000;
+  text-align: left;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 5px 8px;
+  line-height: 1.2;
+}
+
+.context-menu-item:hover:not(:disabled) {
+  background: #000080;
+  color: #fff;
+  cursor: pointer;
+}
+
+.context-menu-item.danger {
+  color: #7d0000;
+}
+
+.context-menu-item.danger:hover:not(:disabled) {
+  color: #fff;
+}
+
+.context-menu-item:disabled {
+  color: #777;
+}
+
 @media (max-width: 900px) {
   :host {
     padding: 6px;

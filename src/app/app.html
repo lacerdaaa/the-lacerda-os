@@ -1,6 +1,6 @@
 <div class="retro-stage">
   <div class="retro-screen">
-    <div class="desktop-shell">
+    <div class="desktop-shell" (contextmenu)="openPageContextMenu($event)">
       <header class="menu-bar">
     <div class="menu-left">
       <button type="button" class="os-mark" (click)="openApp('finder')">OS8</button>
@@ -25,6 +25,7 @@
                 [style.grid-column]="item.column"
                 [style.grid-row]="item.row"
                 (click)="openWorkspaceItem(item)"
+                (contextmenu)="openWorkspaceContextMenu(item, $event)"
               >
                 <span
                   class="workspace-icon"
@@ -48,6 +49,7 @@
                 [style.top.px]="windowState.y"
                 [style.z-index]="windowState.z"
                 (mousedown)="activateWindow(windowState.id)"
+                (contextmenu)="openWindowContextMenu(windowState.appId, $event)"
               >
                 <header class="window-titlebar" (pointerdown)="startDrag(windowState.id, windowLayer, $event)">
               <div class="window-controls" aria-label="Window controls">
@@ -229,7 +231,7 @@ Next milestones:
       </main>
 
       <footer class="dock" aria-label="App dock">
-        @for (app of dockApps; track app.name) {
+        @for (app of getDockApps(); track app.appId) {
           <button
             type="button"
             class="dock-item"
@@ -237,6 +239,7 @@ Next milestones:
             [class.running]="isAppRunning(app.appId)"
             [class.minimized]="isAppMinimized(app.appId)"
             (click)="openApp(app.appId)"
+            (contextmenu)="openDockContextMenu(app.appId, $event)"
           >
             <span
               class="dock-icon"
@@ -247,6 +250,27 @@ Next milestones:
           </button>
         }
       </footer>
+
+      @if (contextMenu().visible) {
+        <div
+          class="context-menu"
+          [style.left.px]="contextMenu().x"
+          [style.top.px]="contextMenu().y"
+          (click)="$event.stopPropagation()"
+        >
+          @for (item of contextMenu().items; track item.id) {
+            <button
+              type="button"
+              class="context-menu-item"
+              [class.danger]="item.danger"
+              [disabled]="item.disabled"
+              (click)="handleContextMenuAction(item.id)"
+            >
+              {{ item.label }}
+            </button>
+          }
+        </div>
+      }
     </div>
   </div>
 </div>
