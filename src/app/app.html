@@ -50,18 +50,21 @@
                   type="button"
                   class="control red"
                   aria-label="Close window"
+                  (pointerdown)="$event.stopPropagation()"
                   (click)="closeWindow(windowState.id, $event)"
                 ></button>
                 <button
                   type="button"
                   class="control amber"
                   aria-label="Minimize window"
+                  (pointerdown)="$event.stopPropagation()"
                   (click)="minimizeWindow(windowState.id, $event)"
                 ></button>
                 <button
                   type="button"
                   class="control green"
                   [attr.aria-label]="windowState.maximized ? 'Restore window' : 'Open window'"
+                  (pointerdown)="$event.stopPropagation()"
                   (click)="toggleOpenWindow(windowState.id, windowLayer, $event)"
                 ></button>
               </div>

@@ -182,8 +182,10 @@ export class App implements OnDestroy {
       return;
     }
 
-    const target = event.currentTarget as HTMLElement | null;
-    target?.setPointerCapture(event.pointerId);
+    const origin = event.target as HTMLElement | null;
+    if (origin?.closest('button, input, textarea, select, a, label')) {
+      return;
+    }
 
     const targetWindow = this.windows().find((windowState) => windowState.id === windowId);
     if (!targetWindow) {
