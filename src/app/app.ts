@@ -197,7 +197,16 @@ GitHub: github.com/lacerdaaa`;
     }
   ];
 
+  protected readonly bootLines = [
+    'MacOS8 BIOS v0.84',
+    'Checking memory............................ OK',
+    'Mounting virtual desktop................... OK',
+    'Loading Finder.app, Projects.app, Books.app',
+    'Booting portfolio workspace.................'
+  ];
   protected readonly windows = signal<WindowState[]>([]);
+  protected readonly isBooting = signal(true);
+  protected readonly bootVisibleLines = signal(0);
   protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
   protected readonly timeLabel = signal(this.formatTime());
   protected readonly terminalLines = signal<string[]>([
@@ -223,6 +232,8 @@ GitHub: github.com/lacerdaaa`;
   private zCounter = 10;
   private dragState: DragState | null = null;
   private resizeState: ResizeState | null = null;
+  private bootIntervalId: number | null = null;
+  private bootFinishTimeoutId: number | null = null;
   private githubProjectsLoaded = false;
   private readonly clockInterval = window.setInterval(() => {
     this.timeLabel.set(this.formatTime());
@@ -231,10 +242,12 @@ GitHub: github.com/lacerdaaa`;
   constructor() {
     this.restoreDockFromStorage();
     this.openApp('about');
+    this.beginBootSequence();
   }
 
   ngOnDestroy(): void {
     window.clearInterval(this.clockInterval);
+    this.clearBootTimers();
   }
 
   protected openApp(appId: AppId): void {
@@ -548,6 +561,10 @@ GitHub: github.com/lacerdaaa`;
     });
   }
 
+  protected skipBootSequence(): void {
+    this.finishBootSequence();
+  }
+
   @HostListener('window:click')
   protected onWindowClick(): void {
     this.closeContextMenu();
@@ -689,6 +706,46 @@ GitHub: github.com/lacerdaaa`;
       fileName,
       items
     });
+  }
+
+  private beginBootSequence(): void {
+    this.clearBootTimers();
+    this.isBooting.set(true);
+    this.bootVisibleLines.set(0);
+
+    this.bootIntervalId = window.setInterval(() => {
+      const nextLine = this.bootVisibleLines() + 1;
+      this.bootVisibleLines.set(nextLine);
+
+      if (nextLine >= this.bootLines.length) {
+        if (this.bootIntervalId !== null) {
+          window.clearInterval(this.bootIntervalId);
+          this.bootIntervalId = null;
+        }
+
+        this.bootFinishTimeoutId = window.setTimeout(() => {
+          this.finishBootSequence();
+        }, 600);
+      }
+    }, 220);
+  }
+
+  private finishBootSequence(): void {
+    this.clearBootTimers();
+    this.bootVisibleLines.set(this.bootLines.length);
+    this.isBooting.set(false);
+  }
+
+  private clearBootTimers(): void {
+    if (this.bootIntervalId !== null) {
+      window.clearInterval(this.bootIntervalId);
+      this.bootIntervalId = null;
+    }
+
+    if (this.bootFinishTimeoutId !== null) {
+      window.clearTimeout(this.bootFinishTimeoutId);
+      this.bootFinishTimeoutId = null;
+    }
   }
 
   private isPinnedInDock(appId: AppId): boolean {

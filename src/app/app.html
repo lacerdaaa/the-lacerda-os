@@ -271,6 +271,23 @@ Next milestones:
           }
         </div>
       }
+
+      @if (isBooting()) {
+        <section class="boot-overlay" aria-label="Boot sequence">
+          <p class="boot-title">MacOS8 Startup</p>
+          <div class="boot-log">
+            @for (line of bootLines; track $index) {
+              @if ($index < bootVisibleLines()) {
+                <p>{{ line }}</p>
+              }
+            }
+          </div>
+          <div class="boot-progress">
+            <span [style.width.%]="(bootVisibleLines() / bootLines.length) * 100"></span>
+          </div>
+          <button type="button" class="boot-skip" (click)="skipBootSequence()">Skip boot</button>
+        </section>
+      }
     </div>
   </div>
 </div>

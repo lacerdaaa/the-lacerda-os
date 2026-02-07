@@ -11,12 +11,31 @@ describe('App', () => {
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
     expect(app).toBeTruthy();
+  });
+
+  it('should show boot overlay on startup', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.boot-overlay')).toBeTruthy();
+  });
+
+  it('should hide boot overlay when skipped', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.boot-overlay')).toBeFalsy();
   });
 
   it('should render the desktop shell title', () => {
     const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('macOS8 Portfolio');
@@ -24,6 +43,8 @@ describe('App', () => {
 
   it('should show at least one window', () => {
     const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelectorAll('.window').length).toBeGreaterThan(0);
@@ -31,6 +52,8 @@ describe('App', () => {
 
   it('should render workspace items', () => {
     const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelectorAll('.workspace-item').length).toBeGreaterThan(0);
@@ -39,6 +62,7 @@ describe('App', () => {
   it('should open apps from terminal commands', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
+    app.skipBootSequence();
 
     app.runTerminalCommand('open notes');
 
@@ -49,6 +73,7 @@ describe('App', () => {
   it('should minimize and reopen windows', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
+    app.skipBootSequence();
 
     app.openApp('notes');
     const notesWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'notes');
@@ -66,6 +91,7 @@ describe('App', () => {
   it('should close windows', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
+    app.skipBootSequence();
 
     app.openApp('terminal');
     const terminalWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'terminal');
@@ -79,6 +105,7 @@ describe('App', () => {
   it('should toggle open control between maximized and restored', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
+    app.skipBootSequence();
 
     app.openApp('finder');
     const finderWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'finder');
@@ -100,6 +127,7 @@ describe('App', () => {
   it('should resize windows with the resize handle logic', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
+    app.skipBootSequence();
 
     app.openApp('notes');
     const notesWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'notes');
@@ -129,6 +157,7 @@ describe('App', () => {
   it('should open text files from workspace in text viewer', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
+    app.skipBootSequence();
 
     const textFile = app.workspaceItems.find((item: { kind: string }) => item.kind === 'file');
     expect(textFile).toBeTruthy();
@@ -142,6 +171,7 @@ describe('App', () => {
   it('should open books app', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
+    app.skipBootSequence();
 
     app.openApp('books');
     const booksWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'books');
@@ -151,6 +181,7 @@ describe('App', () => {
   it('should pin and unpin apps from dock via context action', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
+    app.skipBootSequence();
 
     app.dockAppIds.set(['finder']);
     app.contextMenu.set({
