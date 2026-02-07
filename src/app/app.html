@@ -112,20 +112,37 @@
 
                 @case ('projects') {
                   <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <div class="project-grid">
-                    @for (project of projectItems; track project.name) {
-                      <a
-                        class="project-card"
-                        [href]="project.href"
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        <h2>{{ project.name }}</h2>
-                        <p>{{ project.summary }}</p>
-                        <span>Open case study</span>
-                      </a>
-                    }
-                  </div>
+                  <p class="projects-meta">
+                    Live data from
+                    <a href="https://github.com/lacerdaaa" target="_blank" rel="noopener">
+                      github.com/lacerdaaa
+                    </a>
+                  </p>
+
+                  @if (githubProjectsLoading()) {
+                    <p class="projects-status">Loading repositories from GitHub...</p>
+                  } @else if (githubProjectsError()) {
+                    <p class="projects-status projects-status-error">{{ githubProjectsError() }}</p>
+                  } @else if (githubProjects().length === 0) {
+                    <p class="projects-status">No repositories available right now.</p>
+                  } @else {
+                    <div class="project-grid">
+                      @for (project of githubProjects(); track project.id) {
+                        <a
+                          class="project-card"
+                          [href]="project.href"
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          <h2>{{ project.name }}</h2>
+                          <p>{{ project.description }}</p>
+                          <span>
+                            Stars {{ project.stars }} | Updated {{ getProjectUpdatedLabel(project.updatedAt) }}
+                          </span>
+                        </a>
+                      }
+                    </div>
+                  }
                 }
 
                 @case ('terminal') {

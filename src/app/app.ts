@@ -29,10 +29,24 @@ interface WorkspaceFileItem {
 
 type WorkspaceItem = WorkspaceAppItem | WorkspaceFileItem;
 
-interface ProjectItem {
+interface GithubRepoResponse {
+  id: number;
   name: string;
-  summary: string;
+  description: string | null;
+  html_url: string;
+  stargazers_count: number;
+  fork: boolean;
+  archived: boolean;
+  updated_at: string;
+}
+
+interface GithubProject {
+  id: number;
+  name: string;
+  description: string;
   href: string;
+  stars: number;
+  updatedAt: string;
 }
 
 interface WindowState {
@@ -121,24 +135,6 @@ GitHub: github.com/lacerdaaa`;
     }
   ];
 
-  protected readonly projectItems: ProjectItem[] = [
-    {
-      name: 'Product Analytics Lab',
-      summary: 'Dashboard simulations with event streams and timeline replay.',
-      href: 'https://example.com/product-analytics-lab'
-    },
-    {
-      name: 'Design Token Forge',
-      summary: 'Tooling for generating themeable systems and component variants.',
-      href: 'https://example.com/design-token-forge'
-    },
-    {
-      name: 'Studio Archive',
-      summary: 'Case studies, prototypes, and project retrospectives.',
-      href: 'https://example.com/studio-archive'
-    }
-  ];
-
   protected readonly windows = signal<WindowState[]>([]);
   protected readonly timeLabel = signal(this.formatTime());
   protected readonly terminalLines = signal<string[]>([
@@ -148,17 +144,20 @@ GitHub: github.com/lacerdaaa`;
   protected readonly terminalInput = signal('');
   protected readonly openedFileName = signal('about-me.txt');
   protected readonly openedFileContent = signal(this.aboutMeFileText);
+  protected readonly githubProjects = signal<GithubProject[]>([]);
+  protected readonly githubProjectsLoading = signal(false);
+  protected readonly githubProjectsError = signal<string | null>(null);
 
   private nextWindowId = 1;
   private zCounter = 10;
   private dragState: DragState | null = null;
+  private githubProjectsLoaded = false;
   private readonly clockInterval = window.setInterval(() => {
     this.timeLabel.set(this.formatTime());
   }, 30000);
 
   constructor() {
     this.openApp('about');
-    this.openApp('projects');
   }
 
   ngOnDestroy(): void {
@@ -166,6 +165,10 @@ GitHub: github.com/lacerdaaa`;
   }
 
   protected openApp(appId: AppId): void {
+    if (appId === 'projects') {
+      void this.loadGithubProjects();
+    }
+
     const current = this.windows();
     const existing = current.find((windowState) => windowState.appId === appId);
 
@@ -334,6 +337,10 @@ GitHub: github.com/lacerdaaa`;
     );
   }
 
+  protected getProjectUpdatedLabel(updatedAt: string): string {
+    return updatedAt.slice(0, 10);
+  }
+
   protected getWindowContentTitle(appId: AppId): string {
     switch (appId) {
       case 'about':
@@ -386,7 +393,7 @@ GitHub: github.com/lacerdaaa`;
         return;
       case 'projects':
         this.appendTerminalLines([
-          'Projects: product analytics lab, design token forge, studio archive.'
+          'Projects.app loads your latest repositories from github.com/lacerdaaa.'
         ]);
         return;
       case 'open':
@@ -441,6 +448,42 @@ GitHub: github.com/lacerdaaa`;
           : windowState
       )
     );
+  }
+
+  private async loadGithubProjects(): Promise<void> {
+    if (this.githubProjectsLoaded || this.githubProjectsLoading()) {
+      return;
+    }
+
+    this.githubProjectsLoading.set(true);
+    this.githubProjectsError.set(null);
+
+    try {
+      const response = await fetch('https://api.github.com/users/lacerdaaa/repos?sort=updated&per_page=12');
+      if (!response.ok) {
+        throw new Error(`GitHub API returned ${response.status}`);
+      }
+
+      const repos = await response.json() as GithubRepoResponse[];
+      const normalized = repos
+        .filter((repo) => !repo.fork && !repo.archived)
+        .map((repo) => ({
+          id: repo.id,
+          name: repo.name,
+          description: repo.description ?? 'No description provided yet.',
+          href: repo.html_url,
+          stars: repo.stargazers_count,
+          updatedAt: repo.updated_at
+        }))
+        .slice(0, 8);
+
+      this.githubProjects.set(normalized);
+      this.githubProjectsLoaded = true;
+    } catch {
+      this.githubProjectsError.set('Could not load repositories from GitHub right now.');
+    } finally {
+      this.githubProjectsLoading.set(false);
+    }
   }
 
   private appendTerminalLines(lines: string[]): void {
