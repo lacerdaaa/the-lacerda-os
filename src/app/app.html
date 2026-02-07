@@ -16,6 +16,22 @@
 
       <main class="desktop-surface">
         <section class="window-layer" #windowLayer aria-label="Window layer">
+          <div class="workspace-items" aria-label="Workspace icons">
+            @for (item of workspaceItems; track item.name) {
+              <button
+                type="button"
+                class="workspace-item"
+                [class.file]="item.kind === 'file'"
+                [style.grid-column]="item.column"
+                [style.grid-row]="item.row"
+                (click)="openWorkspaceItem(item)"
+              >
+                <span class="workspace-icon">{{ item.code }}</span>
+                <span class="workspace-label">{{ item.name }}</span>
+              </button>
+            }
+          </div>
+
           @for (windowState of windows(); track windowState.id) {
             @if (!windowState.minimized) {
               <article
@@ -116,6 +132,11 @@ Next milestones:
 - Build command parser for terminal
 - Add project pages and routing
                   </textarea>
+                }
+
+                @case ('textviewer') {
+                  <h1>{{ openedFileName() }}</h1>
+                  <pre class="file-preview">{{ openedFileContent() }}</pre>
                 }
 
                 @case ('finder') {

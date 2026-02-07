@@ -1,12 +1,33 @@
 import { Component, HostListener, OnDestroy, signal } from '@angular/core';
 
-type AppId = 'about' | 'projects' | 'terminal' | 'notes' | 'finder';
+type AppId = 'about' | 'projects' | 'terminal' | 'notes' | 'finder' | 'textviewer';
 
 interface DockApp {
   name: string;
   code: string;
   appId: AppId;
 }
+
+interface WorkspaceAppItem {
+  kind: 'app';
+  name: string;
+  code: string;
+  appId: AppId;
+  column: number;
+  row: number;
+}
+
+interface WorkspaceFileItem {
+  kind: 'file';
+  name: string;
+  code: string;
+  fileName: string;
+  content: string;
+  column: number;
+  row: number;
+}
+
+type WorkspaceItem = WorkspaceAppItem | WorkspaceFileItem;
 
 interface ProjectItem {
   name: string;
@@ -59,6 +80,30 @@ export class App implements OnDestroy {
     { name: 'About', code: 'AB', appId: 'about' }
   ];
 
+  protected readonly workspaceItems: WorkspaceItem[] = [
+    { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },
+    { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 2 },
+    { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 3 },
+    {
+      kind: 'file',
+      name: 'about-me.txt',
+      code: 'TXT',
+      fileName: 'about-me.txt',
+      content: 'Hi, I am Lacerda.\\n\\nThis desktop is my interactive portfolio experiment.',
+      column: 2,
+      row: 1
+    },
+    {
+      kind: 'file',
+      name: 'ideas.txt',
+      code: 'TXT',
+      fileName: 'ideas.txt',
+      content: 'Next ideas:\\n- Simulated filesystem\\n- Boot sequence\\n- Installable themes',
+      column: 2,
+      row: 2
+    }
+  ];
+
   protected readonly projectItems: ProjectItem[] = [
     {
       name: 'Product Analytics Lab',
@@ -84,6 +129,8 @@ export class App implements OnDestroy {
     'Type "help" to list commands.'
   ]);
   protected readonly terminalInput = signal('');
+  protected readonly openedFileName = signal('about-me.txt');
+  protected readonly openedFileContent = signal('Open a .txt file from the workspace to preview it.');
 
   private nextWindowId = 1;
   private zCounter = 10;
@@ -243,6 +290,15 @@ export class App implements OnDestroy {
     this.bringToFront(windowId);
   }
 
+  protected openWorkspaceItem(item: WorkspaceItem): void {
+    if (item.kind === 'app') {
+      this.openApp(item.appId);
+      return;
+    }
+
+    this.openFile(item.fileName, item.content);
+  }
+
   protected isAppOpen(appId: AppId): boolean {
     return this.windows().some(
       (windowState) => windowState.appId === appId && !windowState.minimized
@@ -271,6 +327,8 @@ export class App implements OnDestroy {
         return 'Notes';
       case 'finder':
         return 'Finder';
+      case 'textviewer':
+        return 'Text Viewer';
       default:
         return 'App';
     }
@@ -314,7 +372,7 @@ export class App implements OnDestroy {
         return;
       case 'open':
         if (rest.length === 0) {
-          this.appendTerminalLines(['Usage: open <finder|notes|terminal|projects|about>']);
+          this.appendTerminalLines(['Usage: open <finder|notes|terminal|projects|about|textviewer>']);
           return;
         }
 
@@ -335,20 +393,35 @@ export class App implements OnDestroy {
       notes: 'notes',
       terminal: 'terminal',
       projects: 'projects',
-      about: 'about'
+      about: 'about',
+      textviewer: 'textviewer'
     };
 
     const appId = appAliases[target];
     if (!appId) {
       this.appendTerminalLines([
         `Unknown app: ${rawTarget}`,
-        'Available apps: finder, notes, terminal, projects, about'
+        'Available apps: finder, notes, terminal, projects, about, textviewer'
       ]);
       return;
     }
 
     this.openApp(appId);
     this.appendTerminalLines([`Launching ${this.getWindowTitle(appId)}...`]);
+  }
+
+  private openFile(fileName: string, content: string): void {
+    this.openedFileName.set(fileName);
+    this.openedFileContent.set(content);
+    this.openApp('textviewer');
+
+    this.windows.update((windows) =>
+      windows.map((windowState) =>
+        windowState.appId === 'textviewer'
+          ? { ...windowState, title: `${fileName} - Text Viewer` }
+          : windowState
+      )
+    );
   }
 
   private appendTerminalLines(lines: string[]): void {
@@ -412,8 +485,8 @@ export class App implements OnDestroy {
       id,
       appId,
       title,
-      x: Math.min(48 + placementOffset, 180),
-      y: Math.min(44 + placementOffset, 160),
+      x: Math.min(190 + placementOffset, 300),
+      y: Math.min(56 + placementOffset, 170),
       width: dimensions.width,
       height: dimensions.height,
       z: ++this.zCounter,
@@ -432,6 +505,8 @@ export class App implements OnDestroy {
         return { width: 560, height: 340 };
       case 'notes':
         return { width: 500, height: 330 };
+      case 'textviewer':
+        return { width: 520, height: 340 };
       default:
         return { width: 520, height: 330 };
     }
@@ -449,6 +524,8 @@ export class App implements OnDestroy {
         return 'Notes.app';
       case 'finder':
         return 'Finder.app';
+      case 'textviewer':
+        return 'Text Viewer.app';
       default:
         return 'App';
     }

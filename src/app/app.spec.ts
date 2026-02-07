@@ -28,6 +28,13 @@ describe('App', () => {
     expect(compiled.querySelectorAll('.window').length).toBeGreaterThan(0);
   });
 
+  it('should render workspace items', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('.workspace-item').length).toBeGreaterThan(0);
+  });
+
   it('should open apps from terminal commands', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
@@ -87,5 +94,18 @@ describe('App', () => {
     app.toggleOpenWindow(finderWindow.id, windowLayer);
     updatedFinder = app.windows().find((windowState: { appId: string }) => windowState.appId === 'finder');
     expect(updatedFinder.maximized).toBe(false);
+  });
+
+  it('should open text files from workspace in text viewer', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+
+    const textFile = app.workspaceItems.find((item: { kind: string }) => item.kind === 'file');
+    expect(textFile).toBeTruthy();
+
+    app.openWorkspaceItem(textFile);
+    const textViewerWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'textviewer');
+    expect(textViewerWindow).toBeTruthy();
+    expect(app.openedFileName()).toContain('.txt');
   });
 });
