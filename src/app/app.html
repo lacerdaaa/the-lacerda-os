@@ -1,21 +1,21 @@
 <div class="desktop-shell">
   <header class="menu-bar">
     <div class="menu-left">
-      <button type="button" class="os-mark">OS8</button>
+      <button type="button" class="os-mark" (click)="openApp('finder')">OS8</button>
       @for (item of menuItems; track item) {
         <button type="button" class="menu-item">{{ item }}</button>
       }
     </div>
     <div class="menu-right">
       <span>Portfolio Mode</span>
-      <span>Saturday 23:56</span>
+      <span>{{ timeLabel() }}</span>
     </div>
   </header>
 
   <main class="desktop-surface">
     <aside class="desktop-icons" aria-label="Desktop icons">
       @for (shortcut of desktopShortcuts; track shortcut.name) {
-        <button type="button" class="desktop-icon">
+        <button type="button" class="desktop-icon" (click)="openApp(shortcut.appId)">
           <span class="icon-badge">{{ shortcut.code }}</span>
           <span class="icon-label">{{ shortcut.name }}</span>
         </button>
@@ -23,35 +23,117 @@
     </aside>
 
     <section class="window-layer" aria-label="Window layer">
-      <article class="window">
-        <header class="window-titlebar">
-          <div class="window-controls" aria-hidden="true">
-            <span class="control red"></span>
-            <span class="control amber"></span>
-            <span class="control green"></span>
-          </div>
-          <p>Welcome.app</p>
-        </header>
+      @for (windowState of windows(); track windowState.id) {
+        @if (!windowState.minimized) {
+          <article
+            class="window"
+            [class.active]="windowState.active"
+            [style.width.px]="windowState.width"
+            [style.height.px]="windowState.height"
+            [style.left.px]="windowState.x"
+            [style.top.px]="windowState.y"
+            [style.z-index]="windowState.z"
+            (mousedown)="activateWindow(windowState.id)"
+          >
+            <header class="window-titlebar" (pointerdown)="startDrag(windowState.id, $event)">
+              <div class="window-controls" aria-label="Window controls">
+                <button
+                  type="button"
+                  class="control red"
+                  aria-label="Close window"
+                  (click)="closeWindow(windowState.id, $event)"
+                ></button>
+                <button
+                  type="button"
+                  class="control amber"
+                  aria-label="Minimize window"
+                  (click)="minimizeWindow(windowState.id, $event)"
+                ></button>
+                <span class="control green" aria-hidden="true"></span>
+              </div>
+              <p>{{ windowState.title }}</p>
+            </header>
 
-        <div class="window-content">
-          <h1>macOS8 Portfolio</h1>
-          <p>
-            This shell is the foundation of your virtual operating system.
-            Next step is a full window manager with real app state.
-          </p>
-          <div class="window-pills">
-            <span>Angular</span>
-            <span>Standalone Components</span>
-            <span>Virtual Desktop</span>
-          </div>
-        </div>
-      </article>
+            <div class="window-content">
+              @switch (windowState.appId) {
+                @case ('about') {
+                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+                  <p>
+                    This shell now has a real window manager with stacking,
+                    dragging, minimizing, and app-based launch actions.
+                  </p>
+                  <div class="window-pills">
+                    <span>Angular</span>
+                    <span>Window Manager</span>
+                    <span>Virtual Desktop</span>
+                  </div>
+                }
+
+                @case ('projects') {
+                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+                  <ul class="project-list">
+                    <li>
+                      <strong>Product Analytics Lab:</strong>
+                      Dashboard simulations with event streams and timeline replay.
+                    </li>
+                    <li>
+                      <strong>Design Token Forge:</strong>
+                      Tooling for generating themeable systems at scale.
+                    </li>
+                    <li>
+                      <strong>Studio Archive:</strong>
+                      Case studies, prototypes, and project retrospectives.
+                    </li>
+                  </ul>
+                }
+
+                @case ('terminal') {
+                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+                  <div class="terminal-output">
+                    @for (line of getTerminalLines(); track line) {
+                      <p>{{ line }}</p>
+                    }
+                  </div>
+                }
+
+                @case ('notes') {
+                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+                  <textarea readonly>
+This is a placeholder Notes app.
+
+Next milestones:
+- Persist app state
+- Build command parser for terminal
+- Add project pages and routing
+                  </textarea>
+                }
+
+                @case ('finder') {
+                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+                  <p>Explore files, open apps, and navigate your portfolio desktop.</p>
+                  <div class="finder-grid">
+                    <span>Portfolio</span>
+                    <span>Assets</span>
+                    <span>Experiments</span>
+                    <span>Archive</span>
+                  </div>
+                }
+              }
+            </div>
+          </article>
+        }
+      }
     </section>
   </main>
 
   <footer class="dock" aria-label="App dock">
     @for (app of dockApps; track app.name) {
-      <button type="button" class="dock-item" [class.active]="app.active">
+      <button
+        type="button"
+        class="dock-item"
+        [class.active]="isAppOpen(app.appId)"
+        (click)="openApp(app.appId)"
+      >
         <span>{{ app.code }}</span>
         <small>{{ app.name }}</small>
       </button>

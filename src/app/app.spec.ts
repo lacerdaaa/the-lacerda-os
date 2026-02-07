@@ -14,10 +14,17 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should render the desktop shell title', () => {
     const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
+    fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, macos8');
+    expect(compiled.querySelector('h1')?.textContent).toContain('macOS8 Portfolio');
+  });
+
+  it('should show at least one window', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('.window').length).toBeGreaterThan(0);
   });
 });

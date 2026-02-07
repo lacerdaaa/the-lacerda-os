@@ -6,7 +6,7 @@
   --menu-fill: rgba(245, 249, 255, 0.86);
   --menu-text: #15284d;
   --dock-fill: rgba(8, 16, 33, 0.66);
-  --window-fill: rgba(247, 251, 255, 0.88);
+  --window-fill: rgba(247, 251, 255, 0.94);
   --window-text: #22365f;
   --accent: #2e7cf7;
 
@@ -20,7 +20,8 @@
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  background: radial-gradient(circle at 18% 8%, #90d3ff 0, #5e9af8 30%, transparent 60%),
+  background:
+    radial-gradient(circle at 18% 8%, #90d3ff 0, #5e9af8 30%, transparent 60%),
     radial-gradient(circle at 88% 82%, #4fa5e4 0, #2b5aaa 45%, transparent 70%),
     linear-gradient(165deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
 }
@@ -66,8 +67,14 @@
 
 .menu-item:hover,
 .dock-item:hover,
-.desktop-icon:hover {
+.desktop-icon:hover,
+.os-mark:hover {
   cursor: pointer;
+}
+
+.menu-item:hover,
+.os-mark:hover {
+  background: rgba(56, 105, 189, 0.18);
 }
 
 .desktop-surface {
@@ -95,6 +102,11 @@
   backdrop-filter: blur(10px);
 }
 
+.desktop-icon:hover {
+  border-color: rgba(255, 255, 255, 0.72);
+  transform: translateY(-1px);
+}
+
 .icon-badge {
   width: 36px;
   height: 36px;
@@ -112,21 +124,26 @@
 }
 
 .window-layer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-right: 40px;
+  position: relative;
+  min-height: 68dvh;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 22px;
+  background: rgba(7, 16, 35, 0.1);
+  backdrop-filter: blur(4px);
 }
 
 .window {
-  width: min(760px, 100%);
-  min-height: 380px;
+  position: absolute;
   border: 1px solid rgba(255, 255, 255, 0.48);
   border-radius: 18px;
   background: var(--window-fill);
   color: var(--window-text);
   overflow: hidden;
-  box-shadow: 0 36px 80px rgba(5, 13, 31, 0.4);
+  box-shadow: 0 24px 60px rgba(5, 13, 31, 0.32);
+}
+
+.window.active {
+  box-shadow: 0 30px 72px rgba(7, 18, 43, 0.45);
 }
 
 .window-titlebar {
@@ -137,6 +154,8 @@
   padding: 0 14px;
   background: linear-gradient(180deg, rgba(206, 227, 255, 0.94) 0%, rgba(189, 214, 248, 0.84) 100%);
   border-bottom: 1px solid rgba(89, 127, 187, 0.35);
+  touch-action: none;
+  user-select: none;
 }
 
 .window-titlebar p {
@@ -154,6 +173,8 @@
   width: 11px;
   height: 11px;
   border-radius: 999px;
+  border: 0;
+  padding: 0;
 }
 
 .control.red {
@@ -166,25 +187,26 @@
 
 .control.green {
   background: #36cf5f;
+  display: inline-block;
 }
 
 .window-content {
-  padding: 26px;
+  padding: 24px;
 }
 
 .window-content h1 {
   margin: 0;
-  font-size: clamp(1.4rem, 2.8vw, 2rem);
+  font-size: clamp(1.2rem, 2.6vw, 1.9rem);
 }
 
 .window-content p {
   max-width: 56ch;
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   line-height: 1.45;
 }
 
 .window-pills {
-  margin-top: 18px;
+  margin-top: 16px;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
@@ -200,6 +222,57 @@
   font-weight: 600;
   color: #234171;
   background: rgba(255, 255, 255, 0.65);
+}
+
+.project-list {
+  margin: 14px 0 0;
+  padding-left: 16px;
+  display: grid;
+  gap: 10px;
+  font-size: 0.92rem;
+}
+
+.terminal-output {
+  margin-top: 12px;
+  border-radius: 12px;
+  padding: 14px;
+  background: #0d1a31;
+  color: #8dfbba;
+  font-family: 'IBM Plex Sans', monospace;
+  font-size: 0.88rem;
+}
+
+.terminal-output p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+textarea {
+  width: 100%;
+  min-height: 220px;
+  border-radius: 12px;
+  border: 1px solid rgba(109, 141, 198, 0.45);
+  padding: 12px;
+  resize: none;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #1e3360;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.finder-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.finder-grid span {
+  border: 1px solid rgba(117, 147, 200, 0.6);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .dock {
@@ -266,7 +339,13 @@
   }
 
   .window-layer {
-    padding-right: 0;
+    min-height: 62dvh;
+    overflow: hidden;
+  }
+
+  .window {
+    width: calc(100% - 12px) !important;
+    left: 6px !important;
   }
 
   .menu-right {

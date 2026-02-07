@@ -1,14 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, OnDestroy, signal } from '@angular/core';
+
+type AppId = 'about' | 'projects' | 'terminal' | 'notes' | 'finder';
 
 interface DesktopShortcut {
   name: string;
   code: string;
+  appId: AppId;
 }
 
 interface DockApp {
   name: string;
   code: string;
-  active?: boolean;
+  appId: AppId;
+}
+
+interface WindowState {
+  id: number;
+  appId: AppId;
+  title: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  z: number;
+  active: boolean;
+  minimized: boolean;
+}
+
+interface DragState {
+  windowId: number;
+  offsetX: number;
+  offsetY: number;
 }
 
 @Component({
@@ -16,21 +38,272 @@ interface DockApp {
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements OnDestroy {
   protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
 
   protected readonly desktopShortcuts: DesktopShortcut[] = [
-    { name: 'About Me', code: 'AB' },
-    { name: 'Projects', code: 'PR' },
-    { name: 'Terminal', code: 'TM' },
-    { name: 'Contact', code: 'CT' }
+    { name: 'About Me', code: 'AB', appId: 'about' },
+    { name: 'Projects', code: 'PR', appId: 'projects' },
+    { name: 'Terminal', code: 'TM', appId: 'terminal' },
+    { name: 'Notes', code: 'NT', appId: 'notes' }
   ];
 
   protected readonly dockApps: DockApp[] = [
-    { name: 'Finder', code: 'FD', active: true },
-    { name: 'Notes', code: 'NT' },
-    { name: 'Terminal', code: 'TM' },
-    { name: 'Projects', code: 'PR' },
-    { name: 'Settings', code: 'ST' }
+    { name: 'Finder', code: 'FD', appId: 'finder' },
+    { name: 'Notes', code: 'NT', appId: 'notes' },
+    { name: 'Terminal', code: 'TM', appId: 'terminal' },
+    { name: 'Projects', code: 'PR', appId: 'projects' },
+    { name: 'About', code: 'AB', appId: 'about' }
   ];
+
+  protected readonly windows = signal<WindowState[]>([]);
+  protected readonly timeLabel = signal(this.formatTime());
+
+  private nextWindowId = 1;
+  private zCounter = 10;
+  private dragState: DragState | null = null;
+  private readonly clockInterval = window.setInterval(() => {
+    this.timeLabel.set(this.formatTime());
+  }, 30000);
+
+  constructor() {
+    this.openApp('about');
+    this.openApp('projects');
+  }
+
+  ngOnDestroy(): void {
+    window.clearInterval(this.clockInterval);
+  }
+
+  protected openApp(appId: AppId): void {
+    const current = this.windows();
+    const existing = current.find((windowState) => windowState.appId === appId);
+
+    if (existing) {
+      if (existing.minimized) {
+        this.windows.update((windows) =>
+          windows.map((windowState) =>
+            windowState.id === existing.id
+              ? { ...windowState, minimized: false }
+              : windowState
+          )
+        );
+      }
+      this.bringToFront(existing.id);
+      return;
+    }
+
+    const createdWindow = this.createWindow(appId);
+    this.windows.update((windows) => [
+      ...windows.map((windowState) => ({ ...windowState, active: false })),
+      createdWindow
+    ]);
+  }
+
+  protected activateWindow(windowId: number): void {
+    this.bringToFront(windowId);
+  }
+
+  protected startDrag(windowId: number, event: PointerEvent): void {
+    if (event.button !== 0) {
+      return;
+    }
+
+    const target = event.currentTarget as HTMLElement | null;
+    target?.setPointerCapture(event.pointerId);
+
+    const targetWindow = this.windows().find((windowState) => windowState.id === windowId);
+    if (!targetWindow) {
+      return;
+    }
+
+    this.bringToFront(windowId);
+    this.dragState = {
+      windowId,
+      offsetX: event.clientX - targetWindow.x,
+      offsetY: event.clientY - targetWindow.y
+    };
+  }
+
+  protected minimizeWindow(windowId: number, event?: Event): void {
+    event?.stopPropagation();
+
+    this.windows.update((windows) =>
+      windows.map((windowState) =>
+        windowState.id === windowId
+          ? { ...windowState, minimized: true, active: false }
+          : windowState
+      )
+    );
+
+    this.activateTopWindow();
+  }
+
+  protected closeWindow(windowId: number, event?: Event): void {
+    event?.stopPropagation();
+
+    this.windows.update((windows) =>
+      windows.filter((windowState) => windowState.id !== windowId)
+    );
+
+    this.activateTopWindow();
+  }
+
+  protected isAppOpen(appId: AppId): boolean {
+    return this.windows().some(
+      (windowState) => windowState.appId === appId && !windowState.minimized
+    );
+  }
+
+  protected getWindowContentTitle(appId: AppId): string {
+    switch (appId) {
+      case 'about':
+        return 'macOS8 Portfolio';
+      case 'projects':
+        return 'Featured Projects';
+      case 'terminal':
+        return 'Terminal';
+      case 'notes':
+        return 'Notes';
+      case 'finder':
+        return 'Finder';
+      default:
+        return 'App';
+    }
+  }
+
+  protected getTerminalLines(): string[] {
+    return [
+      'welcome@macos8:~$ help',
+      'Available commands: about, projects, open <app>, clear',
+      'welcome@macos8:~$ open projects',
+      'Launching Projects.app'
+    ];
+  }
+
+  @HostListener('window:pointermove', ['$event'])
+  protected onPointerMove(event: PointerEvent): void {
+    if (!this.dragState) {
+      return;
+    }
+
+    const draggedWindow = this.windows().find(
+      (windowState) => windowState.id === this.dragState?.windowId
+    );
+
+    if (!draggedWindow) {
+      this.dragState = null;
+      return;
+    }
+
+    const margin = 10;
+    const nextX = event.clientX - this.dragState.offsetX;
+    const nextY = event.clientY - this.dragState.offsetY;
+    const maxX = Math.max(margin, window.innerWidth - draggedWindow.width - margin);
+    const maxY = Math.max(60, window.innerHeight - draggedWindow.height - 90);
+
+    this.windows.update((windows) =>
+      windows.map((windowState) => {
+        if (windowState.id !== this.dragState?.windowId) {
+          return windowState;
+        }
+
+        return {
+          ...windowState,
+          x: Math.max(margin, Math.min(nextX, maxX)),
+          y: Math.max(52, Math.min(nextY, maxY))
+        };
+      })
+    );
+  }
+
+  @HostListener('window:pointerup')
+  @HostListener('window:pointercancel')
+  protected onPointerEnd(): void {
+    this.dragState = null;
+  }
+
+  private createWindow(appId: AppId): WindowState {
+    const id = this.nextWindowId++;
+    const placementOffset = (id - 1) * 26;
+
+    const dimensions = this.getWindowDimensions(appId);
+    const title = this.getWindowTitle(appId);
+
+    return {
+      id,
+      appId,
+      title,
+      x: Math.min(220 + placementOffset, 420),
+      y: Math.min(90 + placementOffset, 250),
+      width: dimensions.width,
+      height: dimensions.height,
+      z: ++this.zCounter,
+      active: true,
+      minimized: false
+    };
+  }
+
+  private getWindowDimensions(appId: AppId): { width: number; height: number } {
+    switch (appId) {
+      case 'terminal':
+        return { width: 700, height: 430 };
+      case 'finder':
+        return { width: 680, height: 420 };
+      case 'notes':
+        return { width: 620, height: 400 };
+      default:
+        return { width: 640, height: 400 };
+    }
+  }
+
+  private getWindowTitle(appId: AppId): string {
+    switch (appId) {
+      case 'about':
+        return 'Welcome.app';
+      case 'projects':
+        return 'Projects.app';
+      case 'terminal':
+        return 'Terminal.app';
+      case 'notes':
+        return 'Notes.app';
+      case 'finder':
+        return 'Finder.app';
+      default:
+        return 'App';
+    }
+  }
+
+  private bringToFront(windowId: number): void {
+    const nextZ = ++this.zCounter;
+
+    this.windows.update((windows) =>
+      windows.map((windowState) =>
+        windowState.id === windowId
+          ? { ...windowState, active: true, z: nextZ }
+          : { ...windowState, active: false }
+      )
+    );
+  }
+
+  private activateTopWindow(): void {
+    const candidates = this.windows()
+      .filter((windowState) => !windowState.minimized)
+      .sort((a, b) => b.z - a.z);
+
+    if (candidates.length === 0) {
+      return;
+    }
+
+    this.bringToFront(candidates[0].id);
+  }
+
+  private formatTime(): string {
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).format(new Date());
+  }
 }
