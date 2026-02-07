@@ -39,6 +39,7 @@ interface DragState {
   windowId: number;
   offsetX: number;
   offsetY: number;
+  windowLayer: HTMLElement;
 }
 
 interface WindowBounds {
@@ -142,7 +143,7 @@ export class App implements OnDestroy {
     this.bringToFront(windowId);
   }
 
-  protected startDrag(windowId: number, event: PointerEvent): void {
+  protected startDrag(windowId: number, windowLayer: HTMLElement, event: PointerEvent): void {
     if (event.button !== 0) {
       return;
     }
@@ -159,10 +160,12 @@ export class App implements OnDestroy {
     }
 
     this.bringToFront(windowId);
+    const layerBounds = windowLayer.getBoundingClientRect();
     this.dragState = {
       windowId,
-      offsetX: event.clientX - targetWindow.x,
-      offsetY: event.clientY - targetWindow.y
+      offsetX: event.clientX - layerBounds.left - targetWindow.x,
+      offsetY: event.clientY - layerBounds.top - targetWindow.y,
+      windowLayer
     };
   }
 
@@ -383,11 +386,12 @@ export class App implements OnDestroy {
       return;
     }
 
-    const margin = 10;
-    const nextX = event.clientX - this.dragState.offsetX;
-    const nextY = event.clientY - this.dragState.offsetY;
-    const maxX = Math.max(margin, window.innerWidth - draggedWindow.width - margin);
-    const maxY = Math.max(60, window.innerHeight - draggedWindow.height - 90);
+    const layerBounds = this.dragState.windowLayer.getBoundingClientRect();
+    const margin = 6;
+    const nextX = event.clientX - layerBounds.left - this.dragState.offsetX;
+    const nextY = event.clientY - layerBounds.top - this.dragState.offsetY;
+    const maxX = Math.max(margin, layerBounds.width - draggedWindow.width - margin);
+    const maxY = Math.max(margin, layerBounds.height - draggedWindow.height - margin);
 
     this.windows.update((windows) =>
       windows.map((windowState) => {
@@ -398,7 +402,7 @@ export class App implements OnDestroy {
         return {
           ...windowState,
           x: Math.max(margin, Math.min(nextX, maxX)),
-          y: Math.max(52, Math.min(nextY, maxY))
+          y: Math.max(margin, Math.min(nextY, maxY))
         };
       })
     );
@@ -421,8 +425,8 @@ export class App implements OnDestroy {
       id,
       appId,
       title,
-      x: Math.min(220 + placementOffset, 420),
-      y: Math.min(90 + placementOffset, 250),
+      x: Math.min(48 + placementOffset, 180),
+      y: Math.min(44 + placementOffset, 160),
       width: dimensions.width,
       height: dimensions.height,
       z: ++this.zCounter,
@@ -436,13 +440,13 @@ export class App implements OnDestroy {
   private getWindowDimensions(appId: AppId): { width: number; height: number } {
     switch (appId) {
       case 'terminal':
-        return { width: 700, height: 430 };
+        return { width: 580, height: 350 };
       case 'finder':
-        return { width: 680, height: 420 };
+        return { width: 560, height: 340 };
       case 'notes':
-        return { width: 620, height: 400 };
+        return { width: 500, height: 330 };
       default:
-        return { width: 640, height: 400 };
+        return { width: 520, height: 330 };
     }
   }
 

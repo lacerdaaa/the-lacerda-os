@@ -1,5 +1,7 @@
-<div class="desktop-shell">
-  <header class="menu-bar">
+<div class="retro-stage">
+  <div class="retro-screen">
+    <div class="desktop-shell">
+      <header class="menu-bar">
     <div class="menu-left">
       <button type="button" class="os-mark" (click)="openApp('finder')">OS8</button>
       @for (item of menuItems; track item) {
@@ -12,30 +14,30 @@
     </div>
   </header>
 
-  <main class="desktop-surface">
-    <aside class="desktop-icons" aria-label="Desktop icons">
+      <main class="desktop-surface">
+        <aside class="desktop-icons" aria-label="Desktop icons">
       @for (shortcut of desktopShortcuts; track shortcut.name) {
         <button type="button" class="desktop-icon" (click)="openApp(shortcut.appId)">
           <span class="icon-badge">{{ shortcut.code }}</span>
           <span class="icon-label">{{ shortcut.name }}</span>
         </button>
       }
-    </aside>
+        </aside>
 
-    <section class="window-layer" #windowLayer aria-label="Window layer">
-      @for (windowState of windows(); track windowState.id) {
-        @if (!windowState.minimized) {
-          <article
-            class="window"
-            [class.active]="windowState.active"
-            [style.width.px]="windowState.width"
-            [style.height.px]="windowState.height"
-            [style.left.px]="windowState.x"
-            [style.top.px]="windowState.y"
-            [style.z-index]="windowState.z"
-            (mousedown)="activateWindow(windowState.id)"
-          >
-            <header class="window-titlebar" (pointerdown)="startDrag(windowState.id, $event)">
+        <section class="window-layer" #windowLayer aria-label="Window layer">
+          @for (windowState of windows(); track windowState.id) {
+            @if (!windowState.minimized) {
+              <article
+                class="window"
+                [class.active]="windowState.active"
+                [style.width.px]="windowState.width"
+                [style.height.px]="windowState.height"
+                [style.left.px]="windowState.x"
+                [style.top.px]="windowState.y"
+                [style.z-index]="windowState.z"
+                (mousedown)="activateWindow(windowState.id)"
+              >
+                <header class="window-titlebar" (pointerdown)="startDrag(windowState.id, windowLayer, $event)">
               <div class="window-controls" aria-label="Window controls">
                 <button
                   type="button"
@@ -57,9 +59,9 @@
                 ></button>
               </div>
               <p>{{ windowState.title }}</p>
-            </header>
+                </header>
 
-            <div class="window-content">
+                <div class="window-content">
               @switch (windowState.appId) {
                 @case ('about') {
                   <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
@@ -136,26 +138,28 @@ Next milestones:
                   </div>
                 }
               }
-            </div>
-          </article>
-        }
-      }
-    </section>
-  </main>
+                </div>
+              </article>
+            }
+          }
+        </section>
+      </main>
 
-  <footer class="dock" aria-label="App dock">
-    @for (app of dockApps; track app.name) {
-      <button
-        type="button"
-        class="dock-item"
-        [class.active]="isAppOpen(app.appId)"
-        [class.running]="isAppRunning(app.appId)"
-        [class.minimized]="isAppMinimized(app.appId)"
-        (click)="openApp(app.appId)"
-      >
-        <span>{{ app.code }}</span>
-        <small>{{ app.name }}</small>
-      </button>
-    }
-  </footer>
+      <footer class="dock" aria-label="App dock">
+        @for (app of dockApps; track app.name) {
+          <button
+            type="button"
+            class="dock-item"
+            [class.active]="isAppOpen(app.appId)"
+            [class.running]="isAppRunning(app.appId)"
+            [class.minimized]="isAppMinimized(app.appId)"
+            (click)="openApp(app.appId)"
+          >
+            <span>{{ app.code }}</span>
+            <small>{{ app.name }}</small>
+          </button>
+        }
+      </footer>
+    </div>
+  </div>
 </div>
