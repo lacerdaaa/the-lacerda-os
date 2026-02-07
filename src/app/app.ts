@@ -71,6 +71,23 @@ interface WindowBounds {
 })
 export class App implements OnDestroy {
   protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
+  private readonly aboutMeFileText = `Eduardo Lacerda
+
+Location: Campinas, Sao Paulo, Brazil
+
+I am passionate about technology and building real-world solutions.
+I started my professional technology journey in 2024 and I keep evolving every year.
+
+Hobbies:
+- Cooking
+- History in different contexts (food, finance, geopolitics, economics)
+
+Education:
+- Technician degree completed
+- Preparing to join USP or UNICAMP
+- Goal: Computer Science or Information Systems bachelor's degree
+
+GitHub: github.com/lacerdaaa`;
 
   protected readonly dockApps: DockApp[] = [
     { name: 'Finder', code: 'FD', appId: 'finder' },
@@ -89,7 +106,7 @@ export class App implements OnDestroy {
       name: 'about-me.txt',
       code: 'TXT',
       fileName: 'about-me.txt',
-      content: 'Hi, I am Lacerda.\\n\\nThis desktop is my interactive portfolio experiment.',
+      content: this.aboutMeFileText,
       column: 2,
       row: 1
     },
@@ -130,7 +147,7 @@ export class App implements OnDestroy {
   ]);
   protected readonly terminalInput = signal('');
   protected readonly openedFileName = signal('about-me.txt');
-  protected readonly openedFileContent = signal('Open a .txt file from the workspace to preview it.');
+  protected readonly openedFileContent = signal(this.aboutMeFileText);
 
   private nextWindowId = 1;
   private zCounter = 10;
