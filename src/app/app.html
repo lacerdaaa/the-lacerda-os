@@ -22,7 +22,7 @@
       }
     </aside>
 
-    <section class="window-layer" aria-label="Window layer">
+    <section class="window-layer" #windowLayer aria-label="Window layer">
       @for (windowState of windows(); track windowState.id) {
         @if (!windowState.minimized) {
           <article
@@ -49,7 +49,12 @@
                   aria-label="Minimize window"
                   (click)="minimizeWindow(windowState.id, $event)"
                 ></button>
-                <span class="control green" aria-hidden="true"></span>
+                <button
+                  type="button"
+                  class="control green"
+                  [attr.aria-label]="windowState.maximized ? 'Restore window' : 'Open window'"
+                  (click)="toggleOpenWindow(windowState.id, windowLayer, $event)"
+                ></button>
               </div>
               <p>{{ windowState.title }}</p>
             </header>
@@ -144,6 +149,8 @@ Next milestones:
         type="button"
         class="dock-item"
         [class.active]="isAppOpen(app.appId)"
+        [class.running]="isAppRunning(app.appId)"
+        [class.minimized]="isAppMinimized(app.appId)"
         (click)="openApp(app.appId)"
       >
         <span>{{ app.code }}</span>

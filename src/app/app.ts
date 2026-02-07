@@ -31,12 +31,21 @@ interface WindowState {
   z: number;
   active: boolean;
   minimized: boolean;
+  maximized: boolean;
+  restoreBounds: WindowBounds | null;
 }
 
 interface DragState {
   windowId: number;
   offsetX: number;
   offsetY: number;
+}
+
+interface WindowBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 @Component({
@@ -145,6 +154,9 @@ export class App implements OnDestroy {
     if (!targetWindow) {
       return;
     }
+    if (targetWindow.maximized) {
+      return;
+    }
 
     this.bringToFront(windowId);
     this.dragState = {
@@ -156,6 +168,10 @@ export class App implements OnDestroy {
 
   protected minimizeWindow(windowId: number, event?: Event): void {
     event?.stopPropagation();
+
+    if (this.dragState?.windowId === windowId) {
+      this.dragState = null;
+    }
 
     this.windows.update((windows) =>
       windows.map((windowState) =>
@@ -171,6 +187,10 @@ export class App implements OnDestroy {
   protected closeWindow(windowId: number, event?: Event): void {
     event?.stopPropagation();
 
+    if (this.dragState?.windowId === windowId) {
+      this.dragState = null;
+    }
+
     this.windows.update((windows) =>
       windows.filter((windowState) => windowState.id !== windowId)
     );
@@ -178,9 +198,74 @@ export class App implements OnDestroy {
     this.activateTopWindow();
   }
 
+  protected toggleOpenWindow(windowId: number, windowLayer: HTMLElement, event?: Event): void {
+    event?.stopPropagation();
+
+    const currentWindow = this.windows().find((windowState) => windowState.id === windowId);
+    if (!currentWindow) {
+      return;
+    }
+
+    if (currentWindow.maximized && currentWindow.restoreBounds) {
+      this.windows.update((windows) =>
+        windows.map((windowState) =>
+          windowState.id === windowId
+            ? {
+                ...windowState,
+                ...currentWindow.restoreBounds,
+                maximized: false,
+                restoreBounds: null,
+                minimized: false
+              }
+            : windowState
+        )
+      );
+      this.bringToFront(windowId);
+      return;
+    }
+
+    const bounds = windowLayer.getBoundingClientRect();
+    const margin = 12;
+    const width = Math.max(440, Math.floor(bounds.width - margin * 2));
+    const height = Math.max(300, Math.floor(bounds.height - margin * 2));
+
+    this.windows.update((windows) =>
+      windows.map((windowState) =>
+        windowState.id === windowId
+          ? {
+              ...windowState,
+              x: margin,
+              y: margin,
+              width,
+              height,
+              maximized: true,
+              minimized: false,
+              restoreBounds: {
+                x: windowState.x,
+                y: windowState.y,
+                width: windowState.width,
+                height: windowState.height
+              }
+            }
+          : windowState
+      )
+    );
+    this.bringToFront(windowId);
+  }
+
   protected isAppOpen(appId: AppId): boolean {
     return this.windows().some(
       (windowState) => windowState.appId === appId && !windowState.minimized
+    );
+  }
+
+  protected isAppRunning(appId: AppId): boolean {
+    return this.windows().some((windowState) => windowState.appId === appId);
+  }
+
+  protected isAppMinimized(appId: AppId): boolean {
+    return this.windows().some(
+      (windowState) => windowState.appId === appId && windowState.minimized
     );
   }
 
@@ -342,7 +427,9 @@ export class App implements OnDestroy {
       height: dimensions.height,
       z: ++this.zCounter,
       active: true,
-      minimized: false
+      minimized: false,
+      maximized: false,
+      restoreBounds: null
     };
   }
 

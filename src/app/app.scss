@@ -175,6 +175,13 @@
   border-radius: 999px;
   border: 0;
   padding: 0;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.control:hover {
+  transform: scale(1.08);
+  filter: brightness(1.04);
 }
 
 .control.red {
@@ -376,6 +383,22 @@ textarea {
 .dock-item small {
   font-size: 0.63rem;
   line-height: 1;
+}
+
+.dock-item.running::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(229, 241, 255, 0.92);
+}
+
+.dock-item.minimized span {
+  opacity: 0.72;
+}
+
+.dock-item.minimized::after {
+  background: rgba(255, 190, 82, 0.92);
 }
 
 .dock-item.active span {
