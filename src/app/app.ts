@@ -112,6 +112,13 @@ interface WindowBounds {
   height: number;
 }
 
+type SnakeDirection = 'up' | 'down' | 'left' | 'right';
+
+interface SnakePosition {
+  x: number;
+  y: number;
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
@@ -137,6 +144,8 @@ export class App implements OnDestroy {
     'echo <text>',
     'guess',
     'placar',
+    'snake',
+    'snake-score',
     'history',
     'neofetch',
     'clear'
@@ -212,7 +221,7 @@ GitHub: github.com/lacerdaaa`;
     },
     {
       title: 'As Veias Abertas da America Latina',
-      description: 'Classico sobre historia economica e politica da America Latina.',
+      description: 'Clássico sobre hi economica e politica da America Latina.',
       cover: '/veias_abertas.jpg'
     },
     {
@@ -275,6 +284,14 @@ GitHub: github.com/lacerdaaa`;
   private terminalGuessWins = 0;
   private terminalGuessLosses = 0;
   private readonly terminalGuessMaxAttempts = 5;
+  private readonly terminalSnakeBoardSize = 12;
+  private terminalSnakeBody: SnakePosition[] | null = null;
+  private terminalSnakeFood: SnakePosition | null = null;
+  private terminalSnakeDirection: SnakeDirection = 'right';
+  private terminalSnakeScore = 0;
+  private terminalSnakeWins = 0;
+  private terminalSnakeLosses = 0;
+  private terminalSnakeBestScore = 0;
   private readonly clockInterval = window.setInterval(() => {
     this.timeLabel.set(this.formatTime());
   }, 30000);
@@ -715,6 +732,9 @@ GitHub: github.com/lacerdaaa`;
     if (this.handleGuessGameInput(sanitizedCommand)) {
       return;
     }
+    if (this.handleSnakeGameInput(sanitizedCommand)) {
+      return;
+    }
 
     const [keywordToken, ...rest] = sanitizedCommand.split(/\s+/);
     const keyword = keywordToken.toLowerCase();
@@ -786,6 +806,15 @@ GitHub: github.com/lacerdaaa`;
       case 'score':
         this.appendTerminalLines([
           `Guess score -> vitorias: ${this.terminalGuessWins} | derrotas: ${this.terminalGuessLosses}`
+        ]);
+        return;
+      case 'snake':
+      case 'cobrinha':
+        this.startSnakeGame();
+        return;
+      case 'snake-score':
+        this.appendTerminalLines([
+          `Snake score -> vitorias: ${this.terminalSnakeWins} | derrotas: ${this.terminalSnakeLosses} | recorde: ${this.terminalSnakeBestScore}`
         ]);
         return;
       case 'history':
@@ -870,6 +899,227 @@ GitHub: github.com/lacerdaaa`;
 
     this.appendTerminalLines([`Errou. Dica: tente um numero ${hint}. Restam ${attemptsLeft} tentativa(s).`]);
     return true;
+  }
+
+  private startSnakeGame(): void {
+    const centerRow = Math.floor(this.terminalSnakeBoardSize / 2);
+    this.terminalSnakeBody = [
+      { x: 2, y: centerRow },
+      { x: 1, y: centerRow },
+      { x: 0, y: centerRow }
+    ];
+    this.terminalSnakeDirection = 'right';
+    this.terminalSnakeScore = 0;
+    this.terminalSnakeFood = this.generateSnakeFood(this.terminalSnakeBody);
+
+    this.appendTerminalLines([
+      'Snake iniciado. Controles: w/a/s/d (ou up/left/down/right).',
+      'Digite "quit" para sair do jogo.'
+    ]);
+    this.appendTerminalLines(this.getSnakeBoardLines());
+  }
+
+  private handleSnakeGameInput(rawInput: string): boolean {
+    if (!this.isSnakeGameActive()) {
+      return false;
+    }
+
+    const normalized = rawInput.toLowerCase();
+    if (normalized === 'quit' || normalized === 'exit' || normalized === 'sair' || normalized === 'desisto') {
+      this.finishSnakeGame('quit', 'Snake encerrado.');
+      return true;
+    }
+
+    if (normalized === 'help') {
+      this.appendTerminalLines(['Snake ativo: use w/a/s/d para mover ou "quit" para sair.']);
+      return true;
+    }
+
+    const direction = this.parseSnakeDirection(normalized);
+    if (!direction) {
+      this.appendTerminalLines(['Snake ativo: comando invalido. Use w/a/s/d ou "quit".']);
+      return true;
+    }
+
+    this.advanceSnake(direction);
+    return true;
+  }
+
+  private parseSnakeDirection(input: string): SnakeDirection | null {
+    switch (input) {
+      case 'w':
+      case 'up':
+        return 'up';
+      case 'a':
+      case 'left':
+        return 'left';
+      case 's':
+      case 'down':
+        return 'down';
+      case 'd':
+      case 'right':
+        return 'right';
+      default:
+        return null;
+    }
+  }
+
+  private advanceSnake(nextDirection: SnakeDirection): void {
+    if (!this.terminalSnakeBody || !this.terminalSnakeFood) {
+      return;
+    }
+
+    const direction = this.getSafeSnakeDirection(nextDirection, this.terminalSnakeDirection, this.terminalSnakeBody.length);
+    const head = this.terminalSnakeBody[0];
+    const nextHead = this.getNextSnakeHead(head, direction);
+
+    if (
+      nextHead.x < 0 ||
+      nextHead.x >= this.terminalSnakeBoardSize ||
+      nextHead.y < 0 ||
+      nextHead.y >= this.terminalSnakeBoardSize ||
+      this.terminalSnakeBody.some((segment) => segment.x === nextHead.x && segment.y === nextHead.y)
+    ) {
+      this.finishSnakeGame('loss', `Game over. Pontuacao final: ${this.terminalSnakeScore}.`);
+      return;
+    }
+
+    const ateFood = nextHead.x === this.terminalSnakeFood.x && nextHead.y === this.terminalSnakeFood.y;
+    const nextBody = ateFood
+      ? [nextHead, ...this.terminalSnakeBody]
+      : [nextHead, ...this.terminalSnakeBody.slice(0, -1)];
+
+    this.terminalSnakeBody = nextBody;
+    this.terminalSnakeDirection = direction;
+    if (ateFood) {
+      this.terminalSnakeScore += 1;
+      this.terminalSnakeFood = this.generateSnakeFood(nextBody);
+      if (!this.terminalSnakeFood) {
+        this.finishSnakeGame('win', `Perfeito. Tabuleiro completo! Pontuacao final: ${this.terminalSnakeScore}.`);
+        return;
+      }
+    }
+
+    this.appendTerminalLines(this.getSnakeBoardLines());
+  }
+
+  private getSafeSnakeDirection(
+    requested: SnakeDirection,
+    current: SnakeDirection,
+    bodyLength: number
+  ): SnakeDirection {
+    if (bodyLength <= 1) {
+      return requested;
+    }
+
+    const oppositeMap: Record<SnakeDirection, SnakeDirection> = {
+      up: 'down',
+      down: 'up',
+      left: 'right',
+      right: 'left'
+    };
+
+    if (oppositeMap[current] === requested) {
+      return current;
+    }
+
+    return requested;
+  }
+
+  private getNextSnakeHead(head: SnakePosition, direction: SnakeDirection): SnakePosition {
+    switch (direction) {
+      case 'up':
+        return { x: head.x, y: head.y - 1 };
+      case 'down':
+        return { x: head.x, y: head.y + 1 };
+      case 'left':
+        return { x: head.x - 1, y: head.y };
+      case 'right':
+        return { x: head.x + 1, y: head.y };
+      default:
+        return head;
+    }
+  }
+
+  private generateSnakeFood(body: SnakePosition[]): SnakePosition | null {
+    const occupied = new Set(body.map((segment) => `${segment.x}:${segment.y}`));
+    const availableCells: SnakePosition[] = [];
+    for (let y = 0; y < this.terminalSnakeBoardSize; y += 1) {
+      for (let x = 0; x < this.terminalSnakeBoardSize; x += 1) {
+        if (!occupied.has(`${x}:${y}`)) {
+          availableCells.push({ x, y });
+        }
+      }
+    }
+
+    if (availableCells.length === 0) {
+      return null;
+    }
+
+    const pickedIndex = Math.floor(Math.random() * availableCells.length);
+    return availableCells[pickedIndex];
+  }
+
+  private getSnakeBoardLines(): string[] {
+    if (!this.terminalSnakeBody || !this.terminalSnakeFood) {
+      return ['Snake inativo. Rode "snake" para iniciar.'];
+    }
+
+    const segments = new Set(this.terminalSnakeBody.map((segment) => `${segment.x}:${segment.y}`));
+    const head = this.terminalSnakeBody[0];
+    const topBottomBorder = `+${'-'.repeat(this.terminalSnakeBoardSize)}+`;
+    const rows: string[] = [];
+
+    for (let y = 0; y < this.terminalSnakeBoardSize; y += 1) {
+      let row = '|';
+      for (let x = 0; x < this.terminalSnakeBoardSize; x += 1) {
+        const key = `${x}:${y}`;
+        if (x === head.x && y === head.y) {
+          row += '@';
+        } else if (x === this.terminalSnakeFood.x && y === this.terminalSnakeFood.y) {
+          row += '*';
+        } else if (segments.has(key)) {
+          row += 'o';
+        } else {
+          row += '.';
+        }
+      }
+      row += '|';
+      rows.push(row);
+    }
+
+    return [
+      `Snake score: ${this.terminalSnakeScore} | recorde: ${this.terminalSnakeBestScore}`,
+      topBottomBorder,
+      ...rows,
+      topBottomBorder
+    ];
+  }
+
+  private finishSnakeGame(result: 'win' | 'loss' | 'quit', message: string): void {
+    if (!this.terminalSnakeBody) {
+      return;
+    }
+
+    if (this.terminalSnakeScore > this.terminalSnakeBestScore) {
+      this.terminalSnakeBestScore = this.terminalSnakeScore;
+    }
+
+    if (result === 'win') {
+      this.terminalSnakeWins += 1;
+    } else if (result === 'loss') {
+      this.terminalSnakeLosses += 1;
+    }
+
+    this.appendTerminalLines([message, 'Rode "snake" para jogar novamente.']);
+    this.terminalSnakeBody = null;
+    this.terminalSnakeFood = null;
+    this.terminalSnakeDirection = 'right';
+    this.terminalSnakeScore = 0;
+  }
+
+  private isSnakeGameActive(): boolean {
+    return this.terminalSnakeBody !== null && this.terminalSnakeFood !== null;
   }
 
   private openContextMenuAt(

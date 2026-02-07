@@ -141,6 +141,41 @@ describe('App', () => {
     expect(terminalLog).toContain('derrotas: 1');
   });
 
+  it('should play snake and grow after eating food', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.runTerminalCommand('snake');
+    app.terminalSnakeBody = [{ x: 1, y: 1 }, { x: 0, y: 1 }];
+    app.terminalSnakeDirection = 'right';
+    app.terminalSnakeFood = { x: 2, y: 1 };
+    app.terminalSnakeScore = 0;
+
+    app.runTerminalCommand('d');
+
+    expect(app.terminalSnakeScore).toBe(1);
+    expect(app.terminalSnakeBody.length).toBe(3);
+  });
+
+  it('should end snake game on wall collision', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.runTerminalCommand('snake');
+    app.terminalSnakeBody = [{ x: 11, y: 0 }];
+    app.terminalSnakeDirection = 'right';
+    app.terminalSnakeFood = { x: 0, y: 0 };
+    app.terminalSnakeScore = 2;
+
+    app.runTerminalCommand('d');
+
+    expect(app.terminalSnakeBody).toBeNull();
+    expect(app.terminalSnakeLosses).toBe(1);
+    expect(app.terminalSnakeBestScore).toBe(2);
+  });
+
   it('should minimize and reopen windows', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
