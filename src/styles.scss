@@ -3,8 +3,11 @@
 }
 
 :root {
-  --cursor-retro: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNicgaGVpZ2h0PScxNicgc2hhcGUtcmVuZGVyaW5nPSdjcmlzcEVkZ2VzJz48cGF0aCBmaWxsPScjMDAwJyBkPSdNMSAxdjEwaDJWOGwzIDMgMS0xLTMtM2gzVjVINFYxeicvPjxwYXRoIGZpbGw9JyNmZmYnIGQ9J00yIDJ2N2gxVjZoMkwyIDN6Jy8+PC9zdmc+") 1 1, auto;
-  --cursor-retro-pointer: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNicgaGVpZ2h0PScxNicgc2hhcGUtcmVuZGVyaW5nPSdjcmlzcEVkZ2VzJz48cGF0aCBmaWxsPScjMDAwJyBkPSdNMSAxdjEwaDJWOGwzIDMgMS0xLTMtM2gzVjVINFYxeicvPjxwYXRoIGZpbGw9JyNmZmYnIGQ9J00yIDJ2N2gxVjZoMkwyIDN6Jy8+PC9zdmc+") 1 1, pointer;
+  --cursor-retro-default: url('/cursors/retro-default.svg') 1 1, auto;
+  --cursor-retro-pointer: url('/cursors/retro-pointer.svg') 8 2, pointer;
+  --cursor-retro-text: url('/cursors/retro-text.svg') 16 16, text;
+  --cursor-retro-move: url('/cursors/retro-move.svg') 16 16, move;
+  --cursor-retro-nwse: url('/cursors/retro-nwse.svg') 16 16, nwse-resize;
 }
 
 html,
@@ -22,13 +25,27 @@ body {
 
 body,
 body * {
-  cursor: var(--cursor-retro);
+  cursor: var(--cursor-retro-default);
 }
 
 a,
 button,
 [role='button'],
-.window-titlebar,
 .resize-handle {
   cursor: var(--cursor-retro-pointer);
+}
+
+input,
+textarea,
+select,
+[contenteditable='true'] {
+  cursor: var(--cursor-retro-text);
+}
+
+.window-titlebar {
+  cursor: var(--cursor-retro-move);
+}
+
+.resize-handle {
+  cursor: var(--cursor-retro-nwse);
 }
