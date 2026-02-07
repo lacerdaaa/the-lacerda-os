@@ -37,6 +37,7 @@
               <article
                 class="window"
                 [class.active]="windowState.active"
+                [class.maximized]="windowState.maximized"
                 [style.width.px]="windowState.width"
                 [style.height.px]="windowState.height"
                 [style.left.px]="windowState.x"
@@ -155,7 +156,7 @@
                       <p>{{ line }}</p>
                     }
                     <form class="terminal-input-row" (submit)="$event.preventDefault(); submitTerminalCommand()">
-                      <label for="terminal-command">welcome@macos8:~$</label>
+                      <label for="terminal-command">welcome@lacos:~$</label>
                       <input
                         id="terminal-command"
                         type="text"
@@ -198,6 +199,12 @@ Next milestones:
                 }
               }
                 </div>
+                <button
+                  type="button"
+                  class="resize-handle"
+                  aria-label="Resize window"
+                  (pointerdown)="startResize(windowState.id, windowLayer, $event)"
+                ></button>
               </article>
             }
           }

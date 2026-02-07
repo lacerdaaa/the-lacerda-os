@@ -198,6 +198,29 @@
   box-shadow: inset 1px 1px 0 var(--retro-panel-hi), inset -1px -1px 0 var(--retro-panel-lo);
 }
 
+.resize-handle {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 14px;
+  height: 14px;
+  border: 0;
+  padding: 0;
+  background:
+    linear-gradient(135deg, transparent 0 38%, #4a4a4a 38% 50%, transparent 50% 63%, #4a4a4a 63% 75%, transparent 75%),
+    #c8c8c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #333;
+  border-bottom: 1px solid #333;
+  cursor: nwse-resize;
+  z-index: 5;
+}
+
+.window.maximized .resize-handle {
+  display: none;
+}
+
 .window-titlebar {
   height: 22px;
   margin: 2px 2px 0;
@@ -587,6 +610,10 @@ textarea {
   .window {
     width: calc(100% - 8px) !important;
     left: 4px !important;
+  }
+
+  .resize-handle {
+    display: none;
   }
 
   .project-grid {

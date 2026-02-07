@@ -96,6 +96,35 @@ describe('App', () => {
     expect(updatedFinder.maximized).toBe(false);
   });
 
+  it('should resize windows with the resize handle logic', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+
+    app.openApp('notes');
+    const notesWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'notes');
+    expect(notesWindow).toBeTruthy();
+
+    const windowLayer = {
+      getBoundingClientRect: () => ({ left: 0, top: 0, width: 980, height: 620 }),
+    } as HTMLElement;
+
+    app.startResize(notesWindow.id, windowLayer, {
+      button: 0,
+      clientX: 300,
+      clientY: 220,
+      stopPropagation: () => undefined,
+    } as PointerEvent);
+
+    app.onPointerMove({
+      clientX: 360,
+      clientY: 280,
+    } as PointerEvent);
+
+    const resizedWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'notes');
+    expect(resizedWindow.width).toBeGreaterThan(notesWindow.width);
+    expect(resizedWindow.height).toBeGreaterThan(notesWindow.height);
+  });
+
   it('should open text files from workspace in text viewer', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;

@@ -62,6 +62,8 @@ interface WindowState {
   active: boolean;
   minimized: boolean;
   maximized: boolean;
+  minWidth: number;
+  minHeight: number;
   restoreBounds: WindowBounds | null;
 }
 
@@ -69,6 +71,15 @@ interface DragState {
   windowId: number;
   offsetX: number;
   offsetY: number;
+  windowLayer: HTMLElement;
+}
+
+interface ResizeState {
+  windowId: number;
+  startClientX: number;
+  startClientY: number;
+  startWidth: number;
+  startHeight: number;
   windowLayer: HTMLElement;
 }
 
@@ -153,6 +164,7 @@ GitHub: github.com/lacerdaaa`;
   private nextWindowId = 1;
   private zCounter = 10;
   private dragState: DragState | null = null;
+  private resizeState: ResizeState | null = null;
   private githubProjectsLoaded = false;
   private readonly clockInterval = window.setInterval(() => {
     this.timeLabel.set(this.formatTime());
@@ -225,6 +237,30 @@ GitHub: github.com/lacerdaaa`;
       offsetY: event.clientY - layerBounds.top - targetWindow.y,
       windowLayer
     };
+    this.resizeState = null;
+  }
+
+  protected startResize(windowId: number, windowLayer: HTMLElement, event: PointerEvent): void {
+    event.stopPropagation();
+    if (event.button !== 0) {
+      return;
+    }
+
+    const targetWindow = this.windows().find((windowState) => windowState.id === windowId);
+    if (!targetWindow || targetWindow.maximized) {
+      return;
+    }
+
+    this.bringToFront(windowId);
+    this.resizeState = {
+      windowId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startWidth: targetWindow.width,
+      startHeight: targetWindow.height,
+      windowLayer
+    };
+    this.dragState = null;
   }
 
   protected minimizeWindow(windowId: number, event?: Event): void {
@@ -232,6 +268,9 @@ GitHub: github.com/lacerdaaa`;
 
     if (this.dragState?.windowId === windowId) {
       this.dragState = null;
+    }
+    if (this.resizeState?.windowId === windowId) {
+      this.resizeState = null;
     }
 
     this.windows.update((windows) =>
@@ -251,6 +290,9 @@ GitHub: github.com/lacerdaaa`;
     if (this.dragState?.windowId === windowId) {
       this.dragState = null;
     }
+    if (this.resizeState?.windowId === windowId) {
+      this.resizeState = null;
+    }
 
     this.windows.update((windows) =>
       windows.filter((windowState) => windowState.id !== windowId)
@@ -261,6 +303,9 @@ GitHub: github.com/lacerdaaa`;
 
   protected toggleOpenWindow(windowId: number, windowLayer: HTMLElement, event?: Event): void {
     event?.stopPropagation();
+    if (this.resizeState?.windowId === windowId) {
+      this.resizeState = null;
+    }
 
     const currentWindow = this.windows().find((windowState) => windowState.id === windowId);
     if (!currentWindow) {
@@ -515,38 +560,79 @@ GitHub: github.com/lacerdaaa`;
 
   @HostListener('window:pointermove', ['$event'])
   protected onPointerMove(event: PointerEvent): void {
-    if (!this.dragState) {
+    if (this.dragState) {
+      const draggedWindow = this.windows().find(
+        (windowState) => windowState.id === this.dragState?.windowId
+      );
+
+      if (!draggedWindow) {
+        this.dragState = null;
+        return;
+      }
+
+      const layerBounds = this.dragState.windowLayer.getBoundingClientRect();
+      const margin = 6;
+      const nextX = event.clientX - layerBounds.left - this.dragState.offsetX;
+      const nextY = event.clientY - layerBounds.top - this.dragState.offsetY;
+      const maxX = Math.max(margin, layerBounds.width - draggedWindow.width - margin);
+      const maxY = Math.max(margin, layerBounds.height - draggedWindow.height - margin);
+
+      this.windows.update((windows) =>
+        windows.map((windowState) => {
+          if (windowState.id !== this.dragState?.windowId) {
+            return windowState;
+          }
+
+          return {
+            ...windowState,
+            x: Math.max(margin, Math.min(nextX, maxX)),
+            y: Math.max(margin, Math.min(nextY, maxY))
+          };
+        })
+      );
       return;
     }
 
-    const draggedWindow = this.windows().find(
-      (windowState) => windowState.id === this.dragState?.windowId
+    if (!this.resizeState) {
+      return;
+    }
+
+    const resizedWindow = this.windows().find(
+      (windowState) => windowState.id === this.resizeState?.windowId
     );
 
-    if (!draggedWindow) {
-      this.dragState = null;
+    if (!resizedWindow) {
+      this.resizeState = null;
       return;
     }
 
-    const layerBounds = this.dragState.windowLayer.getBoundingClientRect();
+    const layerBounds = this.resizeState.windowLayer.getBoundingClientRect();
     const margin = 6;
-    const nextX = event.clientX - layerBounds.left - this.dragState.offsetX;
-    const nextY = event.clientY - layerBounds.top - this.dragState.offsetY;
-    const maxX = Math.max(margin, layerBounds.width - draggedWindow.width - margin);
-    const maxY = Math.max(margin, layerBounds.height - draggedWindow.height - margin);
+    const deltaX = event.clientX - this.resizeState.startClientX;
+    const deltaY = event.clientY - this.resizeState.startClientY;
+    const maxWidth = Math.max(
+      resizedWindow.minWidth,
+      layerBounds.width - resizedWindow.x - margin
+    );
+    const maxHeight = Math.max(
+      resizedWindow.minHeight,
+      layerBounds.height - resizedWindow.y - margin
+    );
+    const nextWidth = Math.max(
+      resizedWindow.minWidth,
+      Math.min(this.resizeState.startWidth + deltaX, maxWidth)
+    );
+    const nextHeight = Math.max(
+      resizedWindow.minHeight,
+      Math.min(this.resizeState.startHeight + deltaY, maxHeight)
+    );
 
     this.windows.update((windows) =>
-      windows.map((windowState) => {
-        if (windowState.id !== this.dragState?.windowId) {
-          return windowState;
-        }
-
-        return {
-          ...windowState,
-          x: Math.max(margin, Math.min(nextX, maxX)),
-          y: Math.max(margin, Math.min(nextY, maxY))
-        };
-      })
+      windows.map((windowState) =>
+        windowState.id === this.resizeState?.windowId
+          ? { ...windowState, width: nextWidth, height: nextHeight }
+          : windowState
+      )
     );
   }
 
@@ -554,6 +640,7 @@ GitHub: github.com/lacerdaaa`;
   @HostListener('window:pointercancel')
   protected onPointerEnd(): void {
     this.dragState = null;
+    this.resizeState = null;
   }
 
   private createWindow(appId: AppId): WindowState {
@@ -561,6 +648,7 @@ GitHub: github.com/lacerdaaa`;
     const placementOffset = (id - 1) * 26;
 
     const dimensions = this.getWindowDimensions(appId);
+    const minimums = this.getWindowMinimumDimensions(appId);
     const title = this.getWindowTitle(appId);
 
     return {
@@ -575,6 +663,8 @@ GitHub: github.com/lacerdaaa`;
       active: true,
       minimized: false,
       maximized: false,
+      minWidth: minimums.width,
+      minHeight: minimums.height,
       restoreBounds: null
     };
   }
@@ -591,6 +681,21 @@ GitHub: github.com/lacerdaaa`;
         return { width: 520, height: 340 };
       default:
         return { width: 520, height: 330 };
+    }
+  }
+
+  private getWindowMinimumDimensions(appId: AppId): { width: number; height: number } {
+    switch (appId) {
+      case 'terminal':
+        return { width: 420, height: 260 };
+      case 'finder':
+        return { width: 420, height: 250 };
+      case 'notes':
+        return { width: 380, height: 240 };
+      case 'textviewer':
+        return { width: 400, height: 250 };
+      default:
+        return { width: 400, height: 240 };
     }
   }
 
