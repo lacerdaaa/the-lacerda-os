@@ -2,12 +2,6 @@ import { Component, HostListener, OnDestroy, signal } from '@angular/core';
 
 type AppId = 'about' | 'projects' | 'terminal' | 'notes' | 'finder';
 
-interface DesktopShortcut {
-  name: string;
-  code: string;
-  appId: AppId;
-}
-
 interface DockApp {
   name: string;
   code: string;
@@ -56,13 +50,6 @@ interface WindowBounds {
 })
 export class App implements OnDestroy {
   protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
-
-  protected readonly desktopShortcuts: DesktopShortcut[] = [
-    { name: 'About Me', code: 'AB', appId: 'about' },
-    { name: 'Projects', code: 'PR', appId: 'projects' },
-    { name: 'Terminal', code: 'TM', appId: 'terminal' },
-    { name: 'Notes', code: 'NT', appId: 'notes' }
-  ];
 
   protected readonly dockApps: DockApp[] = [
     { name: 'Finder', code: 'FD', appId: 'finder' },

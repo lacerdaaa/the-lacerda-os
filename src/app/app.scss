@@ -99,7 +99,6 @@
 
 .menu-item:hover,
 .os-mark:hover,
-.desktop-icon:hover,
 .dock-item:hover {
   cursor: pointer;
 }
@@ -113,55 +112,8 @@
 .desktop-surface {
   height: 100%;
   min-height: 0;
-  display: grid;
-  grid-template-columns: 108px 1fr;
-  gap: 12px;
+  display: block;
   padding: 2px 8px 12px;
-}
-
-.desktop-icons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.desktop-icon {
-  width: 92px;
-  border: 0;
-  background: transparent;
-  color: #fff;
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  padding: 3px;
-}
-
-.desktop-icon:focus-visible {
-  outline: 1px dotted #fff;
-  outline-offset: 2px;
-}
-
-.icon-badge {
-  width: 34px;
-  height: 30px;
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-right: 1px solid #222;
-  border-bottom: 1px solid #222;
-  box-shadow: inset 1px 1px 0 #dcdcdc, inset -1px -1px 0 #7a7a7a;
-  background: #d9d9d9;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: #000;
-}
-
-.icon-label {
-  font-size: 11px;
-  line-height: 1.1;
-  text-align: center;
-  text-shadow: 1px 1px #005454;
 }
 
 .window-layer {
@@ -514,16 +466,6 @@ textarea {
   .retro-stage {
     width: calc(100vw - 12px);
     padding: 6px;
-  }
-
-  .desktop-surface {
-    grid-template-columns: 1fr;
-  }
-
-  .desktop-icons {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px;
   }
 
   .window-layer {

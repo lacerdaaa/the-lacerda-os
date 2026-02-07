@@ -15,15 +15,6 @@
   </header>
 
       <main class="desktop-surface">
-        <aside class="desktop-icons" aria-label="Desktop icons">
-      @for (shortcut of desktopShortcuts; track shortcut.name) {
-        <button type="button" class="desktop-icon" (click)="openApp(shortcut.appId)">
-          <span class="icon-badge">{{ shortcut.code }}</span>
-          <span class="icon-label">{{ shortcut.name }}</span>
-        </button>
-      }
-        </aside>
-
         <section class="window-layer" #windowLayer aria-label="Window layer">
           @for (windowState of windows(); track windowState.id) {
             @if (!windowState.minimized) {
