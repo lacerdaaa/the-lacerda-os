@@ -90,9 +90,21 @@
                 @case ('terminal') {
                   <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
                   <div class="terminal-output">
-                    @for (line of getTerminalLines(); track line) {
+                    @for (line of terminalLines(); track $index) {
                       <p>{{ line }}</p>
                     }
+                    <form class="terminal-input-row" (submit)="$event.preventDefault(); submitTerminalCommand()">
+                      <label for="terminal-command">welcome@macos8:~$</label>
+                      <input
+                        id="terminal-command"
+                        type="text"
+                        [value]="terminalInput()"
+                        (input)="updateTerminalInput($event)"
+                        autocomplete="off"
+                        spellcheck="false"
+                        placeholder="Type a command"
+                      />
+                    </form>
                   </div>
                 }
 

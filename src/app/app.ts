@@ -58,6 +58,11 @@ export class App implements OnDestroy {
 
   protected readonly windows = signal<WindowState[]>([]);
   protected readonly timeLabel = signal(this.formatTime());
+  protected readonly terminalLines = signal<string[]>([
+    'macOS8 Terminal v0.1',
+    'Type "help" to list commands.'
+  ]);
+  protected readonly terminalInput = signal('');
 
   private nextWindowId = 1;
   private zCounter = 10;
@@ -172,13 +177,86 @@ export class App implements OnDestroy {
     }
   }
 
-  protected getTerminalLines(): string[] {
-    return [
-      'welcome@macos8:~$ help',
-      'Available commands: about, projects, open <app>, clear',
-      'welcome@macos8:~$ open projects',
-      'Launching Projects.app'
-    ];
+  protected updateTerminalInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.terminalInput.set(target?.value ?? '');
+  }
+
+  protected submitTerminalCommand(): void {
+    const rawCommand = this.terminalInput().trim();
+    if (!rawCommand) {
+      return;
+    }
+
+    this.appendTerminalLines([`welcome@macos8:~$ ${rawCommand}`]);
+    this.runTerminalCommand(rawCommand);
+    this.terminalInput.set('');
+  }
+
+  protected runTerminalCommand(rawCommand: string): void {
+    const command = rawCommand.trim().toLowerCase();
+    const [keyword, ...rest] = command.split(/\s+/);
+
+    switch (keyword) {
+      case 'help':
+        this.appendTerminalLines([
+          'Commands: help, about, projects, open <app>, clear'
+        ]);
+        return;
+      case 'about':
+        this.appendTerminalLines([
+          'macOS8 is a virtual OS portfolio built with Angular.'
+        ]);
+        return;
+      case 'projects':
+        this.appendTerminalLines([
+          'Projects: product analytics lab, design token forge, studio archive.'
+        ]);
+        return;
+      case 'open':
+        if (rest.length === 0) {
+          this.appendTerminalLines(['Usage: open <finder|notes|terminal|projects|about>']);
+          return;
+        }
+
+        this.openAppFromTerminal(rest[0]);
+        return;
+      case 'clear':
+        this.terminalLines.set([]);
+        return;
+      default:
+        this.appendTerminalLines([`Unknown command: ${rawCommand}`]);
+    }
+  }
+
+  private openAppFromTerminal(rawTarget: string): void {
+    const target = rawTarget.toLowerCase();
+    const appAliases: Record<string, AppId> = {
+      finder: 'finder',
+      notes: 'notes',
+      terminal: 'terminal',
+      projects: 'projects',
+      about: 'about'
+    };
+
+    const appId = appAliases[target];
+    if (!appId) {
+      this.appendTerminalLines([
+        `Unknown app: ${rawTarget}`,
+        'Available apps: finder, notes, terminal, projects, about'
+      ]);
+      return;
+    }
+
+    this.openApp(appId);
+    this.appendTerminalLines([`Launching ${this.getWindowTitle(appId)}...`]);
+  }
+
+  private appendTerminalLines(lines: string[]): void {
+    this.terminalLines.update((history) => {
+      const nextHistory = [...history, ...lines];
+      return nextHistory.slice(-80);
+    });
   }
 
   @HostListener('window:pointermove', ['$event'])

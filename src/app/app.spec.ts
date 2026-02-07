@@ -27,4 +27,14 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelectorAll('.window').length).toBeGreaterThan(0);
   });
+
+  it('should open apps from terminal commands', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+
+    app.runTerminalCommand('open notes');
+
+    const windows = app.windows();
+    expect(windows.some((windowState: { appId: string }) => windowState.appId === 'notes')).toBe(true);
+  });
 });

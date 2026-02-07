@@ -247,6 +247,35 @@
   line-height: 1.5;
 }
 
+.terminal-input-row {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(141, 251, 186, 0.25);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-input-row label {
+  font-size: 0.88rem;
+}
+
+.terminal-input-row input {
+  height: 30px;
+  border: 1px solid rgba(141, 251, 186, 0.35);
+  border-radius: 8px;
+  background: rgba(12, 29, 52, 0.85);
+  color: #b1ffd3;
+  font-family: 'IBM Plex Sans', monospace;
+  padding: 0 8px;
+}
+
+.terminal-input-row input:focus {
+  outline: 2px solid rgba(141, 251, 186, 0.45);
+  outline-offset: 1px;
+}
+
 textarea {
   width: 100%;
   min-height: 220px;
