@@ -135,6 +135,8 @@ export class App implements OnDestroy {
     'pwd',
     'date',
     'echo <text>',
+    'guess',
+    'placar',
     'history',
     'neofetch',
     'clear'
@@ -268,6 +270,11 @@ GitHub: github.com/lacerdaaa`;
   private terminalCommandHistory: string[] = [];
   private terminalHistoryIndex = -1;
   private terminalDraftInput = '';
+  private terminalGuessTarget: number | null = null;
+  private terminalGuessAttempts = 0;
+  private terminalGuessWins = 0;
+  private terminalGuessLosses = 0;
+  private readonly terminalGuessMaxAttempts = 5;
   private readonly clockInterval = window.setInterval(() => {
     this.timeLabel.set(this.formatTime());
   }, 30000);
@@ -705,6 +712,10 @@ GitHub: github.com/lacerdaaa`;
       return;
     }
 
+    if (this.handleGuessGameInput(sanitizedCommand)) {
+      return;
+    }
+
     const [keywordToken, ...rest] = sanitizedCommand.split(/\s+/);
     const keyword = keywordToken.toLowerCase();
     const argumentText = sanitizedCommand.slice(keywordToken.length).trim();
@@ -767,6 +778,16 @@ GitHub: github.com/lacerdaaa`;
       case 'echo':
         this.appendTerminalLines([argumentText]);
         return;
+      case 'guess':
+      case 'jogo':
+        this.startGuessGame();
+        return;
+      case 'placar':
+      case 'score':
+        this.appendTerminalLines([
+          `Guess score -> vitorias: ${this.terminalGuessWins} | derrotas: ${this.terminalGuessLosses}`
+        ]);
+        return;
       case 'history':
         this.appendTerminalLines(this.getTerminalHistoryLines());
         return;
@@ -787,6 +808,68 @@ GitHub: github.com/lacerdaaa`;
       default:
         this.appendTerminalLines([`Command not found: ${rawCommand}`]);
     }
+  }
+
+  private startGuessGame(): void {
+    this.terminalGuessTarget = Math.floor(Math.random() * 20) + 1;
+    this.terminalGuessAttempts = 0;
+    this.appendTerminalLines([
+      'Guess game iniciado.',
+      `Adivinhe um numero de 1 a 20 em ${this.terminalGuessMaxAttempts} tentativas.`,
+      'Digite um numero ou "desisto".'
+    ]);
+  }
+
+  private handleGuessGameInput(rawInput: string): boolean {
+    if (this.terminalGuessTarget === null) {
+      return false;
+    }
+
+    const normalized = rawInput.toLowerCase();
+    if (normalized === 'desisto' || normalized === 'exit' || normalized === 'quit') {
+      this.terminalGuessTarget = null;
+      this.terminalGuessLosses += 1;
+      this.appendTerminalLines(['Jogo encerrado. Boa tentativa.']);
+      return true;
+    }
+
+    if (!/^\d+$/.test(rawInput)) {
+      this.appendTerminalLines(['Jogo ativo: digite um numero de 1 a 20 ou "desisto".']);
+      return true;
+    }
+
+    const guessValue = Number(rawInput);
+    if (guessValue < 1 || guessValue > 20) {
+      this.appendTerminalLines(['Use um numero valido entre 1 e 20.']);
+      return true;
+    }
+
+    this.terminalGuessAttempts += 1;
+
+    if (guessValue === this.terminalGuessTarget) {
+      this.terminalGuessWins += 1;
+      this.appendTerminalLines([
+        `Boa! Acertou em ${this.terminalGuessAttempts} tentativa(s).`,
+        'Rode "guess" para jogar de novo.'
+      ]);
+      this.terminalGuessTarget = null;
+      return true;
+    }
+
+    const hint = guessValue < this.terminalGuessTarget ? 'mais alto' : 'mais baixo';
+    const attemptsLeft = this.terminalGuessMaxAttempts - this.terminalGuessAttempts;
+    if (attemptsLeft <= 0) {
+      this.terminalGuessLosses += 1;
+      this.appendTerminalLines([
+        `Fim de jogo. O numero era ${this.terminalGuessTarget}.`,
+        'Rode "guess" para tentar novamente.'
+      ]);
+      this.terminalGuessTarget = null;
+      return true;
+    }
+
+    this.appendTerminalLines([`Errou. Dica: tente um numero ${hint}. Restam ${attemptsLeft} tentativa(s).`]);
+    return true;
   }
 
   private openContextMenuAt(
@@ -1277,7 +1360,7 @@ GitHub: github.com/lacerdaaa`;
   }
 
   private formatTime(): string {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('pt-BR', {
       weekday: 'short',
       hour: '2-digit',
       minute: '2-digit',

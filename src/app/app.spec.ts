@@ -111,6 +111,36 @@ describe('App', () => {
     expect(terminalLog).toContain('Eduardo Lacerda');
   });
 
+  it('should play and win the terminal guess game', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.runTerminalCommand('guess');
+    app.terminalGuessTarget = 7;
+    app.runTerminalCommand('7');
+
+    const terminalLog = app.terminalLines().join('\n');
+    expect(terminalLog).toContain('Guess game iniciado.');
+    expect(terminalLog).toContain('Boa! Acertou');
+    expect(app.terminalGuessTarget).toBeNull();
+    expect(app.terminalGuessWins).toBe(1);
+  });
+
+  it('should show guess game score', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.terminalGuessWins = 2;
+    app.terminalGuessLosses = 1;
+    app.runTerminalCommand('placar');
+
+    const terminalLog = app.terminalLines().join('\n');
+    expect(terminalLog).toContain('vitorias: 2');
+    expect(terminalLog).toContain('derrotas: 1');
+  });
+
   it('should minimize and reopen windows', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
