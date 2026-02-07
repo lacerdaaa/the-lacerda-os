@@ -216,22 +216,22 @@ GitHub: github.com/lacerdaaa`;
   protected readonly books: BookItem[] = [
     {
       title: 'Aprenda Domain-Driven Design',
-      description: 'Guia pratico para modelar software com foco em dominio e linguagem ubiqua.',
+      description: 'Guia prático e conciso para modelar software com foco no domínio, na linguagem ubíqua e em táticas de design que melhoram a comunicação entre equipes e stakeholders.',
       cover: '/ddd.jpg'
     },
     {
-      title: 'As Veias Abertas da America Latina',
-      description: 'Clássico sobre hi economica e politica da America Latina.',
+      title: 'As Veias Abertas da América Latina',
+      description: 'Análise clássica e contundente sobre a exploração econômica e os impactos do colonialismo na América Latina, combinando pesquisa histórica e crítica política.',
       cover: '/veias_abertas.jpg'
     },
     {
-      title: 'Opusculo Humanitario',
-      description: 'Texto curto com reflexoes sociais e humanitarias para ampliar repertorio critico.',
+      title: 'Opúsculo Humanitário',
+      description: 'Texto breve e denso com reflexões sobre solidariedade, ética e responsabilidade social, útil para ampliar repertório crítico e empático.',
       cover: '/opusculo.jpg'
     },
     {
-      title: 'A Vida Nao e Util',
-      description: 'Reflexoes de Ailton Krenak sobre sociedade, natureza e sentido coletivo.',
+      title: 'A Vida Não é Útil',
+      description: 'Ensaios reflexivos de Ailton Krenak sobre a relação entre sociedade e natureza, propondo modos de vida e pensamento coletivo que valorizam a sustentabilidade e o cuidado.',
       cover: '/vida_nao_e_util.jpg'
     }
   ];
