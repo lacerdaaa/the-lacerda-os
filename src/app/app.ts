@@ -45,6 +45,7 @@ interface GithubProject {
   name: string;
   description: string;
   href: string;
+  pinned: boolean;
   stars: number;
   updatedAt: string;
 }
@@ -85,6 +86,7 @@ interface WindowBounds {
 })
 export class App implements OnDestroy {
   protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
+  private readonly pinnedRepoNames = ['pressum-core-service', 'fynansee-core', 'auto-trace'];
   private readonly aboutMeFileText = `Eduardo Lacerda
 
 Location: Campinas, Sao Paulo, Brazil
@@ -465,17 +467,21 @@ GitHub: github.com/lacerdaaa`;
       }
 
       const repos = await response.json() as GithubRepoResponse[];
+      const pinnedOrder = new Map(this.pinnedRepoNames.map((name, index) => [name, index]));
       const normalized = repos
         .filter((repo) => !repo.fork && !repo.archived)
         .sort((a, b) => {
-          const aHasStars = a.stargazers_count > 0 ? 1 : 0;
-          const bHasStars = b.stargazers_count > 0 ? 1 : 0;
-          if (aHasStars !== bHasStars) {
-            return bHasStars - aHasStars;
+          const aPinnedIndex = pinnedOrder.get(a.name);
+          const bPinnedIndex = pinnedOrder.get(b.name);
+          const aPinned = aPinnedIndex !== undefined;
+          const bPinned = bPinnedIndex !== undefined;
+
+          if (aPinned !== bPinned) {
+            return aPinned ? -1 : 1;
           }
 
-          if (a.stargazers_count !== b.stargazers_count) {
-            return b.stargazers_count - a.stargazers_count;
+          if (aPinned && bPinned && aPinnedIndex !== bPinnedIndex) {
+            return (aPinnedIndex ?? 0) - (bPinnedIndex ?? 0);
           }
 
           return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
@@ -485,6 +491,7 @@ GitHub: github.com/lacerdaaa`;
           name: repo.name,
           description: repo.description ?? 'No description provided yet.',
           href: repo.html_url,
+          pinned: pinnedOrder.has(repo.name),
           stars: repo.stargazers_count,
           updatedAt: repo.updated_at
         }))

@@ -137,6 +137,9 @@
                           <h2>{{ project.name }}</h2>
                           <p>{{ project.description }}</p>
                           <span>
+                            @if (project.pinned) {
+                              Pinned |
+                            }
                             Stars {{ project.stars }} | Updated {{ getProjectUpdatedLabel(project.updatedAt) }}
                           </span>
                         </a>
