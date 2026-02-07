@@ -53,25 +53,6 @@
     #007676 6px,
     #007676 12px
   );
-  background-position: 0 0;
-  animation: desktop-pattern-drift 38s linear infinite;
-}
-
-.desktop-shell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 18% 12%, rgba(160, 255, 241, 0.11) 0%, transparent 34%),
-    radial-gradient(circle at 82% 88%, rgba(0, 56, 56, 0.15) 0%, transparent 32%);
-  opacity: 0.7;
-  animation: desktop-glow-breathe 22s ease-in-out infinite;
-}
-
-.desktop-shell > * {
-  position: relative;
-  z-index: 1;
 }
 
 .menu-bar {
@@ -727,28 +708,6 @@
     opacity: 0;
   }
 }
-
-@keyframes desktop-pattern-drift {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 96px 64px;
-  }
-}
-
-@keyframes desktop-glow-breathe {
-  0%,
-  100% {
-    opacity: 0.56;
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    opacity: 0.78;
-    transform: translate3d(0, -4px, 0);
-  }
-}
-
 
 textarea {
   width: 100%;
