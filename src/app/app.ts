@@ -1,6 +1,6 @@
 import { Component, HostListener, OnDestroy, signal } from '@angular/core';
 
-type AppId = 'about' | 'projects' | 'terminal' | 'notes' | 'finder' | 'textviewer';
+type AppId = 'about' | 'projects' | 'books' | 'terminal' | 'notes' | 'finder' | 'textviewer';
 
 interface DockApp {
   name: string;
@@ -48,6 +48,12 @@ interface GithubProject {
   pinned: boolean;
   stars: number;
   updatedAt: string;
+}
+
+interface BookItem {
+  title: string;
+  description: string;
+  cover: string;
 }
 
 interface WindowState {
@@ -121,6 +127,7 @@ GitHub: github.com/lacerdaaa`;
     { name: 'Notes', code: 'NT', appId: 'notes' },
     { name: 'Terminal', code: 'TM', appId: 'terminal' },
     { name: 'Projects', code: 'PR', appId: 'projects' },
+    { name: 'Books', code: 'BK', appId: 'books' },
     { name: 'About', code: 'AB', appId: 'about' }
   ];
 
@@ -128,6 +135,7 @@ GitHub: github.com/lacerdaaa`;
     { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },
     { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 2 },
     { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 3 },
+    { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 4 },
     {
       kind: 'file',
       name: 'about-me.txt',
@@ -145,6 +153,29 @@ GitHub: github.com/lacerdaaa`;
       content: 'Next ideas:\\n- Simulated filesystem\\n- Boot sequence\\n- Installable themes',
       column: 2,
       row: 2
+    }
+  ];
+
+  protected readonly books: BookItem[] = [
+    {
+      title: 'Aprenda Domain-Driven Design',
+      description: 'Guia pratico para modelar software com foco em dominio e linguagem ubiqua.',
+      cover: '/ddd.jpg'
+    },
+    {
+      title: 'As Veias Abertas da America Latina',
+      description: 'Classico sobre historia economica e politica da America Latina.',
+      cover: '/veias_abertas.jpg'
+    },
+    {
+      title: 'Opusculo Humanitario',
+      description: 'Texto curto com reflexoes sociais e humanitarias para ampliar repertorio critico.',
+      cover: '/opusculo.jpg'
+    },
+    {
+      title: 'A Vida Nao e Util',
+      description: 'Reflexoes de Ailton Krenak sobre sociedade, natureza e sentido coletivo.',
+      cover: '/vida_nao_e_util.jpg'
     }
   ];
 
@@ -406,6 +437,8 @@ GitHub: github.com/lacerdaaa`;
         return 'macOS8 Portfolio';
       case 'projects':
         return 'Featured Projects';
+      case 'books':
+        return 'Books';
       case 'terminal':
         return 'Terminal';
       case 'notes':
@@ -442,7 +475,7 @@ GitHub: github.com/lacerdaaa`;
     switch (keyword) {
       case 'help':
         this.appendTerminalLines([
-          'Commands: help, about, projects, open <app>, clear'
+          'Commands: help, about, projects, books, open <app>, clear'
         ]);
         return;
       case 'about':
@@ -455,9 +488,14 @@ GitHub: github.com/lacerdaaa`;
           'Projects.app loads your latest repositories from github.com/lacerdaaa.'
         ]);
         return;
+      case 'books':
+        this.appendTerminalLines([
+          'Books.app has a retro bookshelf with your selected readings.'
+        ]);
+        return;
       case 'open':
         if (rest.length === 0) {
-          this.appendTerminalLines(['Usage: open <finder|notes|terminal|projects|about|textviewer>']);
+          this.appendTerminalLines(['Usage: open <finder|notes|terminal|projects|books|about|textviewer>']);
           return;
         }
 
@@ -478,6 +516,7 @@ GitHub: github.com/lacerdaaa`;
       notes: 'notes',
       terminal: 'terminal',
       projects: 'projects',
+      books: 'books',
       about: 'about',
       textviewer: 'textviewer'
     };
@@ -486,7 +525,7 @@ GitHub: github.com/lacerdaaa`;
     if (!appId) {
       this.appendTerminalLines([
         `Unknown app: ${rawTarget}`,
-        'Available apps: finder, notes, terminal, projects, about, textviewer'
+        'Available apps: finder, notes, terminal, projects, books, about, textviewer'
       ]);
       return;
     }
@@ -689,6 +728,8 @@ GitHub: github.com/lacerdaaa`;
         return { width: 560, height: 340 };
       case 'notes':
         return { width: 500, height: 330 };
+      case 'books':
+        return { width: 620, height: 380 };
       case 'textviewer':
         return { width: 520, height: 340 };
       default:
@@ -704,6 +745,8 @@ GitHub: github.com/lacerdaaa`;
         return { width: 420, height: 250 };
       case 'notes':
         return { width: 380, height: 240 };
+      case 'books':
+        return { width: 460, height: 280 };
       case 'textviewer':
         return { width: 400, height: 250 };
       default:
@@ -717,6 +760,8 @@ GitHub: github.com/lacerdaaa`;
         return 'Welcome.app';
       case 'projects':
         return 'Projects.app';
+      case 'books':
+        return 'Books.app';
       case 'terminal':
         return 'Terminal.app';
       case 'notes':

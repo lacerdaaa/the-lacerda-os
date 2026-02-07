@@ -137,4 +137,13 @@ describe('App', () => {
     expect(textViewerWindow).toBeTruthy();
     expect(app.openedFileName()).toContain('.txt');
   });
+
+  it('should open books app', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+
+    app.openApp('books');
+    const booksWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'books');
+    expect(booksWindow).toBeTruthy();
+  });
 });

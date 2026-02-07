@@ -153,6 +153,19 @@
                   }
                 }
 
+                @case ('books') {
+                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+                  <div class="books-grid">
+                    @for (book of books; track book.title) {
+                      <article class="book-card">
+                        <img [src]="book.cover" [alt]="book.title" />
+                        <h2>{{ book.title }}</h2>
+                        <p>{{ book.description }}</p>
+                      </article>
+                    }
+                  </div>
+                }
+
                 @case ('terminal') {
                   <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
                   <div class="terminal-output">
