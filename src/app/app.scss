@@ -635,6 +635,20 @@
   text-shadow: 0 0 5px rgba(111, 255, 143, 0.35);
 }
 
+.snake-board {
+  margin: 0 0 8px;
+  padding: 6px;
+  border: 1px solid #0f4f25;
+  background: rgba(0, 20, 8, 0.7);
+}
+
+.snake-board .snake-line {
+  margin: 0;
+  font-family: 'Courier New', 'Lucida Console', monospace;
+  line-height: 1.2;
+  white-space: pre;
+}
+
 .terminal-input-row {
   position: relative;
   z-index: 1;

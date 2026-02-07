@@ -254,6 +254,7 @@ GitHub: github.com/lacerdaaa`;
     '64K RAM SYSTEM 38911 BASIC BYTES FREE',
     'READY. Type "help".'
   ]);
+  protected readonly terminalSnakeBoard = signal<string[] | null>(null);
   protected readonly terminalInput = signal('');
   protected readonly openedFileName = signal('about-me.txt');
   protected readonly openedFileContent = signal(this.aboutMeFileText);
@@ -285,6 +286,7 @@ GitHub: github.com/lacerdaaa`;
   private terminalGuessLosses = 0;
   private readonly terminalGuessMaxAttempts = 5;
   private readonly terminalSnakeBoardSize = 12;
+  private readonly terminalSnakeTickMs = 420;
   private terminalSnakeBody: SnakePosition[] | null = null;
   private terminalSnakeFood: SnakePosition | null = null;
   private terminalSnakeDirection: SnakeDirection = 'right';
@@ -292,6 +294,7 @@ GitHub: github.com/lacerdaaa`;
   private terminalSnakeWins = 0;
   private terminalSnakeLosses = 0;
   private terminalSnakeBestScore = 0;
+  private snakeTickIntervalId: number | null = null;
   private readonly clockInterval = window.setInterval(() => {
     this.timeLabel.set(this.formatTime());
   }, 30000);
@@ -305,6 +308,7 @@ GitHub: github.com/lacerdaaa`;
   ngOnDestroy(): void {
     window.clearInterval(this.clockInterval);
     this.clearBootTimers();
+    this.stopSnakeTicker();
   }
 
   protected openApp(appId: AppId): void {
@@ -690,6 +694,19 @@ GitHub: github.com/lacerdaaa`;
   }
 
   protected onTerminalKeydown(event: KeyboardEvent): void {
+    if (this.isSnakeGameActive()) {
+      const direction = this.parseSnakeDirection(event.key.toLowerCase().replace('arrow', ''));
+      if (direction) {
+        event.preventDefault();
+        this.terminalSnakeDirection = this.getSafeSnakeDirection(
+          direction,
+          this.terminalSnakeDirection,
+          this.terminalSnakeBody?.length ?? 0
+        );
+        return;
+      }
+    }
+
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       this.navigateTerminalHistory(true);
@@ -705,6 +722,9 @@ GitHub: github.com/lacerdaaa`;
     if (event.ctrlKey && event.key.toLowerCase() === 'l') {
       event.preventDefault();
       this.terminalLines.set([]);
+      if (this.isSnakeGameActive()) {
+        this.finishSnakeGame('quit', 'Snake interrompido.');
+      }
       return;
     }
   }
@@ -832,6 +852,12 @@ GitHub: github.com/lacerdaaa`;
         return;
       case 'clear':
       case 'cls':
+        this.stopSnakeTicker();
+        this.terminalSnakeBody = null;
+        this.terminalSnakeFood = null;
+        this.terminalSnakeBoard.set(null);
+        this.terminalSnakeDirection = 'right';
+        this.terminalSnakeScore = 0;
         this.terminalLines.set([]);
         return;
       default:
@@ -902,6 +928,7 @@ GitHub: github.com/lacerdaaa`;
   }
 
   private startSnakeGame(): void {
+    this.stopSnakeTicker();
     const centerRow = Math.floor(this.terminalSnakeBoardSize / 2);
     this.terminalSnakeBody = [
       { x: 2, y: centerRow },
@@ -913,10 +940,11 @@ GitHub: github.com/lacerdaaa`;
     this.terminalSnakeFood = this.generateSnakeFood(this.terminalSnakeBody);
 
     this.appendTerminalLines([
-      'Snake iniciado. Controles: w/a/s/d (ou up/left/down/right).',
-      'Digite "quit" para sair do jogo.'
+      'Snake iniciado em tempo real.',
+      'Controles: setas ou w/a/s/d. Digite "quit" para sair.'
     ]);
-    this.appendTerminalLines(this.getSnakeBoardLines());
+    this.terminalSnakeBoard.set(this.getSnakeBoardLines());
+    this.startSnakeTicker();
   }
 
   private handleSnakeGameInput(rawInput: string): boolean {
@@ -936,13 +964,16 @@ GitHub: github.com/lacerdaaa`;
     }
 
     const direction = this.parseSnakeDirection(normalized);
-    if (!direction) {
-      this.appendTerminalLines(['Snake ativo: comando invalido. Use w/a/s/d ou "quit".']);
+    if (direction) {
+      this.terminalSnakeDirection = this.getSafeSnakeDirection(
+        direction,
+        this.terminalSnakeDirection,
+        this.terminalSnakeBody?.length ?? 0
+      );
       return true;
     }
 
-    this.advanceSnake(direction);
-    return true;
+    return false;
   }
 
   private parseSnakeDirection(input: string): SnakeDirection | null {
@@ -964,14 +995,13 @@ GitHub: github.com/lacerdaaa`;
     }
   }
 
-  private advanceSnake(nextDirection: SnakeDirection): void {
+  private advanceSnake(): void {
     if (!this.terminalSnakeBody || !this.terminalSnakeFood) {
       return;
     }
 
-    const direction = this.getSafeSnakeDirection(nextDirection, this.terminalSnakeDirection, this.terminalSnakeBody.length);
     const head = this.terminalSnakeBody[0];
-    const nextHead = this.getNextSnakeHead(head, direction);
+    const nextHead = this.getNextSnakeHead(head, this.terminalSnakeDirection);
 
     if (
       nextHead.x < 0 ||
@@ -990,7 +1020,6 @@ GitHub: github.com/lacerdaaa`;
       : [nextHead, ...this.terminalSnakeBody.slice(0, -1)];
 
     this.terminalSnakeBody = nextBody;
-    this.terminalSnakeDirection = direction;
     if (ateFood) {
       this.terminalSnakeScore += 1;
       this.terminalSnakeFood = this.generateSnakeFood(nextBody);
@@ -1000,7 +1029,7 @@ GitHub: github.com/lacerdaaa`;
       }
     }
 
-    this.appendTerminalLines(this.getSnakeBoardLines());
+    this.terminalSnakeBoard.set(this.getSnakeBoardLines());
   }
 
   private getSafeSnakeDirection(
@@ -1100,6 +1129,7 @@ GitHub: github.com/lacerdaaa`;
     if (!this.terminalSnakeBody) {
       return;
     }
+    this.stopSnakeTicker();
 
     if (this.terminalSnakeScore > this.terminalSnakeBestScore) {
       this.terminalSnakeBestScore = this.terminalSnakeScore;
@@ -1114,12 +1144,27 @@ GitHub: github.com/lacerdaaa`;
     this.appendTerminalLines([message, 'Rode "snake" para jogar novamente.']);
     this.terminalSnakeBody = null;
     this.terminalSnakeFood = null;
+    this.terminalSnakeBoard.set(null);
     this.terminalSnakeDirection = 'right';
     this.terminalSnakeScore = 0;
   }
 
   private isSnakeGameActive(): boolean {
     return this.terminalSnakeBody !== null && this.terminalSnakeFood !== null;
+  }
+
+  private startSnakeTicker(): void {
+    this.stopSnakeTicker();
+    this.snakeTickIntervalId = window.setInterval(() => {
+      this.advanceSnake();
+    }, this.terminalSnakeTickMs);
+  }
+
+  private stopSnakeTicker(): void {
+    if (this.snakeTickIntervalId !== null) {
+      window.clearInterval(this.snakeTickIntervalId);
+      this.snakeTickIntervalId = null;
+    }
   }
 
   private openContextMenuAt(

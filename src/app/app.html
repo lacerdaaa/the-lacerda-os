@@ -172,6 +172,13 @@
                       <span>9600 baud</span>
                     </div>
                     <div class="terminal-output" aria-live="polite">
+                      @if (terminalSnakeBoard(); as snakeBoard) {
+                        <div class="snake-board" aria-label="Snake board">
+                          @for (line of snakeBoard; track $index) {
+                            <p class="snake-line">{{ line }}</p>
+                          }
+                        </div>
+                      }
                       @for (line of terminalLines(); track $index) {
                         <p>{{ line }}</p>
                       }

@@ -153,9 +153,12 @@ describe('App', () => {
     app.terminalSnakeScore = 0;
 
     app.runTerminalCommand('d');
+    app.advanceSnake();
 
     expect(app.terminalSnakeScore).toBe(1);
     expect(app.terminalSnakeBody.length).toBe(3);
+    expect(app.terminalSnakeBoard()).toBeTruthy();
+    app.stopSnakeTicker();
   });
 
   it('should end snake game on wall collision', () => {
@@ -169,11 +172,12 @@ describe('App', () => {
     app.terminalSnakeFood = { x: 0, y: 0 };
     app.terminalSnakeScore = 2;
 
-    app.runTerminalCommand('d');
+    app.advanceSnake();
 
     expect(app.terminalSnakeBody).toBeNull();
     expect(app.terminalSnakeLosses).toBe(1);
     expect(app.terminalSnakeBestScore).toBe(2);
+    expect(app.terminalSnakeBoard()).toBeNull();
   });
 
   it('should minimize and reopen windows', () => {
