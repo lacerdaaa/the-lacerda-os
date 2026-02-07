@@ -38,7 +38,7 @@ describe('App', () => {
     app.skipBootSequence();
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('macOS8 Portfolio');
+    expect(compiled.querySelector('h1')?.textContent).toContain('lacOs Portfolio');
   });
 
   it('should show at least one window', () => {

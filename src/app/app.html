@@ -3,7 +3,7 @@
     <div class="desktop-shell" (contextmenu)="openPageContextMenu($event)">
       <header class="menu-bar">
     <div class="menu-left">
-      <button type="button" class="os-mark" (click)="openApp('finder')">OS8</button>
+      <button type="button" class="os-mark" (click)="openApp('finder')">lacOs</button>
       @for (item of menuItems; track item) {
         <button type="button" class="menu-item">{{ item }}</button>
       }
@@ -175,7 +175,7 @@
                       <p>{{ line }}</p>
                     }
                     <form class="terminal-input-row" (submit)="$event.preventDefault(); submitTerminalCommand()">
-                      <label for="terminal-command">welcome@lacos:~$</label>
+                      <label for="terminal-command">welcome@lacOs:~$</label>
                       <input
                         id="terminal-command"
                         type="text"
@@ -274,7 +274,7 @@ Next milestones:
 
       @if (isBooting()) {
         <section class="boot-overlay" aria-label="Boot sequence">
-          <p class="boot-title">MacOS8 Startup</p>
+          <p class="boot-title">lacOs Startup</p>
           <div class="boot-log">
             @for (line of bootLines; track $index) {
               @if ($index < bootVisibleLines()) {

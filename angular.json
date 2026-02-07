@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "macos8": {
+    "lacos": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -62,10 +62,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "macos8:build:production"
+              "buildTarget": "lacos:build:production"
             },
             "development": {
-              "buildTarget": "macos8:build:development"
+              "buildTarget": "lacos:build:development"
             }
           },
           "defaultConfiguration": "development"

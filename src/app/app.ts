@@ -120,7 +120,7 @@ interface WindowBounds {
 export class App implements OnDestroy {
   protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
   private readonly pinnedRepoNames = ['pressum-core-service', 'fynansee-core', 'auto-trace'];
-  private readonly dockStorageKey = 'macos8.dock.apps';
+  private readonly dockStorageKey = 'lacos.dock.apps';
   private readonly defaultDockAppIds: AppId[] = ['finder', 'notes', 'terminal', 'projects', 'books', 'about'];
   private readonly appRegistry: Record<AppId, DockApp> = {
     finder: { name: 'Finder', code: 'FD', appId: 'finder' },
@@ -198,7 +198,7 @@ GitHub: github.com/lacerdaaa`;
   ];
 
   protected readonly bootLines = [
-    'MacOS8 BIOS v0.84',
+    'lacOs BIOS v0.84',
     'Checking memory............................ OK',
     'Mounting virtual desktop................... OK',
     'Loading Finder.app, Projects.app, Books.app',
@@ -210,7 +210,7 @@ GitHub: github.com/lacerdaaa`;
   protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
   protected readonly timeLabel = signal(this.formatTime());
   protected readonly terminalLines = signal<string[]>([
-    'macOS8 Terminal v0.1',
+    'lacOs Terminal v0.1',
     'Type "help" to list commands.'
   ]);
   protected readonly terminalInput = signal('');
@@ -610,7 +610,7 @@ GitHub: github.com/lacerdaaa`;
   protected getWindowContentTitle(appId: AppId): string {
     switch (appId) {
       case 'about':
-        return 'macOS8 Portfolio';
+        return 'lacOs Portfolio';
       case 'projects':
         return 'Featured Projects';
       case 'books':
@@ -639,7 +639,7 @@ GitHub: github.com/lacerdaaa`;
       return;
     }
 
-    this.appendTerminalLines([`welcome@macos8:~$ ${rawCommand}`]);
+    this.appendTerminalLines([`welcome@lacOs:~$ ${rawCommand}`]);
     this.runTerminalCommand(rawCommand);
     this.terminalInput.set('');
   }
@@ -656,7 +656,7 @@ GitHub: github.com/lacerdaaa`;
         return;
       case 'about':
         this.appendTerminalLines([
-          'macOS8 is a virtual OS portfolio built with Angular.'
+          'lacOs is a virtual OS portfolio built with Angular.'
         ]);
         return;
       case 'projects':
