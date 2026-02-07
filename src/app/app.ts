@@ -483,7 +483,6 @@ GitHub: github.com/lacerdaaa`;
     event.preventDefault();
     this.openContextMenuAt(event.clientX, event.clientY, null, null, [
       { id: 'open-terminal', label: 'Abrir Terminal' },
-      { id: 'open-books', label: 'Abrir Books' },
       { id: 'reset-dock', label: 'Restaurar dock padrao' }
     ]);
   }
