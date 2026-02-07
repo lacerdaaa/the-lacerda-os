@@ -71,20 +71,20 @@
 
                 @case ('projects') {
                   <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <ul class="project-list">
-                    <li>
-                      <strong>Product Analytics Lab:</strong>
-                      Dashboard simulations with event streams and timeline replay.
-                    </li>
-                    <li>
-                      <strong>Design Token Forge:</strong>
-                      Tooling for generating themeable systems at scale.
-                    </li>
-                    <li>
-                      <strong>Studio Archive:</strong>
-                      Case studies, prototypes, and project retrospectives.
-                    </li>
-                  </ul>
+                  <div class="project-grid">
+                    @for (project of projectItems; track project.name) {
+                      <a
+                        class="project-card"
+                        [href]="project.href"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        <h2>{{ project.name }}</h2>
+                        <p>{{ project.summary }}</p>
+                        <span>Open case study</span>
+                      </a>
+                    }
+                  </div>
                 }
 
                 @case ('terminal') {

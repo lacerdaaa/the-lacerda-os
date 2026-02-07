@@ -224,12 +224,44 @@
   background: rgba(255, 255, 255, 0.65);
 }
 
-.project-list {
-  margin: 14px 0 0;
-  padding-left: 16px;
+.project-grid {
+  margin-top: 14px;
   display: grid;
-  gap: 10px;
-  font-size: 0.92rem;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.project-card {
+  border: 1px solid rgba(117, 147, 200, 0.58);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  color: #1c3463;
+  display: grid;
+  gap: 8px;
+}
+
+.project-card h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.project-card p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.project-card span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #28559e;
+}
+
+.project-card:hover {
+  border-color: #2e7cf7;
+  transform: translateY(-1px);
 }
 
 .terminal-output {
@@ -375,6 +407,10 @@ textarea {
   .window {
     width: calc(100% - 12px) !important;
     left: 6px !important;
+  }
+
+  .project-grid {
+    grid-template-columns: 1fr;
   }
 
   .menu-right {

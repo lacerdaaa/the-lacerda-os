@@ -14,6 +14,12 @@ interface DockApp {
   appId: AppId;
 }
 
+interface ProjectItem {
+  name: string;
+  summary: string;
+  href: string;
+}
+
 interface WindowState {
   id: number;
   appId: AppId;
@@ -54,6 +60,24 @@ export class App implements OnDestroy {
     { name: 'Terminal', code: 'TM', appId: 'terminal' },
     { name: 'Projects', code: 'PR', appId: 'projects' },
     { name: 'About', code: 'AB', appId: 'about' }
+  ];
+
+  protected readonly projectItems: ProjectItem[] = [
+    {
+      name: 'Product Analytics Lab',
+      summary: 'Dashboard simulations with event streams and timeline replay.',
+      href: 'https://example.com/product-analytics-lab'
+    },
+    {
+      name: 'Design Token Forge',
+      summary: 'Tooling for generating themeable systems and component variants.',
+      href: 'https://example.com/design-token-forge'
+    },
+    {
+      name: 'Studio Archive',
+      summary: 'Case studies, prototypes, and project retrospectives.',
+      href: 'https://example.com/studio-archive'
+    }
   ];
 
   protected readonly windows = signal<WindowState[]>([]);
