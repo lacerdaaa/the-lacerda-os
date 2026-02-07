@@ -149,6 +149,7 @@ export class App implements OnDestroy {
   private readonly pinnedRepoNames = ['pressum-core-service', 'fynansee-core', 'auto-trace'];
   private readonly dockStorageKey = 'lacos.dock.apps';
   private readonly desktopThemeStorageKey = 'lacos.desktop.theme';
+  private readonly mobileLayoutMaxWidth = 900;
   private readonly terminalVirtualPath = '/Users/eduardo/Desktop';
   private readonly terminalCommandNames = [
     'help',
@@ -266,6 +267,7 @@ GitHub: github.com/lacerdaaa`;
   ];
   protected readonly windows = signal<WindowState[]>([]);
   protected readonly isBooting = signal(true);
+  protected readonly isMobileAccessBlocked = signal(false);
   protected readonly bootVisibleLines = signal(0);
   protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
   protected readonly desktopTheme = signal<DesktopTheme>('classic');
@@ -328,6 +330,7 @@ GitHub: github.com/lacerdaaa`;
   }, 30000);
 
   constructor() {
+    this.updateMobileAccessBlock();
     this.restoreDesktopThemeFromStorage();
     this.restoreDockFromStorage();
     this.openApp('about');
@@ -715,6 +718,11 @@ GitHub: github.com/lacerdaaa`;
   @HostListener('window:keydown.escape')
   protected onEscapePressed(): void {
     this.closeContextMenu();
+  }
+
+  @HostListener('window:resize')
+  protected onWindowResize(): void {
+    this.updateMobileAccessBlock();
   }
 
   protected isAppOpen(appId: AppId): boolean {
@@ -1356,6 +1364,14 @@ GitHub: github.com/lacerdaaa`;
   private setDesktopTheme(theme: DesktopTheme): void {
     this.desktopTheme.set(theme);
     this.persistDesktopThemeToStorage();
+  }
+
+  private updateMobileAccessBlock(): void {
+    const blocked = window.innerWidth <= this.mobileLayoutMaxWidth;
+    this.isMobileAccessBlocked.set(blocked);
+    if (blocked) {
+      this.closeContextMenu();
+    }
   }
 
   private getThemeMenuItems(): ContextMenuItem[] {

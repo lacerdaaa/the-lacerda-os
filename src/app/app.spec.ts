@@ -363,4 +363,18 @@ describe('App', () => {
 
     expect(app.desktopTheme()).toBe('grid');
   });
+
+  it('should block access on mobile viewport width', () => {
+    const originalWidth = window.innerWidth;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 800 });
+
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+    expect(app.isMobileAccessBlocked()).toBe(true);
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalWidth });
+    app.onWindowResize();
+    expect(app.isMobileAccessBlocked()).toBe(false);
+  });
 });

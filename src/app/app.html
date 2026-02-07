@@ -1,6 +1,11 @@
 <div class="retro-stage">
   <div class="retro-screen">
-    <div class="desktop-shell" [attr.data-theme]="desktopTheme()" (contextmenu)="openPageContextMenu($event)">
+    <div
+      class="desktop-shell"
+      [class.mobile-blocked]="isMobileAccessBlocked()"
+      [attr.data-theme]="desktopTheme()"
+      (contextmenu)="openPageContextMenu($event)"
+    >
       <header class="menu-bar">
     <div class="menu-left">
       <button type="button" class="os-mark" (click)="openApp('finder')">lacOs</button>
@@ -319,6 +324,14 @@ Next milestones:
             <span [style.width.%]="(bootVisibleLines() / bootLines.length) * 100"></span>
           </div>
           <button type="button" class="boot-skip" (click)="skipBootSequence()">Skip boot</button>
+        </section>
+      }
+
+      @if (isMobileAccessBlocked()) {
+        <section class="mobile-access-block" aria-label="Acesso restrito em mobile">
+          <h2>lacOs requer tela maior</h2>
+          <p>Este projeto foi feito para desktop e o layout fica pequeno em dispositivos moveis.</p>
+          <p>Abra em notebook/desktop ou aumente a janela para continuar.</p>
         </section>
       }
     </div>
