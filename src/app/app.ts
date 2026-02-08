@@ -187,13 +187,36 @@ export class App implements OnDestroy {
   private readonly cursorBoostClassName = 'cursor-boost';
   private readonly cursorBoostSpeedThreshold = 1800;
   private readonly cursorBoostDurationMs = 140;
-  private readonly safariIframeBlockedHosts = new Set(['github.com', 'www.github.com']);
+  private readonly safariIframeBlockedHosts = new Set([
+    'github.com',
+    'www.github.com',
+    'learn.microsoft.com',
+    'dotnet.microsoft.com'
+  ]);
   private readonly safariPresetHistory: SafariHistoryEntry[] = [
     {
       id: 'example-domain',
       label: 'Example Domain',
       url: 'https://example.com',
       note: 'Site classico para testes de navegador.'
+    },
+    {
+      id: 'angular',
+      label: 'Angular',
+      url: 'https://angular.dev',
+      note: 'Documentacao oficial do Angular.'
+    },
+    {
+      id: 'csharp-docs',
+      label: 'C# Docs',
+      url: 'https://learn.microsoft.com/dotnet/csharp/',
+      note: 'Documentacao oficial de C# (Microsoft).'
+    },
+    {
+      id: 'nodejs',
+      label: 'Node.js',
+      url: 'https://nodejs.org/en',
+      note: 'Site oficial do Node.js.'
     },
     {
       id: 'github-lacerdaaa',
