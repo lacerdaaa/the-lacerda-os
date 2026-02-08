@@ -147,6 +147,11 @@
               </div>
               }
 
+              @case ('quiz') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <app-about-quiz></app-about-quiz>
+              }
+
               @case ('safari') {
               <div class="safari-shell" role="region" aria-label="Safari virtual browser">
                 <form class="safari-toolbar" (submit)="$event.preventDefault(); submitSafariNavigation()">

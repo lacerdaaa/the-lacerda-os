@@ -1,0 +1,34 @@
+<section class="quiz-shell" aria-label="Quiz sobre Eduardo Lacerda">
+  <header class="quiz-header">
+    <h2>Quiz sobre mim</h2>
+    <p>Acertos: {{ getSolvedCount() }}/{{ questions.length }}</p>
+    <button type="button" (click)="resetQuiz()">Reiniciar quiz</button>
+  </header>
+
+  <div class="quiz-list">
+    @for (question of questions; track question.prompt; let questionIndex = $index) {
+      <article class="quiz-card">
+        <h3>{{ questionIndex + 1 }}. {{ question.prompt }}</h3>
+
+        <div class="quiz-options">
+          @for (option of question.options; track option; let optionIndex = $index) {
+            <button
+              type="button"
+              class="quiz-option"
+              [class.selected]="isSelected(questionIndex, optionIndex)"
+              [class.correct]="isCorrectOption(questionIndex, optionIndex)"
+              (click)="answerQuestion(questionIndex, optionIndex)"
+            >
+              {{ option }}
+            </button>
+          }
+        </div>
+
+        <p class="quiz-attempts">{{ getAttemptLabel(questionIndex) }}</p>
+        @if (quizState()[questionIndex].feedback) {
+          <p class="quiz-feedback">{{ quizState()[questionIndex].feedback }}</p>
+        }
+      </article>
+    }
+  </div>
+</section>

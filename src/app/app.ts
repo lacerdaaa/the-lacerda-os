@@ -1,7 +1,8 @@
 import { Component, HostListener, OnDestroy, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { AboutQuizComponent } from './about-quiz/about-quiz.component';
 
-type AppId = 'about' | 'projects' | 'books' | 'courses' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari';
+type AppId = 'about' | 'projects' | 'books' | 'courses' | 'quiz' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari';
 
 function normalizeBrowserUrl(rawUrl: string): string | null {
   const trimmed = rawUrl.trim();
@@ -108,6 +109,7 @@ interface ContextMenuItem {
     | 'open-terminal'
     | 'open-books'
     | 'open-courses'
+    | 'open-quiz'
     | 'open-safari'
     | 'reset-dock'
     | 'themes'
@@ -186,6 +188,7 @@ type DesktopTheme = 'classic' | 'sunset' | 'grid';
 
 @Component({
   selector: 'app-root',
+  imports: [AboutQuizComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -249,6 +252,7 @@ export class App implements OnDestroy {
     'projects',
     'books',
     'courses',
+    'quiz',
     'safari',
     'ls',
     'cat <file>',
@@ -273,12 +277,13 @@ export class App implements OnDestroy {
     projects: 'projects',
     books: 'books',
     courses: 'courses',
+    quiz: 'quiz',
     safari: 'safari',
     about: 'about',
     textviewer: 'textviewer',
     text: 'textviewer'
   };
-  private readonly defaultDockAppIds: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'about'];
+  private readonly defaultDockAppIds: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'quiz', 'about'];
   private readonly appRegistry: Record<AppId, DockApp> = {
     finder: { name: 'Finder', code: 'FD', appId: 'finder' },
     safari: { name: 'Safari', code: 'SF', appId: 'safari' },
@@ -287,6 +292,7 @@ export class App implements OnDestroy {
     projects: { name: 'Projects', code: 'PR', appId: 'projects' },
     books: { name: 'Books', code: 'BK', appId: 'books' },
     courses: { name: 'Courses', code: 'CR', appId: 'courses' },
+    quiz: { name: 'Quiz', code: 'QZ', appId: 'quiz' },
     about: { name: 'About', code: 'AB', appId: 'about' },
     textviewer: { name: 'Text Viewer', code: 'TX', appId: 'textviewer' }
   };
@@ -305,6 +311,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
     { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 4 },
     { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 5 },
     { kind: 'app', name: 'Courses', code: 'APP', appId: 'courses', column: 1, row: 6 },
+    { kind: 'app', name: 'Quiz', code: 'APP', appId: 'quiz', column: 1, row: 7 },
     {
       kind: 'file',
       name: 'about-me.txt',
@@ -454,7 +461,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
     'lacOs BIOS v0.84',
     'Checking memory............................ OK',
     'Mounting virtual desktop................... OK',
-    'Loading Finder.app, Safari.app, Projects.app, Books.app, Courses.app',
+    'Loading Finder.app, Safari.app, Projects.app, Books.app, Courses.app, Quiz.app',
     'Booting portfolio workspace.................'
   ];
   protected readonly windows = signal<WindowState[]>([]);
@@ -747,6 +754,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       { id: 'open-terminal', label: 'Abrir Terminal' },
       { id: 'open-books', label: 'Abrir Books' },
       { id: 'open-courses', label: 'Abrir Courses' },
+      { id: 'open-quiz', label: 'Abrir Quiz' },
       { id: 'open-safari', label: 'Abrir Safari' },
       { id: 'themes', label: 'Temas >' },
       { id: 'reset-dock', label: 'Restaurar dock padrao' }
@@ -864,6 +872,9 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       case 'open-courses':
         this.openApp('courses');
         break;
+      case 'open-quiz':
+        this.openApp('quiz');
+        break;
       case 'open-safari':
         this.openApp('safari');
         break;
@@ -952,6 +963,10 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
   }
 
   protected getAppIconKey(appId: AppId): string {
+    if (appId === 'quiz') {
+      return 'notes';
+    }
+
     return appId;
   }
 
@@ -977,6 +992,8 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return 'Books';
       case 'courses':
         return 'Courses';
+      case 'quiz':
+        return 'Quiz';
       case 'safari':
         return 'Safari';
       case 'terminal':
@@ -1109,6 +1126,12 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
           'Courses.app opened with your completed certifications.'
         ]);
         return;
+      case 'quiz':
+        this.openApp('quiz');
+        this.appendTerminalLines([
+          'Quiz.app opened. Try to guess facts about Eduardo.'
+        ]);
+        return;
       case 'safari':
         this.openApp('safari');
         this.appendTerminalLines([
@@ -1130,7 +1153,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return;
       case 'open':
         if (rest.length === 0) {
-          this.appendTerminalLines(['Usage: open <finder|safari|notes|terminal|projects|books|courses|about|textviewer>']);
+          this.appendTerminalLines(['Usage: open <finder|safari|notes|terminal|projects|books|courses|quiz|about|textviewer>']);
           return;
         }
 
@@ -1719,7 +1742,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return;
       }
 
-      const allowed = new Set<AppId>(['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'about']);
+      const allowed = new Set<AppId>(['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'quiz', 'about']);
       const restored = parsed.filter(
         (appId): appId is AppId => typeof appId === 'string' && allowed.has(appId as AppId)
       );
@@ -1738,7 +1761,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
     if (!appId) {
       this.appendTerminalLines([
         `Unknown app: ${rawTarget}`,
-        'Available apps: finder, safari, notes, terminal, projects, books, courses, about, textviewer'
+        'Available apps: finder, safari, notes, terminal, projects, books, courses, quiz, about, textviewer'
       ]);
       return;
     }
@@ -2067,6 +2090,8 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return { width: 700, height: 420 };
       case 'courses':
         return { width: 680, height: 400 };
+      case 'quiz':
+        return { width: 700, height: 420 };
       case 'terminal':
         return { width: 580, height: 350 };
       case 'finder':
@@ -2088,6 +2113,8 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return { width: 520, height: 320 };
       case 'courses':
         return { width: 500, height: 300 };
+      case 'quiz':
+        return { width: 520, height: 320 };
       case 'terminal':
         return { width: 420, height: 260 };
       case 'finder':
@@ -2115,6 +2142,8 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return 'Books.app';
       case 'courses':
         return 'Courses.app';
+      case 'quiz':
+        return 'Quiz.app';
       case 'terminal':
         return 'Terminal.app';
       case 'notes':
