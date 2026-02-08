@@ -309,23 +309,23 @@ describe('App', () => {
     expect(app.safariError()).toContain('historico permitido');
     expect(app.safariCurrentUrl()).not.toBe('https://google.com');
 
-    app.safariInput.set('neverssl.com');
+    app.safariInput.set('nodejs.org/en');
     app.submitSafariNavigation();
 
     expect(app.safariError()).toBeNull();
-    expect(app.safariCurrentUrl()).toBe('https://neverssl.com');
+    expect(app.safariCurrentUrl()).toBe('https://nodejs.org/en');
   });
 
-  it('should show external fallback for github url in safari', () => {
+  it('should show external fallback for npm url in safari', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
     app.skipBootSequence();
 
-    app.safariInput.set('https://www.github.com/lacerdaaa');
+    app.safariInput.set('https://www.npmjs.com/');
     app.submitSafariNavigation();
 
     expect(app.safariError()).toBeNull();
-    expect(app.safariCurrentUrl()).toBe('https://www.github.com/lacerdaaa');
+    expect(app.safariCurrentUrl()).toBe('https://www.npmjs.com/');
     expect(app.safariFrameUrl()).toBeNull();
     expect(app.safariFrameBlockedReason()).toContain('iframe');
   });

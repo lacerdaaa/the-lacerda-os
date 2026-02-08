@@ -191,27 +191,13 @@ export class App implements OnDestroy {
     'github.com',
     'www.github.com',
     'learn.microsoft.com',
-    'dotnet.microsoft.com'
+    'dotnet.microsoft.com',
+    'npmjs.com',
+    'www.npmjs.com',
+    'refactoring.guru',
+    'www.refactoring.guru'
   ]);
   private readonly safariPresetHistory: SafariHistoryEntry[] = [
-    {
-      id: 'example-domain',
-      label: 'Example Domain',
-      url: 'https://example.com',
-      note: 'Site classico para testes de navegador.'
-    },
-    {
-      id: 'angular',
-      label: 'Angular',
-      url: 'https://angular.dev',
-      note: 'Documentacao oficial do Angular.'
-    },
-    {
-      id: 'csharp-docs',
-      label: 'C# Docs',
-      url: 'https://learn.microsoft.com/dotnet/csharp/',
-      note: 'Documentacao oficial de C# (Microsoft).'
-    },
     {
       id: 'nodejs',
       label: 'Node.js',
@@ -219,28 +205,22 @@ export class App implements OnDestroy {
       note: 'Site oficial do Node.js.'
     },
     {
-      id: 'github-lacerdaaa',
-      label: 'GitHub lacerdaaa',
-      url: 'https://www.github.com/lacerdaaa',
-      note: 'Perfil pessoal no GitHub.'
+      id: 'npm',
+      label: 'npm',
+      url: 'https://www.npmjs.com/',
+      note: 'Gerenciador de pacotes do ecossistema Node.'
     },
     {
-      id: 'neverssl',
-      label: 'NeverSSL',
-      url: 'https://neverssl.com',
-      note: 'Teste simples sem redirects complexos.'
+      id: 'ddd-community',
+      label: 'DDD Community',
+      url: 'https://dddcommunity.org/',
+      note: 'Conteudo sobre Domain-Driven Design.'
     },
     {
-      id: 'cern',
-      label: 'CERN (info.cern.ch)',
-      url: 'https://info.cern.ch',
-      note: 'Uma pagina historica da web.'
-    },
-    {
-      id: 'httpbin',
-      label: 'httpbin',
-      url: 'https://httpbin.org',
-      note: 'Endpoints publicos para debug HTTP.'
+      id: 'design-patterns',
+      label: 'Design Patterns',
+      url: 'https://refactoring.guru/design-patterns',
+      note: 'Catalogo pratico de padroes de design.'
     }
   ];
   private readonly safariAllowedUrlMap = new Map(
