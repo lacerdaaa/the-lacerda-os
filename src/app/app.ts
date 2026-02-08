@@ -1,7 +1,7 @@
 import { Component, HostListener, OnDestroy, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-type AppId = 'about' | 'projects' | 'books' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari';
+type AppId = 'about' | 'projects' | 'books' | 'courses' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari';
 
 function normalizeBrowserUrl(rawUrl: string): string | null {
   const trimmed = rawUrl.trim();
@@ -82,6 +82,16 @@ interface BookItem {
   cover: string;
 }
 
+interface CourseItem {
+  title: string;
+  organization: string;
+  logo: string;
+  issuedAt: string;
+  summary: string;
+  skills: string;
+  credentialCode?: string;
+}
+
 interface SafariHistoryEntry {
   id: string;
   label: string;
@@ -97,6 +107,7 @@ interface ContextMenuItem {
     | 'open-file'
     | 'open-terminal'
     | 'open-books'
+    | 'open-courses'
     | 'open-safari'
     | 'reset-dock'
     | 'themes'
@@ -237,6 +248,7 @@ export class App implements OnDestroy {
     'about',
     'projects',
     'books',
+    'courses',
     'safari',
     'ls',
     'cat <file>',
@@ -260,12 +272,13 @@ export class App implements OnDestroy {
     terminal: 'terminal',
     projects: 'projects',
     books: 'books',
+    courses: 'courses',
     safari: 'safari',
     about: 'about',
     textviewer: 'textviewer',
     text: 'textviewer'
   };
-  private readonly defaultDockAppIds: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'about'];
+  private readonly defaultDockAppIds: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'about'];
   private readonly appRegistry: Record<AppId, DockApp> = {
     finder: { name: 'Finder', code: 'FD', appId: 'finder' },
     safari: { name: 'Safari', code: 'SF', appId: 'safari' },
@@ -273,6 +286,7 @@ export class App implements OnDestroy {
     terminal: { name: 'Terminal', code: 'TM', appId: 'terminal' },
     projects: { name: 'Projects', code: 'PR', appId: 'projects' },
     books: { name: 'Books', code: 'BK', appId: 'books' },
+    courses: { name: 'Courses', code: 'CR', appId: 'courses' },
     about: { name: 'About', code: 'AB', appId: 'about' },
     textviewer: { name: 'Text Viewer', code: 'TX', appId: 'textviewer' }
   };
@@ -300,6 +314,7 @@ GitHub: github.com/lacerdaaa`;
     { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 3 },
     { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 4 },
     { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 5 },
+    { kind: 'app', name: 'Courses', code: 'APP', appId: 'courses', column: 1, row: 6 },
     {
       kind: 'file',
       name: 'about-me.txt',
@@ -334,11 +349,122 @@ GitHub: github.com/lacerdaaa`;
     }
   ];
 
+  protected readonly courses: CourseItem[] = [
+    {
+      title: 'Testes Automatizados com Jest',
+      organization: 'Udemy',
+      logo: '/udemy_logo.jpeg',
+      issuedAt: 'out de 2025',
+      summary: 'Curso prático sobre testes unitários e de integração com Jest, com foco em qualidade e manutenção de código.',
+      skills: 'Jest · Automação de testes'
+    },
+    {
+      title: 'Pipelines CI/CD com GitHub Actions',
+      organization: 'Rocketseat',
+      logo: '/rocketseat_logo.jpeg',
+      issuedAt: 'set de 2025',
+      summary: 'Construção de pipelines de integração e entrega contínuas para automatizar validação, build e deploy.',
+      skills: 'Integração e entrega contínuas (CI/CD)',
+      credentialCode: '42a3f889-2cfd-4bd8-a271-a7f09dfa8593'
+    },
+    {
+      title: 'IAC com Terraform',
+      organization: 'Rocketseat',
+      logo: '/rocketseat_logo.jpeg',
+      issuedAt: 'mai de 2025',
+      summary: 'Fundamentos de infraestrutura como código com Terraform para provisionamento padronizado e escalável.',
+      skills: 'Infraestrutura como código (IaC) · Terraform',
+      credentialCode: 'd5939e53-0621-4770-9142-10d65a78b540'
+    },
+    {
+      title: 'Containers com Docker e Docker Compose',
+      organization: 'Rocketseat',
+      logo: '/rocketseat_logo.jpeg',
+      issuedAt: 'abr de 2025',
+      summary: 'Orquestração de ambientes de desenvolvimento e execução de aplicações em contêineres com Docker.',
+      skills: 'Docker · Docker Compose',
+      credentialCode: '47d26a8a-46e7-4d8c-9c11-226a2e6821e3'
+    },
+    {
+      title: 'Fundamentos da Cultura DevOps',
+      organization: 'Rocketseat',
+      logo: '/rocketseat_logo.jpeg',
+      issuedAt: 'abr de 2025',
+      summary: 'Princípios de colaboração, automação e entrega contínua para criar fluxos de engenharia mais confiáveis.',
+      skills: 'DevOps · Integração contínua',
+      credentialCode: 'c732204e-a6a9-4e86-b0ed-723ea0bdd0f4'
+    },
+    {
+      title: 'React: Software Architecture',
+      organization: 'LinkedIn',
+      logo: '/linkedin_logo.jpeg',
+      issuedAt: 'nov de 2024',
+      summary: 'Arquitetura de aplicações React com foco em escalabilidade, organização de componentes e separação de responsabilidades.',
+      skills: 'Arquitetura de software'
+    },
+    {
+      title: 'CSS: Variables and Fluid Layouts',
+      organization: 'LinkedIn',
+      logo: '/linkedin_logo.jpeg',
+      issuedAt: 'nov de 2024',
+      summary: 'Uso de variáveis CSS e técnicas de layouts fluidos para interfaces responsivas e consistentes.',
+      skills: 'CSS'
+    },
+    {
+      title: 'TypeScript Essential Training',
+      organization: 'LinkedIn',
+      logo: '/linkedin_logo.jpeg',
+      issuedAt: 'nov de 2024',
+      summary: 'Base sólida de TypeScript para tipagem estática, segurança em refatorações e produtividade no desenvolvimento.',
+      skills: 'TypeScript'
+    },
+    {
+      title: 'React: Design Patterns',
+      organization: 'LinkedIn',
+      logo: '/linkedin_logo.jpeg',
+      issuedAt: 'nov de 2024',
+      summary: 'Aplicação de padrões de projeto em React para reduzir acoplamento e melhorar reutilização de componentes.',
+      skills: 'Padrões de projeto de software'
+    },
+    {
+      title: 'Building Production-Ready React Apps: Setup to Deployment with Firebase',
+      organization: 'LinkedIn',
+      logo: '/linkedin_logo.jpeg',
+      issuedAt: 'nov de 2024',
+      summary: 'Configuração e entrega de aplicações React para produção com estratégia de deploy e serviços Firebase.',
+      skills: 'React.js · Aplicativos de página única'
+    },
+    {
+      title: 'Learning Next.js',
+      organization: 'LinkedIn',
+      logo: '/linkedin_logo.jpeg',
+      issuedAt: 'nov de 2024',
+      summary: 'Fundamentos de desenvolvimento web moderno com Next.js, SSR e estrutura de projetos orientada a performance.',
+      skills: 'Desenvolvimento de front-end · Desenvolvimento web'
+    },
+    {
+      title: 'Git e GitHub: Formação Básica',
+      organization: 'LinkedIn',
+      logo: '/linkedin_logo.jpeg',
+      issuedAt: 'nov de 2024',
+      summary: 'Fluxos essenciais de versionamento, colaboração e revisão de código com Git e GitHub.',
+      skills: 'GitHub · Desenvolvimento de software · Git'
+    },
+    {
+      title: 'GitHub Actions: Formação Básica',
+      organization: 'LinkedIn',
+      logo: '/linkedin_logo.jpeg',
+      issuedAt: 'nov de 2024',
+      summary: 'Automação de workflows de build, testes e entrega utilizando GitHub Actions.',
+      skills: 'Automação de TI · GitHub · Integração e entrega contínuas (CI/CD)'
+    }
+  ];
+
   protected readonly bootLines = [
     'lacOs BIOS v0.84',
     'Checking memory............................ OK',
     'Mounting virtual desktop................... OK',
-    'Loading Finder.app, Safari.app, Projects.app, Books.app',
+    'Loading Finder.app, Safari.app, Projects.app, Books.app, Courses.app',
     'Booting portfolio workspace.................'
   ];
   protected readonly windows = signal<WindowState[]>([]);
@@ -630,6 +756,7 @@ GitHub: github.com/lacerdaaa`;
     this.openContextMenuAt(event.clientX, event.clientY, null, null, [
       { id: 'open-terminal', label: 'Abrir Terminal' },
       { id: 'open-books', label: 'Abrir Books' },
+      { id: 'open-courses', label: 'Abrir Courses' },
       { id: 'open-safari', label: 'Abrir Safari' },
       { id: 'themes', label: 'Temas >' },
       { id: 'reset-dock', label: 'Restaurar dock padrao' }
@@ -744,6 +871,9 @@ GitHub: github.com/lacerdaaa`;
       case 'open-books':
         this.openApp('books');
         break;
+      case 'open-courses':
+        this.openApp('courses');
+        break;
       case 'open-safari':
         this.openApp('safari');
         break;
@@ -855,6 +985,8 @@ GitHub: github.com/lacerdaaa`;
         return 'Featured Projects';
       case 'books':
         return 'Books';
+      case 'courses':
+        return 'Courses';
       case 'safari':
         return 'Safari';
       case 'terminal':
@@ -981,6 +1113,12 @@ GitHub: github.com/lacerdaaa`;
           'Books.app has a retro bookshelf with your selected readings.'
         ]);
         return;
+      case 'courses':
+        this.openApp('courses');
+        this.appendTerminalLines([
+          'Courses.app opened with your completed certifications.'
+        ]);
+        return;
       case 'safari':
         this.openApp('safari');
         this.appendTerminalLines([
@@ -1002,7 +1140,7 @@ GitHub: github.com/lacerdaaa`;
         return;
       case 'open':
         if (rest.length === 0) {
-          this.appendTerminalLines(['Usage: open <finder|safari|notes|terminal|projects|books|about|textviewer>']);
+          this.appendTerminalLines(['Usage: open <finder|safari|notes|terminal|projects|books|courses|about|textviewer>']);
           return;
         }
 
@@ -1591,7 +1729,7 @@ GitHub: github.com/lacerdaaa`;
         return;
       }
 
-      const allowed = new Set<AppId>(['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'about']);
+      const allowed = new Set<AppId>(['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'about']);
       const restored = parsed.filter(
         (appId): appId is AppId => typeof appId === 'string' && allowed.has(appId as AppId)
       );
@@ -1610,7 +1748,7 @@ GitHub: github.com/lacerdaaa`;
     if (!appId) {
       this.appendTerminalLines([
         `Unknown app: ${rawTarget}`,
-        'Available apps: finder, safari, notes, terminal, projects, books, about, textviewer'
+        'Available apps: finder, safari, notes, terminal, projects, books, courses, about, textviewer'
       ]);
       return;
     }
@@ -1937,6 +2075,8 @@ GitHub: github.com/lacerdaaa`;
     switch (appId) {
       case 'safari':
         return { width: 700, height: 420 };
+      case 'courses':
+        return { width: 680, height: 400 };
       case 'terminal':
         return { width: 580, height: 350 };
       case 'finder':
@@ -1956,6 +2096,8 @@ GitHub: github.com/lacerdaaa`;
     switch (appId) {
       case 'safari':
         return { width: 520, height: 320 };
+      case 'courses':
+        return { width: 500, height: 300 };
       case 'terminal':
         return { width: 420, height: 260 };
       case 'finder':
@@ -1981,6 +2123,8 @@ GitHub: github.com/lacerdaaa`;
         return 'Projects.app';
       case 'books':
         return 'Books.app';
+      case 'courses':
+        return 'Courses.app';
       case 'terminal':
         return 'Terminal.app';
       case 'notes':

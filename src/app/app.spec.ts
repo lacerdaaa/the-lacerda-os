@@ -288,6 +288,16 @@ describe('App', () => {
     expect(booksWindow).toBeTruthy();
   });
 
+  it('should open courses app', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.openApp('courses');
+    const coursesWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'courses');
+    expect(coursesWindow).toBeTruthy();
+  });
+
   it('should open safari app', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;

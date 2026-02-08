@@ -321,6 +321,27 @@
   background: #f2d5d5;
 }
 
+.workspace-icon[data-icon='courses']::before,
+.dock-icon[data-icon='courses']::before {
+  left: 6px;
+  top: 8px;
+  width: 24px;
+  height: 14px;
+  border: 1px solid #333;
+  background: #f0f0f0;
+}
+
+.workspace-icon[data-icon='courses']::after,
+.dock-icon[data-icon='courses']::after {
+  left: 11px;
+  top: 5px;
+  width: 14px;
+  height: 4px;
+  border: 1px solid #333;
+  border-bottom: 0;
+  background: #d7d7d7;
+}
+
 .workspace-icon[data-icon='notes']::before,
 .workspace-icon[data-icon='textviewer']::before,
 .workspace-icon[data-icon='file']::before,
@@ -614,6 +635,12 @@
   margin: 4px 0 0;
   font-size: 11px;
   line-height: 1.3;
+}
+
+.course-logo {
+  height: 56px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .safari-shell {

@@ -170,6 +170,26 @@
                   </div>
                 }
 
+                @case ('courses') {
+                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+                  <div class="books-grid">
+                    @for (course of courses; track course.title) {
+                      <article class="book-card course-card">
+                        <img class="course-logo" [src]="course.logo" [alt]="'Logo da organização ' + course.organization" />
+                        <div class="course-content">
+                          <h2>{{ course.title }}</h2>
+                          <p class="course-meta">{{ course.organization }} · Verificação emitida em {{ course.issuedAt }}</p>
+                          <p class="course-summary">{{ course.summary }}</p>
+                          <p class="course-skills">Competências: {{ course.skills }}</p>
+                          @if (course.credentialCode) {
+                            <p class="course-credential">Código da credencial: {{ course.credentialCode }}</p>
+                          }
+                        </div>
+                      </article>
+                    }
+                  </div>
+                }
+
                 @case ('safari') {
                   <div class="safari-shell" role="region" aria-label="Safari virtual browser">
                     <form class="safari-toolbar" (submit)="$event.preventDefault(); submitSafariNavigation()">
