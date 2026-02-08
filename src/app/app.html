@@ -170,6 +170,54 @@
                   </div>
                 }
 
+                @case ('safari') {
+                  <div class="safari-shell" role="region" aria-label="Safari virtual browser">
+                    <form class="safari-toolbar" (submit)="$event.preventDefault(); submitSafariNavigation()">
+                      <label for="safari-address">URL</label>
+                      <input
+                        id="safari-address"
+                        type="text"
+                        [value]="safariInput()"
+                        (input)="updateSafariInput($event)"
+                        spellcheck="false"
+                        autocomplete="off"
+                        placeholder="Use uma URL do historico permitido"
+                      />
+                      <button type="submit">Go</button>
+                      <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">Nova aba</a>
+                    </form>
+
+                    @if (safariError()) {
+                      <p class="safari-error">{{ safariError() }}</p>
+                    }
+
+                    <div class="safari-body">
+                      <aside class="safari-history" aria-label="Historico de pesquisa permitido">
+                        <p>Historico permitido</p>
+                        @for (entry of safariHistory(); track entry.id) {
+                          <button
+                            type="button"
+                            [class.active]="isSafariCurrentUrl(entry.url)"
+                            (click)="openSafariHistoryEntry(entry.url)"
+                          >
+                            <strong>{{ entry.label }}</strong>
+                            <span>{{ entry.note }}</span>
+                          </button>
+                        }
+                      </aside>
+
+                      <section class="safari-frame-wrap">
+                        <iframe
+                          class="safari-frame"
+                          [src]="safariFrameUrl()"
+                          title="Safari frame"
+                          loading="lazy"
+                        ></iframe>
+                      </section>
+                    </div>
+                  </div>
+                }
+
                 @case ('terminal') {
                   <div class="terminal-shell" role="region" aria-label="Retro terminal">
                     <div class="terminal-status">

@@ -288,6 +288,34 @@ describe('App', () => {
     expect(booksWindow).toBeTruthy();
   });
 
+  it('should open safari app', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.openApp('safari');
+    const safariWindow = app.windows().find((windowState: { appId: string }) => windowState.appId === 'safari');
+    expect(safariWindow).toBeTruthy();
+  });
+
+  it('should restrict safari navigation to allowed history URLs', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.safariInput.set('https://google.com');
+    app.submitSafariNavigation();
+
+    expect(app.safariError()).toContain('historico permitido');
+    expect(app.safariCurrentUrl()).not.toBe('https://google.com');
+
+    app.safariInput.set('neverssl.com');
+    app.submitSafariNavigation();
+
+    expect(app.safariError()).toBeNull();
+    expect(app.safariCurrentUrl()).toBe('https://neverssl.com');
+  });
+
   it('should pin and unpin apps from dock via context action', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;

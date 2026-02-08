@@ -1,6 +1,32 @@
 import { Component, HostListener, OnDestroy, signal } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-type AppId = 'about' | 'projects' | 'books' | 'terminal' | 'notes' | 'finder' | 'textviewer';
+type AppId = 'about' | 'projects' | 'books' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari';
+
+function normalizeBrowserUrl(rawUrl: string): string | null {
+  const trimmed = rawUrl.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const absoluteUrl = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+  try {
+    const parsed = new URL(absoluteUrl);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      return null;
+    }
+
+    parsed.hash = '';
+    const normalizedPath = parsed.pathname !== '/' && parsed.pathname.endsWith('/')
+      ? parsed.pathname.slice(0, -1)
+      : parsed.pathname;
+    const normalized = `${parsed.protocol}//${parsed.host}${normalizedPath}${parsed.search}`;
+    return normalized.endsWith('/') ? normalized.slice(0, -1) : normalized;
+  } catch {
+    return null;
+  }
+}
 
 interface DockApp {
   name: string;
@@ -56,6 +82,13 @@ interface BookItem {
   cover: string;
 }
 
+interface SafariHistoryEntry {
+  id: string;
+  label: string;
+  url: string;
+  note: string;
+}
+
 interface ContextMenuItem {
   id:
     | 'open'
@@ -64,6 +97,7 @@ interface ContextMenuItem {
     | 'open-file'
     | 'open-terminal'
     | 'open-books'
+    | 'open-safari'
     | 'reset-dock'
     | 'themes'
     | 'theme-classic'
@@ -153,12 +187,47 @@ export class App implements OnDestroy {
   private readonly cursorBoostClassName = 'cursor-boost';
   private readonly cursorBoostSpeedThreshold = 1800;
   private readonly cursorBoostDurationMs = 140;
+  private readonly safariPresetHistory: SafariHistoryEntry[] = [
+    {
+      id: 'example-domain',
+      label: 'Example Domain',
+      url: 'https://example.com',
+      note: 'Site classico para testes de navegador.'
+    },
+    {
+      id: 'neverssl',
+      label: 'NeverSSL',
+      url: 'https://neverssl.com',
+      note: 'Teste simples sem redirects complexos.'
+    },
+    {
+      id: 'cern',
+      label: 'CERN (info.cern.ch)',
+      url: 'https://info.cern.ch',
+      note: 'Uma pagina historica da web.'
+    },
+    {
+      id: 'httpbin',
+      label: 'httpbin',
+      url: 'https://httpbin.org',
+      note: 'Endpoints publicos para debug HTTP.'
+    }
+  ];
+  private readonly safariAllowedUrlMap = new Map(
+    this.safariPresetHistory
+      .map((entry) => {
+        const normalizedUrl = normalizeBrowserUrl(entry.url);
+        return normalizedUrl ? [normalizedUrl, entry] as const : null;
+      })
+      .filter((entry): entry is readonly [string, SafariHistoryEntry] => entry !== null)
+  );
   private readonly terminalVirtualPath = '/Users/eduardo/Desktop';
   private readonly terminalCommandNames = [
     'help',
     'about',
     'projects',
     'books',
+    'safari',
     'ls',
     'cat <file>',
     'open <app>',
@@ -181,13 +250,15 @@ export class App implements OnDestroy {
     terminal: 'terminal',
     projects: 'projects',
     books: 'books',
+    safari: 'safari',
     about: 'about',
     textviewer: 'textviewer',
     text: 'textviewer'
   };
-  private readonly defaultDockAppIds: AppId[] = ['finder', 'notes', 'terminal', 'projects', 'books', 'about'];
+  private readonly defaultDockAppIds: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'about'];
   private readonly appRegistry: Record<AppId, DockApp> = {
     finder: { name: 'Finder', code: 'FD', appId: 'finder' },
+    safari: { name: 'Safari', code: 'SF', appId: 'safari' },
     notes: { name: 'Notes', code: 'NT', appId: 'notes' },
     terminal: { name: 'Terminal', code: 'TM', appId: 'terminal' },
     projects: { name: 'Projects', code: 'PR', appId: 'projects' },
@@ -215,9 +286,10 @@ GitHub: github.com/lacerdaaa`;
 
   protected readonly workspaceItems: WorkspaceItem[] = [
     { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },
-    { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 2 },
-    { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 3 },
-    { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 4 },
+    { kind: 'app', name: 'Safari', code: 'APP', appId: 'safari', column: 1, row: 2 },
+    { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 3 },
+    { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 4 },
+    { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 5 },
     {
       kind: 'file',
       name: 'about-me.txt',
@@ -265,7 +337,7 @@ GitHub: github.com/lacerdaaa`;
     'lacOs BIOS v0.84',
     'Checking memory............................ OK',
     'Mounting virtual desktop................... OK',
-    'Loading Finder.app, Projects.app, Books.app',
+    'Loading Finder.app, Safari.app, Projects.app, Books.app',
     'Booting portfolio workspace.................'
   ];
   protected readonly windows = signal<WindowState[]>([]);
@@ -288,6 +360,11 @@ GitHub: github.com/lacerdaaa`;
   protected readonly githubProjects = signal<GithubProject[]>([]);
   protected readonly githubProjectsLoading = signal(false);
   protected readonly githubProjectsError = signal<string | null>(null);
+  protected readonly safariHistory = signal<SafariHistoryEntry[]>([...this.safariPresetHistory]);
+  protected readonly safariInput = signal('');
+  protected readonly safariCurrentUrl = signal('');
+  protected readonly safariFrameUrl = signal<SafeResourceUrl | null>(null);
+  protected readonly safariError = signal<string | null>(null);
   protected readonly contextMenu = signal<ContextMenuState>({
     visible: false,
     x: 0,
@@ -334,10 +411,11 @@ GitHub: github.com/lacerdaaa`;
     this.timeLabel.set(this.formatTime());
   }, 30000);
 
-  constructor() {
+  constructor(private readonly sanitizer: DomSanitizer) {
     this.updateMobileAccessBlock();
     this.restoreDesktopThemeFromStorage();
     this.restoreDockFromStorage();
+    this.initializeSafari();
     this.openApp('about');
     this.beginBootSequence();
   }
@@ -550,6 +628,7 @@ GitHub: github.com/lacerdaaa`;
     this.openContextMenuAt(event.clientX, event.clientY, null, null, [
       { id: 'open-terminal', label: 'Abrir Terminal' },
       { id: 'open-books', label: 'Abrir Books' },
+      { id: 'open-safari', label: 'Abrir Safari' },
       { id: 'themes', label: 'Temas >' },
       { id: 'reset-dock', label: 'Restaurar dock padrao' }
     ]);
@@ -663,6 +742,9 @@ GitHub: github.com/lacerdaaa`;
       case 'open-books':
         this.openApp('books');
         break;
+      case 'open-safari':
+        this.openApp('safari');
+        break;
       case 'reset-dock':
         this.dockAppIds.set([...this.defaultDockAppIds]);
         this.persistDockToStorage();
@@ -771,6 +853,8 @@ GitHub: github.com/lacerdaaa`;
         return 'Featured Projects';
       case 'books':
         return 'Books';
+      case 'safari':
+        return 'Safari';
       case 'terminal':
         return 'Terminal';
       case 'notes':
@@ -782,6 +866,23 @@ GitHub: github.com/lacerdaaa`;
       default:
         return 'App';
     }
+  }
+
+  protected updateSafariInput(event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    this.safariInput.set(target?.value ?? '');
+  }
+
+  protected submitSafariNavigation(): void {
+    this.navigateSafariTo(this.safariInput());
+  }
+
+  protected openSafariHistoryEntry(entryUrl: string): void {
+    this.navigateSafariTo(entryUrl);
+  }
+
+  protected isSafariCurrentUrl(entryUrl: string): boolean {
+    return this.safariCurrentUrl() === entryUrl;
   }
 
   protected updateTerminalInput(event: Event): void {
@@ -878,6 +979,12 @@ GitHub: github.com/lacerdaaa`;
           'Books.app has a retro bookshelf with your selected readings.'
         ]);
         return;
+      case 'safari':
+        this.openApp('safari');
+        this.appendTerminalLines([
+          'Safari.app opened with URL whitelist from search history.'
+        ]);
+        return;
       case 'ls':
       case 'dir':
         this.appendTerminalLines(this.getWorkspaceListingLines());
@@ -893,7 +1000,7 @@ GitHub: github.com/lacerdaaa`;
         return;
       case 'open':
         if (rest.length === 0) {
-          this.appendTerminalLines(['Usage: open <finder|notes|terminal|projects|books|about|textviewer>']);
+          this.appendTerminalLines(['Usage: open <finder|safari|notes|terminal|projects|books|about|textviewer>']);
           return;
         }
 
@@ -1263,6 +1370,34 @@ GitHub: github.com/lacerdaaa`;
     }
   }
 
+  private initializeSafari(): void {
+    const firstEntry = this.safariPresetHistory[0];
+    if (!firstEntry) {
+      return;
+    }
+
+    this.navigateSafariTo(firstEntry.url);
+  }
+
+  private navigateSafariTo(rawUrl: string): void {
+    const normalizedUrl = normalizeBrowserUrl(rawUrl);
+    if (!normalizedUrl) {
+      this.safariError.set('Digite uma URL valida em formato http(s).');
+      return;
+    }
+
+    const allowedEntry = this.safariAllowedUrlMap.get(normalizedUrl);
+    if (!allowedEntry) {
+      this.safariError.set('Por seguranca, o Safari virtual abre apenas URLs do historico permitido.');
+      return;
+    }
+
+    this.safariInput.set(allowedEntry.url);
+    this.safariCurrentUrl.set(allowedEntry.url);
+    this.safariFrameUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(allowedEntry.url));
+    this.safariError.set(null);
+  }
+
   private openContextMenuAt(
     x: number,
     y: number,
@@ -1433,7 +1568,7 @@ GitHub: github.com/lacerdaaa`;
         return;
       }
 
-      const allowed = new Set<AppId>(['finder', 'notes', 'terminal', 'projects', 'books', 'about']);
+      const allowed = new Set<AppId>(['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'about']);
       const restored = parsed.filter(
         (appId): appId is AppId => typeof appId === 'string' && allowed.has(appId as AppId)
       );
@@ -1452,7 +1587,7 @@ GitHub: github.com/lacerdaaa`;
     if (!appId) {
       this.appendTerminalLines([
         `Unknown app: ${rawTarget}`,
-        'Available apps: finder, notes, terminal, projects, books, about, textviewer'
+        'Available apps: finder, safari, notes, terminal, projects, books, about, textviewer'
       ]);
       return;
     }
@@ -1777,6 +1912,8 @@ GitHub: github.com/lacerdaaa`;
 
   private getWindowDimensions(appId: AppId): { width: number; height: number } {
     switch (appId) {
+      case 'safari':
+        return { width: 700, height: 420 };
       case 'terminal':
         return { width: 580, height: 350 };
       case 'finder':
@@ -1794,6 +1931,8 @@ GitHub: github.com/lacerdaaa`;
 
   private getWindowMinimumDimensions(appId: AppId): { width: number; height: number } {
     switch (appId) {
+      case 'safari':
+        return { width: 520, height: 320 };
       case 'terminal':
         return { width: 420, height: 260 };
       case 'finder':
@@ -1813,6 +1952,8 @@ GitHub: github.com/lacerdaaa`;
     switch (appId) {
       case 'about':
         return 'Welcome.app';
+      case 'safari':
+        return 'Safari.app';
       case 'projects':
         return 'Projects.app';
       case 'books':

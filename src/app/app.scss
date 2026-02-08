@@ -237,6 +237,29 @@
   box-shadow: 8px 0 #000;
 }
 
+.workspace-icon[data-icon='safari']::before,
+.dock-icon[data-icon='safari']::before {
+  left: 8px;
+  top: 5px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #1f3a6a;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 32%, #fff 0 9%, #a6d5ff 10% 24%, #4e9cf1 25% 100%);
+}
+
+.workspace-icon[data-icon='safari']::after,
+.dock-icon[data-icon='safari']::after {
+  left: 17px;
+  top: 8px;
+  width: 2px;
+  height: 12px;
+  background: #c31f1f;
+  transform: rotate(30deg);
+  box-shadow: 0 0 0 1px #fff;
+}
+
 .workspace-icon[data-icon='terminal']::before,
 .dock-icon[data-icon='terminal']::before {
   left: 6px;
@@ -591,6 +614,163 @@
   margin: 4px 0 0;
   font-size: 11px;
   line-height: 1.3;
+}
+
+.safari-shell {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 8px;
+}
+
+.safari-toolbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #666;
+  border-bottom: 1px solid #666;
+  background: #ededed;
+}
+
+.safari-toolbar label {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.safari-toolbar input {
+  height: 24px;
+  border-top: 1px solid #6f6f6f;
+  border-left: 1px solid #6f6f6f;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  padding: 0 6px;
+  font-size: 12px;
+  font-family: 'Geneva', 'MS Sans Serif', 'Tahoma', sans-serif;
+}
+
+.safari-toolbar button,
+.safari-toolbar a {
+  height: 24px;
+  border: 0;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #000;
+  text-decoration: none;
+  background: #d9d9d9;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #555;
+  border-bottom: 1px solid #555;
+}
+
+.safari-toolbar button:active,
+.safari-toolbar a:active {
+  border-top: 1px solid #555;
+  border-left: 1px solid #555;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+
+.safari-error {
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #7d0f0f;
+  background: #f7e2e2;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #8f5555;
+  border-bottom: 1px solid #8f5555;
+}
+
+.safari-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 8px;
+}
+
+.safari-history {
+  min-height: 0;
+  overflow: auto;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  border-top: 1px solid #6f6f6f;
+  border-left: 1px solid #6f6f6f;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  background: #f1f1f1;
+}
+
+.safari-history p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.safari-history button {
+  border: 0;
+  text-align: left;
+  padding: 6px;
+  display: grid;
+  gap: 3px;
+  font-size: 11px;
+  color: #000;
+  background: #e6e6e6;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #777;
+  border-bottom: 1px solid #777;
+}
+
+.safari-history button strong {
+  font-size: 11px;
+}
+
+.safari-history button span {
+  font-size: 10px;
+  color: #2f2f2f;
+  line-height: 1.2;
+}
+
+.safari-history button.active {
+  color: #fff;
+  background: #0c4f9f;
+  border-top: 1px solid #083872;
+  border-left: 1px solid #083872;
+  border-right: 1px solid #8ec0ff;
+  border-bottom: 1px solid #8ec0ff;
+}
+
+.safari-history button.active span {
+  color: #dbeeff;
+}
+
+.safari-frame-wrap {
+  min-height: 0;
+  border-top: 1px solid #6f6f6f;
+  border-left: 1px solid #6f6f6f;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  background: #fff;
+  overflow: hidden;
+}
+
+.safari-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #fff;
 }
 
 .terminal-shell {
