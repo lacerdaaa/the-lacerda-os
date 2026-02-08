@@ -308,6 +308,38 @@ describe('App', () => {
     expect(quizWindow).toBeTruthy();
   });
 
+  it('should unlock founder secret and hidden theme from quiz event', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    expect(app.isFounderSecretUnlocked()).toBe(false);
+    expect(app.getThemeMenuItems().some((item: { id: string }) => item.id === 'theme-founder')).toBe(false);
+
+    app.handleQuizSecretUnlocked();
+
+    expect(app.isFounderSecretUnlocked()).toBe(true);
+    expect(localStorage.getItem('lacos.quiz.secret.unlocked')).toBe('true');
+    expect(app.desktopTheme()).toBe('founder');
+    expect(app.getThemeMenuItems().some((item: { id: string }) => item.id === 'theme-founder')).toBe(true);
+  });
+
+  it('should run founder boot command only after unlock', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.runTerminalCommand('boot --founder');
+    let terminalLog = app.terminalLines().join('\n');
+    expect(terminalLog).toContain('founder profile is locked');
+
+    app.handleQuizSecretUnlocked();
+    app.runTerminalCommand('boot --founder');
+    terminalLog = app.terminalLines().join('\n');
+    expect(terminalLog).toContain('lacOs Founder Boot v1.0');
+    expect(terminalLog).toContain('secret boot');
+  });
+
   it('should open safari app', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;

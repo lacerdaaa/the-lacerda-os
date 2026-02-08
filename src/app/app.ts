@@ -115,7 +115,8 @@ interface ContextMenuItem {
     | 'themes'
     | 'theme-classic'
     | 'theme-sunset'
-    | 'theme-grid';
+    | 'theme-grid'
+    | 'theme-founder';
   label: string;
   danger?: boolean;
   disabled?: boolean;
@@ -184,7 +185,7 @@ interface SnakePosition {
   y: number;
 }
 
-type DesktopTheme = 'classic' | 'sunset' | 'grid';
+type DesktopTheme = 'classic' | 'sunset' | 'grid' | 'founder';
 
 @Component({
   selector: 'app-root',
@@ -197,6 +198,7 @@ export class App implements OnDestroy {
   private readonly pinnedRepoNames = ['pressum-core-service', 'fynansee-core', 'auto-trace'];
   private readonly dockStorageKey = 'lacos.dock.apps';
   private readonly desktopThemeStorageKey = 'lacos.desktop.theme';
+  private readonly quizSecretStorageKey = 'lacos.quiz.secret.unlocked';
   private readonly mobileLayoutMaxWidth = 900;
   private readonly cursorBoostClassName = 'cursor-boost';
   private readonly cursorBoostSpeedThreshold = 1800;
@@ -467,6 +469,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
   protected readonly windows = signal<WindowState[]>([]);
   protected readonly isBooting = signal(true);
   protected readonly isMobileAccessBlocked = signal(false);
+  protected readonly isFounderSecretUnlocked = signal(false);
   protected readonly bootVisibleLines = signal(0);
   protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
   protected readonly desktopTheme = signal<DesktopTheme>('classic');
@@ -538,6 +541,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
 
   constructor(private readonly sanitizer: DomSanitizer) {
     this.updateMobileAccessBlock();
+    this.restoreQuizSecretFromStorage();
     this.restoreDesktopThemeFromStorage();
     this.restoreDockFromStorage();
     this.initializeSafari();
@@ -893,6 +897,11 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       case 'theme-grid':
         this.setDesktopTheme('grid');
         break;
+      case 'theme-founder':
+        if (this.isFounderSecretUnlocked()) {
+          this.setDesktopTheme('founder');
+        }
+        break;
     }
 
     this.closeContextMenu();
@@ -1007,6 +1016,21 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       default:
         return 'App';
     }
+  }
+
+  protected handleQuizSecretUnlocked(): void {
+    if (this.isFounderSecretUnlocked()) {
+      return;
+    }
+
+    this.isFounderSecretUnlocked.set(true);
+    this.persistQuizSecretToStorage();
+    this.setDesktopTheme('founder');
+    this.appendTerminalLines([
+      '[secret] Perfect run detected.',
+      '[secret] Hidden theme unlocked: Founder Mode.',
+      '[secret] New command available: boot --founder'
+    ]);
   }
 
   protected updateSafariInput(event: Event): void {
@@ -1205,6 +1229,14 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
           'Resolution: 4:3 CRT',
           'Theme: Teal Classic'
         ]);
+        return;
+      case 'boot':
+        if (argumentText !== '--founder') {
+          this.appendTerminalLines(['Usage: boot --founder']);
+          return;
+        }
+
+        this.runFounderBootCommand();
         return;
       case 'clear':
       case 'cls':
@@ -1677,6 +1709,10 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
   }
 
   private setDesktopTheme(theme: DesktopTheme): void {
+    if (theme === 'founder' && !this.isFounderSecretUnlocked()) {
+      return;
+    }
+
     this.desktopTheme.set(theme);
     this.persistDesktopThemeToStorage();
   }
@@ -1690,11 +1726,17 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
   }
 
   private getThemeMenuItems(): ContextMenuItem[] {
-    return [
+    const items: ContextMenuItem[] = [
       { id: 'theme-classic', label: this.getThemeContextLabel('classic') },
       { id: 'theme-sunset', label: this.getThemeContextLabel('sunset') },
       { id: 'theme-grid', label: this.getThemeContextLabel('grid') }
     ];
+
+    if (this.isFounderSecretUnlocked()) {
+      items.push({ id: 'theme-founder', label: this.getThemeContextLabel('founder') });
+    }
+
+    return items;
   }
 
   private getThemeContextLabel(theme: DesktopTheme): string {
@@ -1706,6 +1748,8 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return `${marker} Tema sunset`;
       case 'grid':
         return `${marker} Tema grid`;
+      case 'founder':
+        return `${marker} Tema founder`;
       default:
         return `${marker} Tema`;
     }
@@ -1724,6 +1768,37 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       const raw = localStorage.getItem(this.desktopThemeStorageKey);
       if (raw === 'classic' || raw === 'sunset' || raw === 'grid') {
         this.desktopTheme.set(raw);
+      } else if (raw === 'founder' && this.isFounderSecretUnlocked()) {
+        this.desktopTheme.set(raw);
+      }
+    } catch {
+      // Ignore malformed local storage payloads and keep defaults.
+    }
+  }
+
+  private persistQuizSecretToStorage(): void {
+    try {
+      localStorage.setItem(this.quizSecretStorageKey, JSON.stringify(this.isFounderSecretUnlocked()));
+    } catch {
+      // Ignore storage errors in private mode or blocked storage environments.
+    }
+  }
+
+  private restoreQuizSecretFromStorage(): void {
+    try {
+      const raw = localStorage.getItem(this.quizSecretStorageKey);
+      if (raw === 'true') {
+        this.isFounderSecretUnlocked.set(true);
+        return;
+      }
+
+      if (!raw) {
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (parsed === true) {
+        this.isFounderSecretUnlocked.set(true);
       }
     } catch {
       // Ignore malformed local storage payloads and keep defaults.
@@ -1922,6 +1997,25 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
     const visibleHistory = this.terminalCommandHistory.slice(-12);
     const startIndex = this.terminalCommandHistory.length - visibleHistory.length + 1;
     return visibleHistory.map((command, index) => `${startIndex + index}: ${command}`);
+  }
+
+  private runFounderBootCommand(): void {
+    if (!this.isFounderSecretUnlocked()) {
+      this.appendTerminalLines([
+        'boot: founder profile is locked.',
+        'Tip: complete Quiz.app with zero mistakes.'
+      ]);
+      return;
+    }
+
+    this.setDesktopTheme('founder');
+    this.appendTerminalLines([
+      'lacOs Founder Boot v1.0',
+      'Reading founder profile................... OK',
+      'Linking purpose modules................... OK',
+      'Loading respect, craft and consistency.... OK',
+      "Welcome, visitor. You found Eduardo's secret boot."
+    ]);
   }
 
   @HostListener('window:pointermove', ['$event'])

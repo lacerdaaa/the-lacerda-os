@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, EventEmitter, Output, signal } from '@angular/core';
 
 interface QuizQuestion {
   prompt: string;
@@ -21,6 +21,8 @@ interface QuizState {
   styleUrl: './about-quiz.component.scss'
 })
 export class AboutQuizComponent {
+  @Output() secretUnlocked = new EventEmitter<void>();
+
   protected readonly questions: QuizQuestion[] = [
     {
       prompt: 'Qual a minha idade atual?',
@@ -79,6 +81,7 @@ export class AboutQuizComponent {
   ];
 
   protected readonly quizState = signal<QuizState[]>(this.buildInitialState());
+  private hasEmittedSecret = false;
 
   protected answerQuestion(questionIndex: number, optionIndex: number): void {
     this.quizState.update((current) =>
@@ -111,10 +114,16 @@ export class AboutQuizComponent {
         };
       })
     );
+
+    if (!this.hasEmittedSecret && this.isPerfectRunComplete()) {
+      this.hasEmittedSecret = true;
+      this.secretUnlocked.emit();
+    }
   }
 
   protected resetQuiz(): void {
     this.quizState.set(this.buildInitialState());
+    this.hasEmittedSecret = false;
   }
 
   protected getSolvedCount(): number {
@@ -154,5 +163,12 @@ export class AboutQuizComponent {
       selectedIndex: null,
       feedback: ''
     }));
+  }
+
+  private isPerfectRunComplete(): boolean {
+    const state = this.quizState();
+    const solvedAll = state.every((entry) => entry.solved);
+    const noMistakes = state.every((entry) => entry.attempts === 0);
+    return solvedAll && noMistakes;
   }
 }

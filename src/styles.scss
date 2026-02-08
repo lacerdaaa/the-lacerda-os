@@ -55,3 +55,10 @@ select,
 .resize-handle {
   cursor: var(--cursor-retro-nwse);
 }
+
+app-root .desktop-shell[data-theme='founder'] {
+  --desktop-shell-bg:
+    linear-gradient(180deg, #2b2313 0%, #1b140a 100%);
+  --desktop-layer-bg:
+    repeating-linear-gradient(45deg, #5c4c20 0 10px, #4b3c16 10px 20px);
+}

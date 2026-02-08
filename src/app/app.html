@@ -149,7 +149,7 @@
 
               @case ('quiz') {
               <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-              <app-about-quiz></app-about-quiz>
+              <app-about-quiz (secretUnlocked)="handleQuizSecretUnlocked()"></app-about-quiz>
               }
 
               @case ('safari') {
