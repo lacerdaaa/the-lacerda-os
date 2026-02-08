@@ -187,6 +187,7 @@ export class App implements OnDestroy {
   private readonly cursorBoostClassName = 'cursor-boost';
   private readonly cursorBoostSpeedThreshold = 1800;
   private readonly cursorBoostDurationMs = 140;
+  private readonly safariIframeBlockedHosts = new Set(['github.com', 'www.github.com']);
   private readonly safariPresetHistory: SafariHistoryEntry[] = [
     {
       id: 'example-domain',
@@ -370,6 +371,7 @@ GitHub: github.com/lacerdaaa`;
   protected readonly safariInput = signal('');
   protected readonly safariCurrentUrl = signal('');
   protected readonly safariFrameUrl = signal<SafeResourceUrl | null>(null);
+  protected readonly safariFrameBlockedReason = signal<string | null>(null);
   protected readonly safariError = signal<string | null>(null);
   protected readonly contextMenu = signal<ContextMenuState>({
     visible: false,
@@ -1388,20 +1390,41 @@ GitHub: github.com/lacerdaaa`;
   private navigateSafariTo(rawUrl: string): void {
     const normalizedUrl = normalizeBrowserUrl(rawUrl);
     if (!normalizedUrl) {
+      this.safariFrameBlockedReason.set(null);
       this.safariError.set('Digite uma URL valida em formato http(s).');
       return;
     }
 
     const allowedEntry = this.safariAllowedUrlMap.get(normalizedUrl);
     if (!allowedEntry) {
+      this.safariFrameBlockedReason.set(null);
       this.safariError.set('Por seguranca, o Safari virtual abre apenas URLs do historico permitido.');
       return;
     }
 
     this.safariInput.set(allowedEntry.url);
     this.safariCurrentUrl.set(allowedEntry.url);
-    this.safariFrameUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(allowedEntry.url));
     this.safariError.set(null);
+
+    if (this.isSafariFrameBlockedByHost(allowedEntry.url)) {
+      this.safariFrameUrl.set(null);
+      this.safariFrameBlockedReason.set(
+        'Este site bloqueia visualizacao em iframe por seguranca. Use "Nova aba".'
+      );
+      return;
+    }
+
+    this.safariFrameUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(allowedEntry.url));
+    this.safariFrameBlockedReason.set(null);
+  }
+
+  private isSafariFrameBlockedByHost(rawUrl: string): boolean {
+    try {
+      const parsed = new URL(rawUrl);
+      return this.safariIframeBlockedHosts.has(parsed.hostname.toLowerCase());
+    } catch {
+      return false;
+    }
   }
 
   private openContextMenuAt(

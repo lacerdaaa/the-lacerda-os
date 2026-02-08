@@ -316,6 +316,20 @@ describe('App', () => {
     expect(app.safariCurrentUrl()).toBe('https://neverssl.com');
   });
 
+  it('should show external fallback for github url in safari', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+    app.skipBootSequence();
+
+    app.safariInput.set('https://www.github.com/lacerdaaa');
+    app.submitSafariNavigation();
+
+    expect(app.safariError()).toBeNull();
+    expect(app.safariCurrentUrl()).toBe('https://www.github.com/lacerdaaa');
+    expect(app.safariFrameUrl()).toBeNull();
+    expect(app.safariFrameBlockedReason()).toContain('iframe');
+  });
+
   it('should pin and unpin apps from dock via context action', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;

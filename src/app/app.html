@@ -190,6 +190,9 @@
                     @if (safariError()) {
                       <p class="safari-error">{{ safariError() }}</p>
                     }
+                    @if (safariFrameBlockedReason()) {
+                      <p class="safari-info">{{ safariFrameBlockedReason() }}</p>
+                    }
 
                     <div class="safari-body">
                       <aside class="safari-history" aria-label="Historico de pesquisa permitido">
@@ -207,12 +210,21 @@
                       </aside>
 
                       <section class="safari-frame-wrap">
-                        <iframe
-                          class="safari-frame"
-                          [src]="safariFrameUrl()"
-                          title="Safari frame"
-                          loading="lazy"
-                        ></iframe>
+                        @if (safariFrameUrl(); as safeFrameUrl) {
+                          <iframe
+                            class="safari-frame"
+                            [src]="safeFrameUrl"
+                            title="Safari frame"
+                            loading="lazy"
+                          ></iframe>
+                        } @else {
+                          <div class="safari-frame-fallback">
+                            <p>Visualizacao interna indisponivel para este dominio.</p>
+                            <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">
+                              Abrir pagina em nova aba
+                            </a>
+                          </div>
+                        }
                       </section>
                     </div>
                   </div>
