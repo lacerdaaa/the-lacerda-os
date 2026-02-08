@@ -292,21 +292,11 @@ export class App implements OnDestroy {
   };
   private readonly aboutMeFileText = `Eduardo Lacerda
 
-Location: Campinas, Sao Paulo, Brazil
+My name is Eduardo and I'm a software developer based in Brazil, more specifically in Campinas, São Paulo. I'm truly passionate about technology and the endless possibilities it brings to build anything imaginable.
 
-I am passionate about technology and building real-world solutions.
-I started my professional technology journey in 2024 and I keep evolving every year.
+I work primarily with TypeScript, using frameworks such as Angular, React, and Node.js. I also have hands-on experience with .NET and Python. Currently, I'm building Pressum and Fynansee.
 
-Hobbies:
-- Cooking
-- History in different contexts (food, finance, geopolitics, economics)
-
-Education:
-- Technician degree completed
-- Preparing to join USP or UNICAMP
-- Goal: Computer Science or Information Systems bachelor's degree
-
-GitHub: github.com/lacerdaaa`;
+Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care about software development best practices, including Domain-Driven Design (DDD) and Test-Driven Development (TDD).`;
 
   protected readonly workspaceItems: WorkspaceItem[] = [
     { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },

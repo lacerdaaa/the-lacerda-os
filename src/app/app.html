@@ -1,292 +1,227 @@
 <div class="retro-stage">
   <div class="retro-screen">
-    <div
-      class="desktop-shell"
-      [class.mobile-blocked]="isMobileAccessBlocked()"
-      [attr.data-theme]="desktopTheme()"
-      (contextmenu)="openPageContextMenu($event)"
-    >
+    <div class="desktop-shell" [class.mobile-blocked]="isMobileAccessBlocked()" [attr.data-theme]="desktopTheme()"
+      (contextmenu)="openPageContextMenu($event)">
       <header class="menu-bar">
-    <div class="menu-left">
-      <button type="button" class="os-mark" (click)="openApp('finder')">lacOs</button>
-      @for (item of menuItems; track item) {
-        <button type="button" class="menu-item">{{ item }}</button>
-      }
-    </div>
-    <div class="menu-right">
-      <span>{{ timeLabel() }}</span>
-    </div>
-  </header>
+        <div class="menu-left">
+          <button type="button" class="os-mark" (click)="openApp('finder')">lacOs</button>
+          @for (item of menuItems; track item) {
+          <button type="button" class="menu-item">{{ item }}</button>
+          }
+        </div>
+        <div class="menu-right">
+          <span>{{ timeLabel() }}</span>
+        </div>
+      </header>
 
       <main class="desktop-surface">
         <section class="window-layer" #windowLayer aria-label="Window layer">
           <div class="workspace-items" aria-label="Workspace icons">
             @for (item of workspaceItems; track item.name) {
-              <button
-                type="button"
-                class="workspace-item"
-                [class.file]="item.kind === 'file'"
-                [style.grid-column]="item.column"
-                [style.grid-row]="item.row"
-                (click)="openWorkspaceItem(item)"
-                (contextmenu)="openWorkspaceContextMenu(item, $event)"
-              >
-                <span
-                  class="workspace-icon"
-                  [attr.data-icon]="getWorkspaceIconKey(item)"
-                  aria-hidden="true"
-                ></span>
-                <span class="workspace-label">{{ item.name }}</span>
-              </button>
+            <button type="button" class="workspace-item" [class.file]="item.kind === 'file'"
+              [style.grid-column]="item.column" [style.grid-row]="item.row" (click)="openWorkspaceItem(item)"
+              (contextmenu)="openWorkspaceContextMenu(item, $event)">
+              <span class="workspace-icon" [attr.data-icon]="getWorkspaceIconKey(item)" aria-hidden="true"></span>
+              <span class="workspace-label">{{ item.name }}</span>
+            </button>
             }
           </div>
 
           @for (windowState of windows(); track windowState.id) {
-            @if (!windowState.minimized) {
-              <article
-                class="window"
-                [class.active]="windowState.active"
-                [class.maximized]="windowState.maximized"
-                [style.width.px]="windowState.width"
-                [style.height.px]="windowState.height"
-                [style.left.px]="windowState.x"
-                [style.top.px]="windowState.y"
-                [style.z-index]="windowState.z"
-                (mousedown)="activateWindow(windowState.id)"
-                (contextmenu)="openWindowContextMenu(windowState.appId, $event)"
-              >
-                <header class="window-titlebar" (pointerdown)="startDrag(windowState.id, windowLayer, $event)">
+          @if (!windowState.minimized) {
+          <article class="window" [class.active]="windowState.active" [class.maximized]="windowState.maximized"
+            [style.width.px]="windowState.width" [style.height.px]="windowState.height" [style.left.px]="windowState.x"
+            [style.top.px]="windowState.y" [style.z-index]="windowState.z" (mousedown)="activateWindow(windowState.id)"
+            (contextmenu)="openWindowContextMenu(windowState.appId, $event)">
+            <header class="window-titlebar" (pointerdown)="startDrag(windowState.id, windowLayer, $event)">
               <div class="window-controls" aria-label="Window controls">
-                <button
-                  type="button"
-                  class="control red"
-                  aria-label="Close window"
-                  (pointerdown)="$event.stopPropagation()"
-                  (click)="closeWindow(windowState.id, $event)"
-                ></button>
-                <button
-                  type="button"
-                  class="control amber"
-                  aria-label="Minimize window"
-                  (pointerdown)="$event.stopPropagation()"
-                  (click)="minimizeWindow(windowState.id, $event)"
-                ></button>
-                <button
-                  type="button"
-                  class="control green"
+                <button type="button" class="control red" aria-label="Close window"
+                  (pointerdown)="$event.stopPropagation()" (click)="closeWindow(windowState.id, $event)"></button>
+                <button type="button" class="control amber" aria-label="Minimize window"
+                  (pointerdown)="$event.stopPropagation()" (click)="minimizeWindow(windowState.id, $event)"></button>
+                <button type="button" class="control green"
                   [attr.aria-label]="windowState.maximized ? 'Restore window' : 'Open window'"
                   (pointerdown)="$event.stopPropagation()"
-                  (click)="toggleOpenWindow(windowState.id, windowLayer, $event)"
-                ></button>
+                  (click)="toggleOpenWindow(windowState.id, windowLayer, $event)"></button>
               </div>
               <p>{{ windowState.title }}</p>
-                </header>
+            </header>
 
-                <div
-                  class="window-content"
-                  [class.window-content-terminal]="windowState.appId === 'terminal'"
-                >
+            <div class="window-content" [class.window-content-terminal]="windowState.appId === 'terminal'">
               @switch (windowState.appId) {
-                @case ('about') {
-                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <p class="about-copy"><strong>Eduardo Lacerda</strong></p>
-                  <p class="about-copy">
-                    I live in Campinas, Sao Paulo, Brazil. I am passionate about technology
-                    and building real-world solutions.
-                  </p>
-                  <p class="about-copy">
-                    I started my professional journey in technology in 2024 and I keep evolving
-                    more each year.
-                  </p>
-                  <p class="about-copy">
-                    As hobbies, I love cooking and learning history in different contexts:
-                    food, finance, geopolitics, and economics.
-                  </p>
-                  <p class="about-copy">
-                    I have a technician degree and I am studying to join USP or UNICAMP,
-                    aiming for a bachelor's degree in Computer Science or Information Systems.
-                  </p>
-                  <p class="about-copy">
-                    GitHub:
-                    <a
-                      class="about-link"
-                      href="https://github.com/lacerdaaa"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      github.com/lacerdaaa
-                    </a>
-                  </p>
+              @case ('about') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <p class="about-copy"><strong>Eduardo Lacerda</strong></p>
+              <p class="about-copy">
+                I live in Campinas, São Paulo, Brazil. I am passionate about technology
+                and building real-world solutions.
+              </p>
+              <p class="about-copy">
+                I started my professional journey in technology in 2024 and I keep evolving
+                more each year. I work primarily with TypeScript, using frameworks such as
+                Angular, React, and Node.js. I also have hands-on experience with .NET and
+                Python. Currently, I'm building Pressum and Fynansee.
+              </p>
+              <p class="about-copy">
+                As hobbies, I love cooking and learning history in different contexts:
+                food, finance, geopolitics, and economics. I also enjoy reading and
+                listening to music.
+              </p>
+              <p class="about-copy">
+                I have a technician degree and I am studying to join USP or UNICAMP,
+                aiming for a bachelor's degree in Computer Science or Information Systems.
+                I deeply care about software development best practices, including
+                Domain-Driven Design (DDD) and Test-Driven Development (TDD).
+              </p>
+              <p class="about-copy">
+                GitHub:
+                <a class="about-link" href="https://github.com/lacerdaaa" target="_blank" rel="noopener">
+                  github.com/lacerdaaa
+                </a>
+              </p>
+              }
+
+              @case ('projects') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <p class="projects-meta">
+                Live data from
+                <a href="https://github.com/lacerdaaa" target="_blank" rel="noopener">
+                  github.com/lacerdaaa
+                </a>
+              </p>
+
+              @if (githubProjectsLoading()) {
+              <p class="projects-status">Loading repositories from GitHub...</p>
+              } @else if (githubProjectsError()) {
+              <p class="projects-status projects-status-error">{{ githubProjectsError() }}</p>
+              } @else if (githubProjects().length === 0) {
+              <p class="projects-status">No repositories available right now.</p>
+              } @else {
+              <div class="project-grid">
+                @for (project of githubProjects(); track project.id) {
+                <a class="project-card" [href]="project.href" target="_blank" rel="noopener">
+                  <h2>{{ project.name }}</h2>
+                  <p>{{ project.description }}</p>
+                  <span>
+                    @if (project.pinned) {
+                    Pinned |
+                    }
+                    Stars {{ project.stars }} | Updated {{ getProjectUpdatedLabel(project.updatedAt) }}
+                  </span>
+                </a>
+                }
+              </div>
+              }
+              }
+
+              @case ('books') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <div class="books-grid">
+                @for (book of books; track book.title) {
+                <article class="book-card">
+                  <img [src]="book.cover" [alt]="book.title" />
+                  <h2>{{ book.title }}</h2>
+                  <p>{{ book.description }}</p>
+                </article>
+                }
+              </div>
+              }
+
+              @case ('courses') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <div class="books-grid">
+                @for (course of courses; track course.title) {
+                <article class="book-card course-card">
+                  <img class="course-logo" [src]="course.logo" [alt]="'Logo da organização ' + course.organization" />
+                  <div class="course-content">
+                    <h2>{{ course.title }}</h2>
+                    <p class="course-meta">{{ course.organization }} · Verificação emitida em {{ course.issuedAt }}</p>
+                    <p class="course-summary">{{ course.summary }}</p>
+                    <p class="course-skills">Competências: {{ course.skills }}</p>
+                    @if (course.credentialCode) {
+                    <p class="course-credential">Código da credencial: {{ course.credentialCode }}</p>
+                    }
+                  </div>
+                </article>
+                }
+              </div>
+              }
+
+              @case ('safari') {
+              <div class="safari-shell" role="region" aria-label="Safari virtual browser">
+                <form class="safari-toolbar" (submit)="$event.preventDefault(); submitSafariNavigation()">
+                  <label for="safari-address">URL</label>
+                  <input id="safari-address" type="text" [value]="safariInput()" (input)="updateSafariInput($event)"
+                    spellcheck="false" autocomplete="off" placeholder="Use uma URL do historico permitido" />
+                  <button type="submit">Go</button>
+                  <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">Nova aba</a>
+                </form>
+
+                @if (safariError()) {
+                <p class="safari-error">{{ safariError() }}</p>
+                }
+                @if (safariFrameBlockedReason()) {
+                <p class="safari-info">{{ safariFrameBlockedReason() }}</p>
                 }
 
-                @case ('projects') {
-                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <p class="projects-meta">
-                    Live data from
-                    <a href="https://github.com/lacerdaaa" target="_blank" rel="noopener">
-                      github.com/lacerdaaa
-                    </a>
-                  </p>
+                <div class="safari-body">
+                  <aside class="safari-history" aria-label="Historico de pesquisa permitido">
+                    <p>Historico permitido</p>
+                    @for (entry of safariHistory(); track entry.id) {
+                    <button type="button" [class.active]="isSafariCurrentUrl(entry.url)"
+                      (click)="openSafariHistoryEntry(entry.url)">
+                      <strong>{{ entry.label }}</strong>
+                      <span>{{ entry.note }}</span>
+                    </button>
+                    }
+                  </aside>
 
-                  @if (githubProjectsLoading()) {
-                    <p class="projects-status">Loading repositories from GitHub...</p>
-                  } @else if (githubProjectsError()) {
-                    <p class="projects-status projects-status-error">{{ githubProjectsError() }}</p>
-                  } @else if (githubProjects().length === 0) {
-                    <p class="projects-status">No repositories available right now.</p>
-                  } @else {
-                    <div class="project-grid">
-                      @for (project of githubProjects(); track project.id) {
-                        <a
-                          class="project-card"
-                          [href]="project.href"
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          <h2>{{ project.name }}</h2>
-                          <p>{{ project.description }}</p>
-                          <span>
-                            @if (project.pinned) {
-                              Pinned |
-                            }
-                            Stars {{ project.stars }} | Updated {{ getProjectUpdatedLabel(project.updatedAt) }}
-                          </span>
-                        </a>
-                      }
+                  <section class="safari-frame-wrap">
+                    @if (safariFrameUrl(); as safeFrameUrl) {
+                    <iframe class="safari-frame" [src]="safeFrameUrl" title="Safari frame" loading="lazy"></iframe>
+                    } @else {
+                    <div class="safari-frame-fallback">
+                      <p>Visualização interna indisponivel para este domínio.</p>
+                      <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">
+                        Abrir página em nova aba
+                      </a>
                     </div>
+                    }
+                  </section>
+                </div>
+              </div>
+              }
+
+              @case ('terminal') {
+              <div class="terminal-shell" role="region" aria-label="Retro terminal">
+                <div class="terminal-status">
+                  <span>VT102 Session</span>
+                  <span>9600 baud</span>
+                </div>
+                <div class="terminal-output" aria-live="polite">
+                  @if (terminalSnakeBoard(); as snakeBoard) {
+                  <div class="snake-board" aria-label="Snake board">
+                    @for (line of snakeBoard; track $index) {
+                    <p class="snake-line">{{ line }}</p>
+                    }
+                  </div>
                   }
-                }
+                  @for (line of terminalLines(); track $index) {
+                  <p>{{ line }}</p>
+                  }
+                </div>
+                <form class="terminal-input-row" (submit)="$event.preventDefault(); submitTerminalCommand()">
+                  <label for="terminal-command">{{ terminalPrompt }}</label>
+                  <input id="terminal-command" type="text" [value]="terminalInput()"
+                    (input)="updateTerminalInput($event)" (keydown)="onTerminalKeydown($event)" autocomplete="off"
+                    spellcheck="false" placeholder="Type a command" />
+                </form>
+              </div>
+              }
 
-                @case ('books') {
-                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <div class="books-grid">
-                    @for (book of books; track book.title) {
-                      <article class="book-card">
-                        <img [src]="book.cover" [alt]="book.title" />
-                        <h2>{{ book.title }}</h2>
-                        <p>{{ book.description }}</p>
-                      </article>
-                    }
-                  </div>
-                }
-
-                @case ('courses') {
-                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <div class="books-grid">
-                    @for (course of courses; track course.title) {
-                      <article class="book-card course-card">
-                        <img class="course-logo" [src]="course.logo" [alt]="'Logo da organização ' + course.organization" />
-                        <div class="course-content">
-                          <h2>{{ course.title }}</h2>
-                          <p class="course-meta">{{ course.organization }} · Verificação emitida em {{ course.issuedAt }}</p>
-                          <p class="course-summary">{{ course.summary }}</p>
-                          <p class="course-skills">Competências: {{ course.skills }}</p>
-                          @if (course.credentialCode) {
-                            <p class="course-credential">Código da credencial: {{ course.credentialCode }}</p>
-                          }
-                        </div>
-                      </article>
-                    }
-                  </div>
-                }
-
-                @case ('safari') {
-                  <div class="safari-shell" role="region" aria-label="Safari virtual browser">
-                    <form class="safari-toolbar" (submit)="$event.preventDefault(); submitSafariNavigation()">
-                      <label for="safari-address">URL</label>
-                      <input
-                        id="safari-address"
-                        type="text"
-                        [value]="safariInput()"
-                        (input)="updateSafariInput($event)"
-                        spellcheck="false"
-                        autocomplete="off"
-                        placeholder="Use uma URL do historico permitido"
-                      />
-                      <button type="submit">Go</button>
-                      <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">Nova aba</a>
-                    </form>
-
-                    @if (safariError()) {
-                      <p class="safari-error">{{ safariError() }}</p>
-                    }
-                    @if (safariFrameBlockedReason()) {
-                      <p class="safari-info">{{ safariFrameBlockedReason() }}</p>
-                    }
-
-                    <div class="safari-body">
-                      <aside class="safari-history" aria-label="Historico de pesquisa permitido">
-                        <p>Historico permitido</p>
-                        @for (entry of safariHistory(); track entry.id) {
-                          <button
-                            type="button"
-                            [class.active]="isSafariCurrentUrl(entry.url)"
-                            (click)="openSafariHistoryEntry(entry.url)"
-                          >
-                            <strong>{{ entry.label }}</strong>
-                            <span>{{ entry.note }}</span>
-                          </button>
-                        }
-                      </aside>
-
-                      <section class="safari-frame-wrap">
-                        @if (safariFrameUrl(); as safeFrameUrl) {
-                          <iframe
-                            class="safari-frame"
-                            [src]="safeFrameUrl"
-                            title="Safari frame"
-                            loading="lazy"
-                          ></iframe>
-                        } @else {
-                          <div class="safari-frame-fallback">
-                            <p>Visualização interna indisponivel para este domínio.</p>
-                            <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">
-                              Abrir página em nova aba
-                            </a>
-                          </div>
-                        }
-                      </section>
-                    </div>
-                  </div>
-                }
-
-                @case ('terminal') {
-                  <div class="terminal-shell" role="region" aria-label="Retro terminal">
-                    <div class="terminal-status">
-                      <span>VT102 Session</span>
-                      <span>9600 baud</span>
-                    </div>
-                    <div class="terminal-output" aria-live="polite">
-                      @if (terminalSnakeBoard(); as snakeBoard) {
-                        <div class="snake-board" aria-label="Snake board">
-                          @for (line of snakeBoard; track $index) {
-                            <p class="snake-line">{{ line }}</p>
-                          }
-                        </div>
-                      }
-                      @for (line of terminalLines(); track $index) {
-                        <p>{{ line }}</p>
-                      }
-                    </div>
-                    <form class="terminal-input-row" (submit)="$event.preventDefault(); submitTerminalCommand()">
-                      <label for="terminal-command">{{ terminalPrompt }}</label>
-                      <input
-                        id="terminal-command"
-                        type="text"
-                        [value]="terminalInput()"
-                        (input)="updateTerminalInput($event)"
-                        (keydown)="onTerminalKeydown($event)"
-                        autocomplete="off"
-                        spellcheck="false"
-                        placeholder="Type a command"
-                      />
-                    </form>
-                  </div>
-                }
-
-                @case ('notes') {
-                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <textarea readonly>
+              @case ('notes') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <textarea readonly>
 This is a placeholder Notes app.
 
 Next milestones:
@@ -294,127 +229,92 @@ Next milestones:
 - Build command parser for terminal
 - Add project pages and routing
                   </textarea>
-                }
-
-                @case ('textviewer') {
-                  <h1>{{ openedFileName() }}</h1>
-                  <pre class="file-preview">{{ openedFileContent() }}</pre>
-                }
-
-                @case ('finder') {
-                  <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-                  <p>Explore files, open apps, and navigate your portfolio desktop.</p>
-                  <div class="finder-grid">
-                    <span>Portfolio</span>
-                    <span>Assets</span>
-                    <span>Experiments</span>
-                    <span>Archive</span>
-                  </div>
-                }
               }
-                </div>
-                <button
-                  type="button"
-                  class="resize-handle"
-                  aria-label="Resize window"
-                  (pointerdown)="startResize(windowState.id, windowLayer, $event)"
-                ></button>
-              </article>
-            }
+
+              @case ('textviewer') {
+              <h1>{{ openedFileName() }}</h1>
+              <pre class="file-preview">{{ openedFileContent() }}</pre>
+              }
+
+              @case ('finder') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <p>Explore files, open apps, and navigate your portfolio desktop.</p>
+              <div class="finder-grid">
+                <span>Portfolio</span>
+                <span>Assets</span>
+                <span>Experiments</span>
+                <span>Archive</span>
+              </div>
+              }
+              }
+            </div>
+            <button type="button" class="resize-handle" aria-label="Resize window"
+              (pointerdown)="startResize(windowState.id, windowLayer, $event)"></button>
+          </article>
+          }
           }
         </section>
       </main>
 
       <footer class="dock" aria-label="App dock">
         @for (app of getDockApps(); track app.appId) {
-          <button
-            type="button"
-            class="dock-item"
-            [class.active]="isAppOpen(app.appId)"
-            [class.running]="isAppRunning(app.appId)"
-            [class.minimized]="isAppMinimized(app.appId)"
-            (click)="openApp(app.appId)"
-            (contextmenu)="openDockContextMenu(app.appId, $event)"
-          >
-            <span
-              class="dock-icon"
-              [attr.data-icon]="getAppIconKey(app.appId)"
-              aria-hidden="true"
-            ></span>
-            <small>{{ app.name }}</small>
-          </button>
+        <button type="button" class="dock-item" [class.active]="isAppOpen(app.appId)"
+          [class.running]="isAppRunning(app.appId)" [class.minimized]="isAppMinimized(app.appId)"
+          (click)="openApp(app.appId)" (contextmenu)="openDockContextMenu(app.appId, $event)">
+          <span class="dock-icon" [attr.data-icon]="getAppIconKey(app.appId)" aria-hidden="true"></span>
+          <small>{{ app.name }}</small>
+        </button>
         }
       </footer>
 
       @if (contextMenu().visible) {
-        <div
-          class="context-menu"
-          [style.left.px]="contextMenu().x"
-          [style.top.px]="contextMenu().y"
-          (click)="$event.stopPropagation()"
-        >
-          @for (item of contextMenu().items; track item.id) {
-            <button
-              type="button"
-              class="context-menu-item"
-              [class.danger]="item.danger"
-              [disabled]="item.disabled"
-              (mouseenter)="onContextMenuItemEnter(item, $event)"
-              (click)="handleContextMenuAction(item.id)"
-            >
-              {{ item.label }}
-            </button>
-          }
-        </div>
-
-        @if (contextSubmenu().visible) {
-          <div
-            class="context-menu context-submenu"
-            [style.left.px]="contextSubmenu().x"
-            [style.top.px]="contextSubmenu().y"
-            (click)="$event.stopPropagation()"
-            (mouseleave)="closeThemeSubmenu()"
-          >
-            @for (item of contextSubmenu().items; track item.id) {
-              <button
-                type="button"
-                class="context-menu-item"
-                [class.danger]="item.danger"
-                [disabled]="item.disabled"
-                (click)="handleContextMenuAction(item.id)"
-              >
-                {{ item.label }}
-              </button>
-            }
-          </div>
+      <div class="context-menu" [style.left.px]="contextMenu().x" [style.top.px]="contextMenu().y"
+        (click)="$event.stopPropagation()">
+        @for (item of contextMenu().items; track item.id) {
+        <button type="button" class="context-menu-item" [class.danger]="item.danger" [disabled]="item.disabled"
+          (mouseenter)="onContextMenuItemEnter(item, $event)" (click)="handleContextMenuAction(item.id)">
+          {{ item.label }}
+        </button>
         }
+      </div>
+
+      @if (contextSubmenu().visible) {
+      <div class="context-menu context-submenu" [style.left.px]="contextSubmenu().x" [style.top.px]="contextSubmenu().y"
+        (click)="$event.stopPropagation()" (mouseleave)="closeThemeSubmenu()">
+        @for (item of contextSubmenu().items; track item.id) {
+        <button type="button" class="context-menu-item" [class.danger]="item.danger" [disabled]="item.disabled"
+          (click)="handleContextMenuAction(item.id)">
+          {{ item.label }}
+        </button>
+        }
+      </div>
+      }
       }
 
       @if (isBooting()) {
-        <section class="boot-overlay" aria-label="Boot sequence">
-          <p class="boot-title">lacOs Startup</p>
-          <div class="boot-log">
-            @for (line of bootLines; track $index) {
-              @if ($index < bootVisibleLines()) {
-                <p>{{ line }}</p>
-              }
+      <section class="boot-overlay" aria-label="Boot sequence">
+        <p class="boot-title">lacOs Startup</p>
+        <div class="boot-log">
+          @for (line of bootLines; track $index) {
+          @if ($index < bootVisibleLines()) { <p>{{ line }}</p>
             }
-          </div>
-          <div class="boot-progress">
-            <span [style.width.%]="(bootVisibleLines() / bootLines.length) * 100"></span>
-          </div>
-          <button type="button" class="boot-skip" (click)="skipBootSequence()">Skip boot</button>
-        </section>
+            }
+        </div>
+        <div class="boot-progress">
+          <span [style.width.%]="(bootVisibleLines() / bootLines.length) * 100"></span>
+        </div>
+        <button type="button" class="boot-skip" (click)="skipBootSequence()">Skip boot</button>
+      </section>
       }
 
       @if (isMobileAccessBlocked()) {
-        <section class="mobile-access-block" aria-label="Acesso restrito em mobile">
-          <article class="mobile-error-modal" role="alertdialog" aria-labelledby="mobile-error-title">
-            <h2 id="mobile-error-title">[ERRO] Acesso bloqueado</h2>
-            <p>O projeto atualmente só funciona em dispositivos desktop para maior compatibilidade :(</p>
-            <p>acesse em um computador ou ative o modo desktop no seu navegador</p>
-          </article>
-        </section>
+      <section class="mobile-access-block" aria-label="Acesso restrito em mobile">
+        <article class="mobile-error-modal" role="alertdialog" aria-labelledby="mobile-error-title">
+          <h2 id="mobile-error-title">[ERRO] Acesso bloqueado</h2>
+          <p>O projeto atualmente só funciona em dispositivos desktop para maior compatibilidade :(</p>
+          <p>acesse em um computador ou ative o modo desktop no seu navegador</p>
+        </article>
+      </section>
       }
     </div>
   </div>
