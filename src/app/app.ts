@@ -195,6 +195,12 @@ export class App implements OnDestroy {
       note: 'Site classico para testes de navegador.'
     },
     {
+      id: 'github-lacerdaaa',
+      label: 'GitHub lacerdaaa',
+      url: 'https://www.github.com/lacerdaaa',
+      note: 'Perfil pessoal no GitHub.'
+    },
+    {
       id: 'neverssl',
       label: 'NeverSSL',
       url: 'https://neverssl.com',
