@@ -470,7 +470,15 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
   protected readonly isBooting = signal(true);
   protected readonly isMobileAccessBlocked = signal(false);
   protected readonly isFounderSecretUnlocked = signal(false);
+  protected readonly isFounderUnlockNoticeVisible = signal(false);
   protected readonly bootVisibleLines = signal(0);
+  protected readonly founderUnlockLines = [
+    'lacOs Secret Monitor v1.0',
+    'Founder profile integrity.................. OK',
+    'Unlocking hidden desktop theme............. OK',
+    'Founder theme unlocked.',
+    'Command enabled: boot --founder'
+  ];
   protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
   protected readonly desktopTheme = signal<DesktopTheme>('classic');
   protected readonly timeLabel = signal(this.formatTime());
@@ -1024,6 +1032,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
     }
 
     this.isFounderSecretUnlocked.set(true);
+    this.isFounderUnlockNoticeVisible.set(true);
     this.persistQuizSecretToStorage();
     this.setDesktopTheme('founder');
     this.appendTerminalLines([
@@ -1031,6 +1040,10 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       '[secret] Hidden theme unlocked: Founder Mode.',
       '[secret] New command available: boot --founder'
     ]);
+  }
+
+  protected closeFounderUnlockNotice(): void {
+    this.isFounderUnlockNoticeVisible.set(false);
   }
 
   protected updateSafariInput(event: Event): void {

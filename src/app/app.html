@@ -312,6 +312,21 @@ Next milestones:
       </section>
       }
 
+      @if (isFounderUnlockNoticeVisible()) {
+      <section class="boot-overlay" aria-label="Founder secret unlocked notice">
+        <p class="boot-title">Founder Secret Unlocked</p>
+        <div class="boot-log">
+          @for (line of founderUnlockLines; track line) {
+          <p>{{ line }}</p>
+          }
+        </div>
+        <div class="boot-progress">
+          <span style="width: 100%"></span>
+        </div>
+        <button type="button" class="boot-skip" (click)="closeFounderUnlockNotice()">Continue</button>
+      </section>
+      }
+
       @if (isMobileAccessBlocked()) {
       <section class="mobile-access-block" aria-label="Acesso restrito em mobile">
         <article class="mobile-error-modal" role="alertdialog" aria-labelledby="mobile-error-title">

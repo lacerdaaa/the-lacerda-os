@@ -319,9 +319,13 @@ describe('App', () => {
     app.handleQuizSecretUnlocked();
 
     expect(app.isFounderSecretUnlocked()).toBe(true);
+    expect(app.isFounderUnlockNoticeVisible()).toBe(true);
     expect(localStorage.getItem('lacos.quiz.secret.unlocked')).toBe('true');
     expect(app.desktopTheme()).toBe('founder');
     expect(app.getThemeMenuItems().some((item: { id: string }) => item.id === 'theme-founder')).toBe(true);
+
+    app.closeFounderUnlockNotice();
+    expect(app.isFounderUnlockNoticeVisible()).toBe(false);
   });
 
   it('should run founder boot command only after unlock', () => {
