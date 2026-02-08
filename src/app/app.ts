@@ -308,15 +308,6 @@ GitHub: github.com/lacerdaaa`;
       content: this.aboutMeFileText,
       column: 2,
       row: 1
-    },
-    {
-      kind: 'file',
-      name: 'ideas.txt',
-      code: 'TXT',
-      fileName: 'ideas.txt',
-      content: 'Next ideas:\\n- Simulated filesystem\\n- Boot sequence\\n- Installable themes',
-      column: 2,
-      row: 2
     }
   ];
 
@@ -1003,7 +994,7 @@ GitHub: github.com/lacerdaaa`;
       case 'cat':
       case 'type':
         if (!argumentText) {
-          this.appendTerminalLines(['Usage: cat <about-me.txt|ideas.txt>']);
+          this.appendTerminalLines(['Usage: cat <about-me.txt>']);
           return;
         }
 
