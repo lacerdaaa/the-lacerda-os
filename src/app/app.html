@@ -51,32 +51,14 @@
               @switch (windowState.appId) {
               @case ('about') {
               <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-              <p class="about-copy"><strong>Eduardo Lacerda</strong></p>
-              <p class="about-copy">
-                I live in Campinas, São Paulo, Brazil. I am passionate about technology
-                and building real-world solutions.
-              </p>
-              <p class="about-copy">
-                I started my professional journey in technology in 2024 and I keep evolving
-                more each year. I work primarily with TypeScript, using frameworks such as
-                Angular, React, and Node.js. I also have hands-on experience with .NET and
-                Python. Currently, I'm building Pressum and Fynansee.
-              </p>
-              <p class="about-copy">
-                As hobbies, I love cooking and learning history in different contexts:
-                food, finance, geopolitics, and economics. I also enjoy reading and
-                listening to music.
-              </p>
-              <p class="about-copy">
-                I have a technician degree and I am studying to join USP or UNICAMP,
-                aiming for a bachelor's degree in Computer Science or Information Systems.
-                I deeply care about software development best practices, including
-                Domain-Driven Design (DDD) and Test-Driven Development (TDD).
-              </p>
+              <p class="about-copy"><strong>{{ aboutProfileName }}</strong></p>
+              @for (paragraph of aboutProfileParagraphs; track paragraph) {
+              <p class="about-copy">{{ paragraph }}</p>
+              }
               <p class="about-copy">
                 GitHub:
-                <a class="about-link" href="https://github.com/lacerdaaa" target="_blank" rel="noopener">
-                  github.com/lacerdaaa
+                <a class="about-link" [href]="aboutProfileGithubUrl" target="_blank" rel="noopener">
+                  {{ aboutProfileGithubLabel }}
                 </a>
               </p>
               }
@@ -237,14 +219,28 @@ Next milestones:
               }
 
               @case ('textviewer') {
+              @if (isAboutMeFileOpen()) {
+              <h1>about me</h1>
+              <p class="about-copy"><strong>{{ aboutProfileName }}</strong></p>
+              @for (paragraph of aboutProfileParagraphs; track paragraph) {
+              <p class="about-copy">{{ paragraph }}</p>
+              }
+              <p class="about-copy">
+                GitHub:
+                <a class="about-link" [href]="aboutProfileGithubUrl" target="_blank" rel="noopener">
+                  {{ aboutProfileGithubLabel }}
+                </a>
+              </p>
+              } @else {
               <h1>{{ openedFileName() }}</h1>
               <pre class="file-preview">{{ openedFileContent() }}</pre>
+              }
               @if (openedFileAttachments().length > 0) {
               <section class="file-attachments" aria-label="File attachments">
                 <p class="file-attachments-title">Attachments</p>
                 <div class="file-attachments-grid">
                   @for (attachment of openedFileAttachments(); track attachment.src) {
-                  <a class="file-attachment-item" target="_blank" rel="noopener">
+                  <a class="file-attachment-item" [href]="attachment.src" target="_blank" rel="noopener">
                     <span class="file-attachment-icon">
                       <img [src]="attachment.src" [alt]="attachment.label" loading="lazy" />
                     </span>

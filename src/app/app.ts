@@ -292,6 +292,8 @@ export class App implements OnDestroy {
     text: 'textviewer'
   };
   private readonly defaultDockAppIds: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'quiz', 'about'];
+  private readonly windowDefaultHeightBoost = 36;
+  private readonly windowMinimumHeightBoost = 24;
   private readonly appRegistry: Record<AppId, DockApp> = {
     finder: { name: 'Finder', code: 'FD', appId: 'finder' },
     safari: { name: 'Safari', code: 'SF', appId: 'safari' },
@@ -304,13 +306,22 @@ export class App implements OnDestroy {
     about: { name: 'About', code: 'AB', appId: 'about' },
     textviewer: { name: 'Text Viewer', code: 'TX', appId: 'textviewer' }
   };
-  private readonly aboutMeFileText = `Eduardo Lacerda
-
-My name is Eduardo and I'm a software developer based in Brazil, more specifically in Campinas, São Paulo. I'm truly passionate about technology and the endless possibilities it brings to build anything imaginable.
-
-I work primarily with TypeScript, using frameworks such as Angular, React, and Node.js. I also have hands-on experience with .NET and Python. Currently, I'm building Pressum and Fynansee.
-
-Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care about software development best practices, including Domain-Driven Design (DDD) and Test-Driven Development (TDD).`;
+  protected readonly aboutProfileName = 'Eduardo Lacerda';
+  protected readonly aboutProfileParagraphs = [
+    'I live in Campinas, São Paulo, Brazil. I am passionate about technology and building real-world solutions.',
+    "I started my professional journey in technology in 2024 and I keep evolving more each year. I work primarily with TypeScript, using frameworks such as Angular, React, and Node.js. I also have hands-on experience with .NET and Python. Currently, I'm building Pressum and Fynansee.",
+    'As hobbies, I love cooking and learning history in different contexts: food, finance, geopolitics, and economics. I also enjoy reading and listening to music.',
+    "I have a technician degree and I am studying to join USP or UNICAMP, aiming for a bachelor's degree in Computer Science or Information Systems. I deeply care about software development best practices, including Domain-Driven Design (DDD) and Test-Driven Development (TDD)."
+  ];
+  protected readonly aboutProfileGithubUrl = 'https://github.com/lacerdaaa';
+  protected readonly aboutProfileGithubLabel = 'github.com/lacerdaaa';
+  private readonly aboutMeFileText = [
+    this.aboutProfileName,
+    '',
+    ...this.aboutProfileParagraphs,
+    '',
+    `GitHub: ${this.aboutProfileGithubLabel}`
+  ].join('\n\n');
   private readonly aboutMeFileAttachments: FileAttachment[] = [
     { label: 'Angular', src: '/skills/angular.svg' },
     { label: 'TypeScript', src: '/skills/typescript.svg' },
@@ -330,7 +341,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
     { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 4 },
     { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 5 },
     { kind: 'app', name: 'Courses', code: 'APP', appId: 'courses', column: 1, row: 6 },
-    { kind: 'app', name: 'Quiz', code: 'APP', appId: 'quiz', column: 1, row: 7 },
+    { kind: 'app', name: 'Quiz', code: 'APP', appId: 'quiz', column: 2, row: 2 },
     {
       kind: 'file',
       name: 'about-me.txt',
@@ -1043,6 +1054,10 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       default:
         return 'App';
     }
+  }
+
+  protected isAboutMeFileOpen(): boolean {
+    return this.openedFileName().toLowerCase() === 'about-me.txt';
   }
 
   protected handleQuizSecretUnlocked(): void {
@@ -2212,7 +2227,8 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
   }
 
   private getWindowDimensions(appId: AppId): { width: number; height: number } {
-    switch (appId) {
+    const baseDimensions = (() => {
+      switch (appId) {
       case 'safari':
         return { width: 700, height: 420 };
       case 'courses':
@@ -2231,11 +2247,18 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return { width: 520, height: 340 };
       default:
         return { width: 520, height: 330 };
-    }
+      }
+    })();
+
+    return {
+      width: baseDimensions.width,
+      height: baseDimensions.height + this.windowDefaultHeightBoost
+    };
   }
 
   private getWindowMinimumDimensions(appId: AppId): { width: number; height: number } {
-    switch (appId) {
+    const baseDimensions = (() => {
+      switch (appId) {
       case 'safari':
         return { width: 520, height: 320 };
       case 'courses':
@@ -2254,7 +2277,13 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
         return { width: 400, height: 250 };
       default:
         return { width: 400, height: 240 };
-    }
+      }
+    })();
+
+    return {
+      width: baseDimensions.width,
+      height: baseDimensions.height + this.windowMinimumHeightBoost
+    };
   }
 
   private getWindowTitle(appId: AppId): string {
