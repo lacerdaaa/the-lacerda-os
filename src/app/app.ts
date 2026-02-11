@@ -2244,7 +2244,7 @@ export class App implements OnDestroy {
       case 'books':
         return { width: 620, height: 380 };
       case 'textviewer':
-        return { width: 520, height: 340 };
+        return { width: 600, height: 400 };
       default:
         return { width: 520, height: 330 };
       }
