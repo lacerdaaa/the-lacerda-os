@@ -50,11 +50,17 @@ interface WorkspaceFileItem {
   code: string;
   fileName: string;
   content: string;
+  attachments?: FileAttachment[];
   column: number;
   row: number;
 }
 
 type WorkspaceItem = WorkspaceAppItem | WorkspaceFileItem;
+
+interface FileAttachment {
+  label: string;
+  src: string;
+}
 
 interface GithubRepoResponse {
   id: number;
@@ -305,6 +311,17 @@ My name is Eduardo and I'm a software developer based in Brazil, more specifical
 I work primarily with TypeScript, using frameworks such as Angular, React, and Node.js. I also have hands-on experience with .NET and Python. Currently, I'm building Pressum and Fynansee.
 
 Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care about software development best practices, including Domain-Driven Design (DDD) and Test-Driven Development (TDD).`;
+  private readonly aboutMeFileAttachments: FileAttachment[] = [
+    { label: 'Angular', src: '/skills/angular.svg' },
+    { label: 'TypeScript', src: '/skills/typescript.svg' },
+    { label: 'JavaScript', src: '/skills/javascript.svg' },
+    { label: '.NET', src: '/skills/dotnet.svg' },
+    { label: 'NestJS', src: '/skills/nestjs.svg' },
+    { label: 'Docker', src: '/skills/docker.svg' },
+    { label: 'Kubernetes', src: '/skills/kubernetes.svg' },
+    { label: 'Terraform', src: '/skills/terraform.svg' },
+    { label: 'Jest', src: '/skills/jest.svg' }
+  ];
 
   protected readonly workspaceItems: WorkspaceItem[] = [
     { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },
@@ -320,6 +337,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       code: 'TXT',
       fileName: 'about-me.txt',
       content: this.aboutMeFileText,
+      attachments: this.aboutMeFileAttachments,
       column: 2,
       row: 1
     }
@@ -492,6 +510,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
   protected readonly terminalInput = signal('');
   protected readonly openedFileName = signal('about-me.txt');
   protected readonly openedFileContent = signal(this.aboutMeFileText);
+  protected readonly openedFileAttachments = signal<FileAttachment[]>([...this.aboutMeFileAttachments]);
   protected readonly githubProjects = signal<GithubProject[]>([]);
   protected readonly githubProjectsLoading = signal(false);
   protected readonly githubProjectsError = signal<string | null>(null);
@@ -751,7 +770,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
       return;
     }
 
-    this.openFile(item.fileName, item.content);
+    this.openFile(item.fileName, item.content, item.attachments ?? []);
   }
 
   protected getDockApps(): DockApp[] {
@@ -871,7 +890,7 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
             (workspaceItem) => workspaceItem.kind === 'file' && workspaceItem.fileName === menu.fileName
           );
           if (item && item.kind === 'file') {
-            this.openFile(item.fileName, item.content);
+            this.openFile(item.fileName, item.content, item.attachments ?? []);
           }
         }
         break;
@@ -1858,9 +1877,10 @@ Beyond coding, I enjoy reading, cooking, and listening to music. I deeply care a
     this.appendTerminalLines([`Launching ${this.getWindowTitle(appId)}...`]);
   }
 
-  private openFile(fileName: string, content: string): void {
+  private openFile(fileName: string, content: string, attachments: FileAttachment[] = []): void {
     this.openedFileName.set(fileName);
     this.openedFileContent.set(content);
+    this.openedFileAttachments.set([...attachments]);
     this.openApp('textviewer');
 
     this.windows.update((windows) =>

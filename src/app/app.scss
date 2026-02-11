@@ -1005,6 +1005,79 @@ textarea {
   line-height: 1.4;
 }
 
+.file-attachments {
+  margin-top: 8px;
+  padding: 8px;
+  border-top: 1px solid #6f6f6f;
+  border-left: 1px solid #6f6f6f;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  background: #e9e9e9;
+}
+
+.file-attachments-title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.file-attachments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  gap: 6px;
+}
+
+.file-attachment-item {
+  text-decoration: none;
+  color: #000;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  padding: 6px 4px;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #666;
+  border-bottom: 1px solid #666;
+  background: #d9d9d9;
+}
+
+.file-attachment-item:hover {
+  background: #d0d0d0;
+}
+
+.file-attachment-item:active {
+  border-top: 1px solid #666;
+  border-left: 1px solid #666;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+
+.file-attachment-icon {
+  width: 38px;
+  height: 34px;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #707070;
+  border-bottom: 1px solid #707070;
+  background: #f6f6f6;
+}
+
+.file-attachment-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.file-attachment-label {
+  font-size: 10px;
+  line-height: 1.15;
+  text-align: center;
+}
+
 .finder-grid {
   margin-top: 10px;
   display: grid;

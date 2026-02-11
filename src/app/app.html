@@ -239,6 +239,21 @@ Next milestones:
               @case ('textviewer') {
               <h1>{{ openedFileName() }}</h1>
               <pre class="file-preview">{{ openedFileContent() }}</pre>
+              @if (openedFileAttachments().length > 0) {
+              <section class="file-attachments" aria-label="File attachments">
+                <p class="file-attachments-title">Attachments</p>
+                <div class="file-attachments-grid">
+                  @for (attachment of openedFileAttachments(); track attachment.src) {
+                  <a class="file-attachment-item" target="_blank" rel="noopener">
+                    <span class="file-attachment-icon">
+                      <img [src]="attachment.src" [alt]="attachment.label" loading="lazy" />
+                    </span>
+                    <span class="file-attachment-label">{{ attachment.label }}</span>
+                  </a>
+                  }
+                </div>
+              </section>
+              }
               }
 
               @case ('finder') {
