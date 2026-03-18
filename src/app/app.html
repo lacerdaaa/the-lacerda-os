@@ -129,6 +129,29 @@
               </div>
               }
 
+              @case ('experience') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <div class="experience-grid">
+                @for (experience of experiences; track experience.title) {
+                <article class="experience-card">
+                  <div class="experience-heading">
+                    <div>
+                      <h2>{{ experience.title }}</h2>
+                      <p class="experience-meta">{{ experience.organization }} · {{ experience.period }}</p>
+                    </div>
+                    <span class="experience-status">{{ experience.status }}</span>
+                  </div>
+                  <p class="experience-summary">{{ experience.summary }}</p>
+                  <ul class="experience-highlights">
+                    @for (highlight of experience.highlights; track highlight) {
+                    <li>{{ highlight }}</li>
+                    }
+                  </ul>
+                </article>
+                }
+              </div>
+              }
+
               @case ('quiz') {
               <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
               <app-about-quiz (secretUnlocked)="handleQuizSecretUnlocked()"></app-about-quiz>
@@ -254,12 +277,24 @@ Next milestones:
 
               @case ('finder') {
               <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-              <p>Explore files, open apps, and navigate your portfolio desktop.</p>
+              <p>Recruiter mode: open the most important parts of my portfolio from this desktop hub.</p>
               <div class="finder-grid">
-                <span>Portfolio</span>
-                <span>Assets</span>
-                <span>Experiments</span>
-                <span>Archive</span>
+                <button type="button" (click)="openApp('about')">
+                  <strong>Profile</strong>
+                  <span>Who I am, where I am, and what I am building.</span>
+                </button>
+                <button type="button" (click)="openApp('experience')">
+                  <strong>Experience</strong>
+                  <span>Thoughtworks start date, TWU, and current hands-on work.</span>
+                </button>
+                <button type="button" (click)="openApp('projects')">
+                  <strong>Projects</strong>
+                  <span>Featured GitHub work and active product builds.</span>
+                </button>
+                <button type="button" (click)="openApp('courses')">
+                  <strong>Courses</strong>
+                  <span>Recent certifications and technical training.</span>
+                </button>
               </div>
               }
               }
