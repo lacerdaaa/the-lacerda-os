@@ -2,7 +2,7 @@ import { Component, HostListener, OnDestroy, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AboutQuizComponent } from './about-quiz/about-quiz.component';
 
-type AppId = 'about' | 'projects' | 'books' | 'courses' | 'quiz' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari';
+type AppId = 'about' | 'projects' | 'books' | 'courses' | 'experience' | 'quiz' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari';
 
 function normalizeBrowserUrl(rawUrl: string): string | null {
   const trimmed = rawUrl.trim();
@@ -99,6 +99,15 @@ interface CourseItem {
   credentialCode?: string;
 }
 
+interface ExperienceItem {
+  title: string;
+  organization: string;
+  period: string;
+  status: string;
+  summary: string;
+  highlights: string[];
+}
+
 interface SafariHistoryEntry {
   id: string;
   label: string;
@@ -115,6 +124,7 @@ interface ContextMenuItem {
     | 'open-terminal'
     | 'open-books'
     | 'open-courses'
+    | 'open-experience'
     | 'open-quiz'
     | 'open-safari'
     | 'reset-dock'
@@ -260,6 +270,7 @@ export class App implements OnDestroy {
     'projects',
     'books',
     'courses',
+    'experience',
     'quiz',
     'safari',
     'ls',
@@ -285,13 +296,14 @@ export class App implements OnDestroy {
     projects: 'projects',
     books: 'books',
     courses: 'courses',
+    experience: 'experience',
     quiz: 'quiz',
     safari: 'safari',
     about: 'about',
     textviewer: 'textviewer',
     text: 'textviewer'
   };
-  private readonly defaultDockAppIds: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'quiz', 'about'];
+  private readonly defaultDockAppIds: AppId[] = ['finder', 'experience', 'projects', 'courses', 'about', 'terminal', 'books', 'quiz', 'safari'];
   private readonly windowDefaultHeightBoost = 36;
   private readonly windowMinimumHeightBoost = 24;
   private readonly appRegistry: Record<AppId, DockApp> = {
@@ -302,16 +314,19 @@ export class App implements OnDestroy {
     projects: { name: 'Projects', code: 'PR', appId: 'projects' },
     books: { name: 'Books', code: 'BK', appId: 'books' },
     courses: { name: 'Courses', code: 'CR', appId: 'courses' },
+    experience: { name: 'Experience', code: 'EX', appId: 'experience' },
     quiz: { name: 'Quiz', code: 'QZ', appId: 'quiz' },
     about: { name: 'About', code: 'AB', appId: 'about' },
     textviewer: { name: 'Text Viewer', code: 'TX', appId: 'textviewer' }
   };
   protected readonly aboutProfileName = 'Eduardo Lacerda';
   protected readonly aboutProfileParagraphs = [
-    'I live in Campinas, São Paulo, Brazil. I am passionate about technology and building real-world solutions.',
-    "I started my professional journey in technology in 2024 and I keep evolving more each year. I work primarily with TypeScript, using frameworks such as Angular, React, and Node.js. I also have hands-on experience with .NET and Python. Currently, I'm building Pressum and Fynansee.",
-    'As hobbies, I love cooking and learning history in different contexts: food, finance, geopolitics, and economics. I also enjoy reading and listening to music.',
-    "I have a technician degree and I am studying to join USP or UNICAMP, aiming for a bachelor's degree in Computer Science or Information Systems. I deeply care about software development best practices, including Domain-Driven Design (DDD) and Test-Driven Development (TDD)."
+    'I live in Campinas, São Paulo, Brazil. I am a software developer focused on building real-world products with strong engineering fundamentals.',
+    "I started my professional journey in technology in 2024. Today, I work mainly with TypeScript, Angular, Node.js, and NestJS, and I also have hands-on experience with React, .NET, and Python.",
+    'Since August 2025, I have been working at Moderna Tecnologia, first as a Full Stack Development Intern and then as a Software Developer. My last day there will be March 26, 2026.',
+    'On April 13, 2026, I will join Thoughtworks as a Developer Associate, where I will also go through Thoughtworks University (TWU). I want this portfolio to already reflect that next step in my journey.',
+    "I have a technician degree and I am preparing to pursue a bachelor's degree in Computer Science or Information Systems at USP or UNICAMP. I care deeply about software engineering practices such as Domain-Driven Design (DDD), Test-Driven Development (TDD), and maintainable architecture.",
+    'Outside software, I love cooking and learning history through food, finance, geopolitics, and economics. I also enjoy reading and listening to music.'
   ];
   protected readonly aboutProfileGithubUrl = 'https://github.com/lacerdaaa';
   protected readonly aboutProfileGithubLabel = 'github.com/lacerdaaa';
@@ -336,12 +351,13 @@ export class App implements OnDestroy {
 
   protected readonly workspaceItems: WorkspaceItem[] = [
     { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },
-    { kind: 'app', name: 'Safari', code: 'APP', appId: 'safari', column: 1, row: 2 },
-    { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 3 },
-    { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 4 },
-    { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 5 },
-    { kind: 'app', name: 'Courses', code: 'APP', appId: 'courses', column: 1, row: 6 },
-    { kind: 'app', name: 'Quiz', code: 'APP', appId: 'quiz', column: 2, row: 2 },
+    { kind: 'app', name: 'Experience', code: 'APP', appId: 'experience', column: 1, row: 2 },
+    { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 3 },
+    { kind: 'app', name: 'Courses', code: 'APP', appId: 'courses', column: 1, row: 4 },
+    { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 5 },
+    { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 6 },
+    { kind: 'app', name: 'Safari', code: 'APP', appId: 'safari', column: 2, row: 2 },
+    { kind: 'app', name: 'Quiz', code: 'APP', appId: 'quiz', column: 2, row: 3 },
     {
       kind: 'file',
       name: 'about-me.txt',
@@ -374,6 +390,45 @@ export class App implements OnDestroy {
       title: 'A Vida Não é Útil',
       description: 'Ensaios reflexivos de Ailton Krenak sobre a relação entre sociedade e natureza, propondo modos de vida e pensamento coletivo que valorizam a sustentabilidade e o cuidado.',
       cover: '/vida_nao_e_util.jpg'
+    }
+  ];
+
+  protected readonly experiences: ExperienceItem[] = [
+    {
+      title: 'Developer Associate',
+      organization: 'Thoughtworks',
+      period: 'Starts April 13, 2026',
+      status: 'Upcoming',
+      summary: 'Starting a new chapter at Thoughtworks as a Developer Associate after leaving Moderna Tecnologia on March 26, 2026.',
+      highlights: [
+        'Joining Thoughtworks on April 13, 2026.',
+        'Planned participation in Thoughtworks University (TWU).',
+        'Important next step in my professional growth as a developer.'
+      ]
+    },
+    {
+      title: 'Software Developer',
+      organization: 'Moderna Tecnologia',
+      period: 'August 2025 - March 26, 2026',
+      status: 'Current role',
+      summary: 'Working as a Full-Stack Developer focused primarily on Angular and Node.js, building scalable web applications and internal tools that improve operational efficiency across the company.',
+      highlights: [
+        'Collaborating in a cross-functional team using Scrum and Kanban for continuous and iterative delivery.',
+        'Using Git, GitHub, and GitHub Actions while applying DevOps and GitOps principles for validation, deployment, and monitoring.',
+        'Contributed to a 30% increase in operational performance across Customer Success, Logistics, Configuration, and Engineering through system modernization and an integrated web platform.'
+      ]
+    },
+    {
+      title: 'Full Stack Development Intern',
+      organization: 'Moderna Tecnologia',
+      period: 'February 2025 - July 2025',
+      status: 'Previous role',
+      summary: 'Started my journey at Moderna Tecnologia as an on-site intern in Campinas, contributing to full-stack product delivery and building the foundation for my transition into a developer role.',
+      highlights: [
+        'Worked with Angular and Node.js in real business workflows.',
+        'Learned to operate in a professional software team with agile practices and version control.',
+        'Gained the experience that helped me grow into the next stage of my career.'
+      ]
     }
   ];
 
@@ -796,6 +851,7 @@ export class App implements OnDestroy {
       { id: 'open-terminal', label: 'Abrir Terminal' },
       { id: 'open-books', label: 'Abrir Books' },
       { id: 'open-courses', label: 'Abrir Courses' },
+      { id: 'open-experience', label: 'Abrir Experience' },
       { id: 'open-quiz', label: 'Abrir Quiz' },
       { id: 'open-safari', label: 'Abrir Safari' },
       { id: 'themes', label: 'Temas >' },
@@ -913,6 +969,9 @@ export class App implements OnDestroy {
         break;
       case 'open-courses':
         this.openApp('courses');
+        break;
+      case 'open-experience':
+        this.openApp('experience');
         break;
       case 'open-quiz':
         this.openApp('quiz');
@@ -1039,6 +1098,8 @@ export class App implements OnDestroy {
         return 'Books';
       case 'courses':
         return 'Courses';
+      case 'experience':
+        return 'Experience';
       case 'quiz':
         return 'Quiz';
       case 'safari':
@@ -1197,6 +1258,12 @@ export class App implements OnDestroy {
           'Courses.app opened with your completed certifications.'
         ]);
         return;
+      case 'experience':
+        this.openApp('experience');
+        this.appendTerminalLines([
+          'Experience.app opened with your upcoming Thoughtworks role and current product work.'
+        ]);
+        return;
       case 'quiz':
         this.openApp('quiz');
         this.appendTerminalLines([
@@ -1224,7 +1291,7 @@ export class App implements OnDestroy {
         return;
       case 'open':
         if (rest.length === 0) {
-          this.appendTerminalLines(['Usage: open <finder|safari|notes|terminal|projects|books|courses|quiz|about|textviewer>']);
+          this.appendTerminalLines(['Usage: open <finder|safari|notes|terminal|projects|books|courses|experience|quiz|about|textviewer>']);
           return;
         }
 
@@ -1864,7 +1931,7 @@ export class App implements OnDestroy {
         return;
       }
 
-      const allowed = new Set<AppId>(['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'quiz', 'about']);
+      const allowed = new Set<AppId>(['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'experience', 'quiz', 'about']);
       const restored = parsed.filter(
         (appId): appId is AppId => typeof appId === 'string' && allowed.has(appId as AppId)
       );
@@ -1883,7 +1950,7 @@ export class App implements OnDestroy {
     if (!appId) {
       this.appendTerminalLines([
         `Unknown app: ${rawTarget}`,
-        'Available apps: finder, safari, notes, terminal, projects, books, courses, quiz, about, textviewer'
+        'Available apps: finder, safari, notes, terminal, projects, books, courses, experience, quiz, about, textviewer'
       ]);
       return;
     }
@@ -2229,24 +2296,26 @@ export class App implements OnDestroy {
   private getWindowDimensions(appId: AppId): { width: number; height: number } {
     const baseDimensions = (() => {
       switch (appId) {
-      case 'safari':
-        return { width: 700, height: 420 };
-      case 'courses':
-        return { width: 680, height: 400 };
-      case 'quiz':
-        return { width: 700, height: 420 };
-      case 'terminal':
-        return { width: 580, height: 350 };
-      case 'finder':
-        return { width: 560, height: 340 };
-      case 'notes':
-        return { width: 500, height: 330 };
-      case 'books':
-        return { width: 620, height: 380 };
-      case 'textviewer':
-        return { width: 600, height: 400 };
-      default:
-        return { width: 520, height: 330 };
+        case 'safari':
+          return { width: 700, height: 420 };
+        case 'courses':
+          return { width: 680, height: 400 };
+        case 'experience':
+          return { width: 700, height: 420 };
+        case 'quiz':
+          return { width: 700, height: 420 };
+        case 'terminal':
+          return { width: 580, height: 350 };
+        case 'finder':
+          return { width: 620, height: 360 };
+        case 'notes':
+          return { width: 500, height: 330 };
+        case 'books':
+          return { width: 620, height: 380 };
+        case 'textviewer':
+          return { width: 600, height: 400 };
+        default:
+          return { width: 520, height: 330 };
       }
     })();
 
@@ -2259,24 +2328,26 @@ export class App implements OnDestroy {
   private getWindowMinimumDimensions(appId: AppId): { width: number; height: number } {
     const baseDimensions = (() => {
       switch (appId) {
-      case 'safari':
-        return { width: 520, height: 320 };
-      case 'courses':
-        return { width: 500, height: 300 };
-      case 'quiz':
-        return { width: 520, height: 320 };
-      case 'terminal':
-        return { width: 420, height: 260 };
-      case 'finder':
-        return { width: 420, height: 250 };
-      case 'notes':
-        return { width: 380, height: 240 };
-      case 'books':
-        return { width: 460, height: 280 };
-      case 'textviewer':
-        return { width: 400, height: 250 };
-      default:
-        return { width: 400, height: 240 };
+        case 'safari':
+          return { width: 520, height: 320 };
+        case 'courses':
+          return { width: 500, height: 300 };
+        case 'experience':
+          return { width: 520, height: 320 };
+        case 'quiz':
+          return { width: 520, height: 320 };
+        case 'terminal':
+          return { width: 420, height: 260 };
+        case 'finder':
+          return { width: 460, height: 260 };
+        case 'notes':
+          return { width: 380, height: 240 };
+        case 'books':
+          return { width: 460, height: 280 };
+        case 'textviewer':
+          return { width: 400, height: 250 };
+        default:
+          return { width: 400, height: 240 };
       }
     })();
 
@@ -2298,6 +2369,8 @@ export class App implements OnDestroy {
         return 'Books.app';
       case 'courses':
         return 'Courses.app';
+      case 'experience':
+        return 'Experience.app';
       case 'quiz':
         return 'Quiz.app';
       case 'terminal':

@@ -342,6 +342,26 @@
   background: #d7d7d7;
 }
 
+.workspace-icon[data-icon='experience']::before,
+.dock-icon[data-icon='experience']::before {
+  left: 7px;
+  top: 6px;
+  width: 22px;
+  height: 18px;
+  border: 1px solid #24523f;
+  background: #79c7a8;
+}
+
+.workspace-icon[data-icon='experience']::after,
+.dock-icon[data-icon='experience']::after {
+  left: 11px;
+  top: 10px;
+  width: 14px;
+  height: 2px;
+  background: #24523f;
+  box-shadow: 0 4px 0 #24523f, 0 8px 0 #24523f;
+}
+
 .workspace-icon[data-icon='notes']::before,
 .workspace-icon[data-icon='textviewer']::before,
 .workspace-icon[data-icon='file']::before,
@@ -641,6 +661,61 @@
   height: 56px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+}
+
+.experience-grid {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.experience-card {
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #666;
+  border-bottom: 1px solid #666;
+  background: #ececec;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.experience-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 10px;
+}
+
+.experience-card h2,
+.finder-grid strong {
+  margin: 0;
+  font-size: 12px;
+}
+
+.experience-meta,
+.experience-summary,
+.experience-highlights,
+.finder-grid span {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.experience-status {
+  padding: 2px 6px;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #666;
+  border-bottom: 1px solid #666;
+  background: #dcefdc;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.experience-highlights {
+  padding-left: 18px;
 }
 
 .safari-shell {
@@ -1081,18 +1156,37 @@ textarea {
 .finder-grid {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
   gap: 8px;
 }
 
-.finder-grid span {
+.finder-grid button {
+  border: 0;
+  text-align: left;
+  display: grid;
+  gap: 4px;
   border-top: 1px solid #fff;
   border-left: 1px solid #fff;
   border-right: 1px solid #666;
   border-bottom: 1px solid #666;
   background: #ececec;
-  padding: 8px;
-  font-size: 11px;
+  padding: 10px;
+  font-family: inherit;
+}
+
+.finder-grid button:hover {
+  background: #e4e4e4;
+}
+
+.finder-grid button:active {
+  border-top: 1px solid #666;
+  border-left: 1px solid #666;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+
+.finder-grid span {
+  color: #303030;
 }
 
 .dock {
