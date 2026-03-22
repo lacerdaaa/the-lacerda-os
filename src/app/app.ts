@@ -411,6 +411,7 @@ export class App implements OnDestroy {
       title: 'Full Stack Development Intern',
       organization: 'Moderna Tecnologia',
       period: 'February 3, 2025 - July 2025',
+
       status: 'Previous role',
       summary: 'Started my journey at Moderna Tecnologia as an on-site intern in Campinas, contributing to full-stack product delivery and building the foundation for my transition into a developer role.',
       highlights: [
@@ -1231,6 +1232,7 @@ export class App implements OnDestroy {
         this.openApp('experience');
         this.appendTerminalLines([
           'Experience.app opened with your professional timeline at Moderna Tecnologia.'
+
         ]);
         return;
       case 'quiz':
@@ -1261,6 +1263,7 @@ export class App implements OnDestroy {
       case 'open':
         if (rest.length === 0) {
           this.appendTerminalLines([`Usage: open <${this.terminalOpenableAppLabel}>`]);
+
           return;
         }
 
@@ -1901,6 +1904,7 @@ export class App implements OnDestroy {
       }
 
       const allowed = new Set<AppId>(this.terminalOpenableApps);
+
       const restored = parsed.filter(
         (appId): appId is AppId => typeof appId === 'string' && allowed.has(appId as AppId)
       );
