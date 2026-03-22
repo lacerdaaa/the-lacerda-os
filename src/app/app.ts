@@ -122,11 +122,6 @@ interface ContextMenuItem {
     | 'unpin'
     | 'open-file'
     | 'open-terminal'
-    | 'open-books'
-    | 'open-courses'
-    | 'open-experience'
-    | 'open-quiz'
-    | 'open-safari'
     | 'reset-dock'
     | 'themes'
     | 'theme-classic'
@@ -246,13 +241,13 @@ export class App implements OnDestroy {
       id: 'ddd-community',
       label: 'DDD Community',
       url: 'https://dddcommunity.org/',
-      note: 'Conteudo sobre Domain-Driven Design.'
+      note: 'Conteúdo sobre Domain-Driven Design.'
     },
     {
       id: 'design-patterns',
       label: 'Design Patterns',
       url: 'https://refactoring.guru/design-patterns',
-      note: 'Catalogo pratico de padroes de design.'
+      note: 'Catálogo prático de padrões de design.'
     }
   ];
   private readonly safariAllowedUrlMap = new Map(
@@ -264,6 +259,8 @@ export class App implements OnDestroy {
       .filter((entry): entry is readonly [string, SafariHistoryEntry] => entry !== null)
   );
   private readonly terminalVirtualPath = '/Users/eduardo/Desktop';
+  private readonly terminalOpenableApps: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'experience', 'quiz', 'about', 'textviewer'];
+  private readonly terminalOpenableAppLabel = this.terminalOpenableApps.join('|');
   private readonly terminalCommandNames = [
     'help',
     'about',
@@ -303,7 +300,7 @@ export class App implements OnDestroy {
     textviewer: 'textviewer',
     text: 'textviewer'
   };
-  private readonly defaultDockAppIds: AppId[] = ['finder', 'experience', 'projects', 'courses', 'about', 'terminal', 'books', 'quiz', 'safari'];
+  private readonly defaultDockAppIds: AppId[] = ['about', 'terminal', 'quiz', 'safari'];
   private readonly windowDefaultHeightBoost = 36;
   private readonly windowMinimumHeightBoost = 24;
   private readonly appRegistry: Record<AppId, DockApp> = {
@@ -323,8 +320,7 @@ export class App implements OnDestroy {
   protected readonly aboutProfileParagraphs = [
     'I live in Campinas, São Paulo, Brazil. I am a software developer focused on building real-world products with strong engineering fundamentals.',
     "I started my professional journey in technology in 2024. Today, I work mainly with TypeScript, Angular, Node.js, and NestJS, and I also have hands-on experience with React, .NET, and Python.",
-    'Since August 2025, I have been working at Moderna Tecnologia, first as a Full Stack Development Intern and then as a Software Developer. My last day there will be March 26, 2026.',
-    'On April 13, 2026, I will join Thoughtworks as a Developer Associate, where I will also go through Thoughtworks University (TWU). I want this portfolio to already reflect that next step in my journey.',
+    'I have been at Moderna Tecnologia since February 3, 2025, first as a Full Stack Development Intern and, since August 2025, as a Software Developer.',
     "I have a technician degree and I am preparing to pursue a bachelor's degree in Computer Science or Information Systems at USP or UNICAMP. I care deeply about software engineering practices such as Domain-Driven Design (DDD), Test-Driven Development (TDD), and maintainable architecture.",
     'Outside software, I love cooking and learning history through food, finance, geopolitics, and economics. I also enjoy reading and listening to music.'
   ];
@@ -377,6 +373,11 @@ export class App implements OnDestroy {
       cover: '/ddd.jpg'
     },
     {
+      title: "Olhos d'água",
+      description: "Em Olhos d'água, Conceição Evaristo ajusta o foco de seu interesse na população afro-brasileira abordando, sem meias palavras, a pobreza e a violência urbana que a acometem.",
+      cover: '/olhos_dagua.svg'
+    },
+    {
       title: 'As Veias Abertas da América Latina',
       description: 'Análise clássica e contundente sobre a exploração econômica e os impactos do colonialismo na América Latina, combinando pesquisa histórica e crítica política.',
       cover: '/veias_abertas.jpg'
@@ -395,21 +396,9 @@ export class App implements OnDestroy {
 
   protected readonly experiences: ExperienceItem[] = [
     {
-      title: 'Developer Associate',
-      organization: 'Thoughtworks',
-      period: 'Starts April 13, 2026',
-      status: 'Upcoming',
-      summary: 'Starting a new chapter at Thoughtworks as a Developer Associate after leaving Moderna Tecnologia on March 26, 2026.',
-      highlights: [
-        'Joining Thoughtworks on April 13, 2026.',
-        'Planned participation in Thoughtworks University (TWU).',
-        'Important next step in my professional growth as a developer.'
-      ]
-    },
-    {
       title: 'Software Developer',
       organization: 'Moderna Tecnologia',
-      period: 'August 2025 - March 26, 2026',
+      period: 'August 2025 - Present',
       status: 'Current role',
       summary: 'Working as a Full-Stack Developer focused primarily on Angular and Node.js, building scalable web applications and internal tools that improve operational efficiency across the company.',
       highlights: [
@@ -421,7 +410,8 @@ export class App implements OnDestroy {
     {
       title: 'Full Stack Development Intern',
       organization: 'Moderna Tecnologia',
-      period: 'February 2025 - July 2025',
+      period: 'February 3, 2025 - July 2025',
+
       status: 'Previous role',
       summary: 'Started my journey at Moderna Tecnologia as an on-site intern in Campinas, contributing to full-stack product delivery and building the foundation for my transition into a developer role.',
       highlights: [
@@ -849,13 +839,8 @@ export class App implements OnDestroy {
     event.preventDefault();
     this.openContextMenuAt(event.clientX, event.clientY, null, null, [
       { id: 'open-terminal', label: 'Abrir Terminal' },
-      { id: 'open-books', label: 'Abrir Books' },
-      { id: 'open-courses', label: 'Abrir Courses' },
-      { id: 'open-experience', label: 'Abrir Experience' },
-      { id: 'open-quiz', label: 'Abrir Quiz' },
-      { id: 'open-safari', label: 'Abrir Safari' },
       { id: 'themes', label: 'Temas >' },
-      { id: 'reset-dock', label: 'Restaurar dock padrao' }
+      { id: 'reset-dock', label: 'Restaurar dock padrão' }
     ]);
   }
 
@@ -963,21 +948,6 @@ export class App implements OnDestroy {
         break;
       case 'open-terminal':
         this.openApp('terminal');
-        break;
-      case 'open-books':
-        this.openApp('books');
-        break;
-      case 'open-courses':
-        this.openApp('courses');
-        break;
-      case 'open-experience':
-        this.openApp('experience');
-        break;
-      case 'open-quiz':
-        this.openApp('quiz');
-        break;
-      case 'open-safari':
-        this.openApp('safari');
         break;
       case 'reset-dock':
         this.dockAppIds.set([...this.defaultDockAppIds]);
@@ -1261,7 +1231,8 @@ export class App implements OnDestroy {
       case 'experience':
         this.openApp('experience');
         this.appendTerminalLines([
-          'Experience.app opened with your upcoming Thoughtworks role and current product work.'
+          'Experience.app opened with your professional timeline at Moderna Tecnologia.'
+
         ]);
         return;
       case 'quiz':
@@ -1291,7 +1262,8 @@ export class App implements OnDestroy {
         return;
       case 'open':
         if (rest.length === 0) {
-          this.appendTerminalLines(['Usage: open <finder|safari|notes|terminal|projects|books|courses|experience|quiz|about|textviewer>']);
+          this.appendTerminalLines([`Usage: open <${this.terminalOpenableAppLabel}>`]);
+
           return;
         }
 
@@ -1931,7 +1903,8 @@ export class App implements OnDestroy {
         return;
       }
 
-      const allowed = new Set<AppId>(['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'experience', 'quiz', 'about']);
+      const allowed = new Set<AppId>(this.terminalOpenableApps);
+
       const restored = parsed.filter(
         (appId): appId is AppId => typeof appId === 'string' && allowed.has(appId as AppId)
       );
@@ -1950,7 +1923,7 @@ export class App implements OnDestroy {
     if (!appId) {
       this.appendTerminalLines([
         `Unknown app: ${rawTarget}`,
-        'Available apps: finder, safari, notes, terminal, projects, books, courses, experience, quiz, about, textviewer'
+        `Available apps: ${this.terminalOpenableApps.join(', ')}`
       ]);
       return;
     }

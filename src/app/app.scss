@@ -639,6 +639,8 @@
   width: 56px;
   height: 74px;
   object-fit: cover;
+  grid-column: 1;
+  grid-row: 1 / span 2;
   border-top: 1px solid #fff;
   border-left: 1px solid #fff;
   border-right: 1px solid #555;
@@ -647,12 +649,15 @@
 
 .book-card h2 {
   margin: 0;
+  grid-column: 2;
   font-size: 12px;
   line-height: 1.2;
 }
 
 .book-card p {
   margin: 4px 0 0;
+  grid-column: 2;
+  align-self: start;
   font-size: 11px;
   line-height: 1.3;
 }

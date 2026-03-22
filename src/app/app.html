@@ -175,8 +175,8 @@
                 }
 
                 <div class="safari-body">
-                  <aside class="safari-history" aria-label="Historico de pesquisa permitido">
-                    <p>Historico permitido</p>
+                  <aside class="safari-history" aria-label="Histórico de pesquisa permitido">
+                    <p>Histórico permitido</p>
                     @for (entry of safariHistory(); track entry.id) {
                     <button type="button" [class.active]="isSafariCurrentUrl(entry.url)"
                       (click)="openSafariHistoryEntry(entry.url)">
@@ -191,7 +191,7 @@
                     <iframe class="safari-frame" [src]="safeFrameUrl" title="Safari frame" loading="lazy"></iframe>
                     } @else {
                     <div class="safari-frame-fallback">
-                      <p>Visualização interna indisponivel para este domínio.</p>
+                      <p>Visualização interna indisponível para este domínio.</p>
                       <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">
                         Abrir página em nova aba
                       </a>
@@ -285,7 +285,8 @@ Next milestones:
                 </button>
                 <button type="button" (click)="openApp('experience')">
                   <strong>Experience</strong>
-                  <span>Thoughtworks start date, TWU, and current hands-on work.</span>
+                  <span>My professional timeline at Moderna Tecnologia and current hands-on work.</span>
+
                 </button>
                 <button type="button" (click)="openApp('projects')">
                   <strong>Projects</strong>
