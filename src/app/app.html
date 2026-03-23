@@ -10,6 +10,16 @@
           }
         </div>
         <div class="menu-right">
+          <div class="language-switcher" aria-label="Language selector">
+            <button type="button" class="language-button" [class.active]="isLanguageSelected('en-US')"
+              (click)="setLanguage('en-US')">
+              {{ getLanguageLabel('en-US') }}
+            </button>
+            <button type="button" class="language-button" [class.active]="isLanguageSelected('pt-BR')"
+              (click)="setLanguage('pt-BR')">
+              {{ getLanguageLabel('pt-BR') }}
+            </button>
+          </div>
           <span>{{ timeLabel() }}</span>
         </div>
       </header>
@@ -66,18 +76,18 @@
               @case ('projects') {
               <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
               <p class="projects-meta">
-                Live data from
+                {{ getProjectsMetaLabel() }}
                 <a href="https://github.com/lacerdaaa" target="_blank" rel="noopener">
                   github.com/lacerdaaa
                 </a>
               </p>
 
               @if (githubProjectsLoading()) {
-              <p class="projects-status">Loading repositories from GitHub...</p>
+              <p class="projects-status">{{ getProjectsLoadingLabel() }}</p>
               } @else if (githubProjectsError()) {
               <p class="projects-status projects-status-error">{{ githubProjectsError() }}</p>
               } @else if (githubProjects().length === 0) {
-              <p class="projects-status">No repositories available right now.</p>
+              <p class="projects-status">{{ getProjectsEmptyLabel() }}</p>
               } @else {
               <div class="project-grid">
                 @for (project of githubProjects(); track project.id) {
@@ -86,9 +96,9 @@
                   <p>{{ project.description }}</p>
                   <span>
                     @if (project.pinned) {
-                    Pinned |
+                    {{ getProjectsPinnedLabel() }} |
                     }
-                    Stars {{ project.stars }} | Updated {{ getProjectUpdatedLabel(project.updatedAt) }}
+                    {{ getProjectsStarsLabel() }} {{ project.stars }} | {{ getProjectsUpdatedPrefix() }} {{ getProjectUpdatedLabel(project.updatedAt) }}
                   </span>
                 </a>
                 }
@@ -117,11 +127,11 @@
                   <img class="course-logo" [src]="course.logo" [alt]="'Logo da organização ' + course.organization" />
                   <div class="course-content">
                     <h2>{{ course.title }}</h2>
-                    <p class="course-meta">{{ course.organization }} · Verificação emitida em {{ course.issuedAt }}</p>
+                    <p class="course-meta">{{ course.organization }} · {{ getCoursesIssuedLabel() }} {{ course.issuedAt }}</p>
                     <p class="course-summary">{{ course.summary }}</p>
-                    <p class="course-skills">Competências: {{ course.skills }}</p>
+                    <p class="course-skills">{{ getCoursesSkillsLabel() }}: {{ course.skills }}</p>
                     @if (course.credentialCode) {
-                    <p class="course-credential">Código da credencial: {{ course.credentialCode }}</p>
+                    <p class="course-credential">{{ getCoursesCredentialLabel() }}: {{ course.credentialCode }}</p>
                     }
                   </div>
                 </article>
@@ -162,9 +172,9 @@
                 <form class="safari-toolbar" (submit)="$event.preventDefault(); submitSafariNavigation()">
                   <label for="safari-address">URL</label>
                   <input id="safari-address" type="text" [value]="safariInput()" (input)="updateSafariInput($event)"
-                    spellcheck="false" autocomplete="off" placeholder="Use uma URL do historico permitido" />
+                    spellcheck="false" autocomplete="off" [placeholder]="getSafariPlaceholder()" />
                   <button type="submit">Go</button>
-                  <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">Nova aba</a>
+                  <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">{{ getSafariNewTabLabel() }}</a>
                 </form>
 
                 @if (safariError()) {
@@ -176,7 +186,7 @@
 
                 <div class="safari-body">
                   <aside class="safari-history" aria-label="Histórico de pesquisa permitido">
-                    <p>Histórico permitido</p>
+                    <p>{{ getSafariHistoryLabel() }}</p>
                     @for (entry of safariHistory(); track entry.id) {
                     <button type="button" [class.active]="isSafariCurrentUrl(entry.url)"
                       (click)="openSafariHistoryEntry(entry.url)">
@@ -191,9 +201,9 @@
                     <iframe class="safari-frame" [src]="safeFrameUrl" title="Safari frame" loading="lazy"></iframe>
                     } @else {
                     <div class="safari-frame-fallback">
-                      <p>Visualização interna indisponível para este domínio.</p>
+                      <p>{{ getSafariUnavailableLabel() }}</p>
                       <a [href]="safariCurrentUrl()" target="_blank" rel="noopener">
-                        Abrir página em nova aba
+                        {{ getSafariOpenExternalLabel() }}
                       </a>
                     </div>
                     }
@@ -224,26 +234,19 @@
                   <label for="terminal-command">{{ terminalPrompt }}</label>
                   <input id="terminal-command" type="text" [value]="terminalInput()"
                     (input)="updateTerminalInput($event)" (keydown)="onTerminalKeydown($event)" autocomplete="off"
-                    spellcheck="false" placeholder="Type a command" />
+                    spellcheck="false" [placeholder]="getTerminalPlaceholder()" />
                 </form>
               </div>
               }
 
               @case ('notes') {
               <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-              <textarea readonly>
-This is a placeholder Notes app.
-
-Next milestones:
-- Persist app state
-- Build command parser for terminal
-- Add project pages and routing
-                  </textarea>
+              <textarea readonly>{{ getNotesContent() }}</textarea>
               }
 
               @case ('textviewer') {
               @if (isAboutMeFileOpen()) {
-              <h1>about me</h1>
+              <h1>{{ getAboutFileName() }}</h1>
               <p class="about-copy"><strong>{{ aboutProfileName }}</strong></p>
               @for (paragraph of aboutProfileParagraphs; track paragraph) {
               <p class="about-copy">{{ paragraph }}</p>
@@ -277,24 +280,24 @@ Next milestones:
 
               @case ('finder') {
               <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
-              <p>Recruiter mode: open the most important parts of my portfolio from this desktop hub.</p>
+              <p>{{ getFinderDescription('intro') }}</p>
               <div class="finder-grid">
                 <button type="button" (click)="openApp('about')">
                   <strong>Profile</strong>
-                  <span>Who I am, where I am, and what I am building.</span>
+                  <span>{{ getFinderDescription('profile') }}</span>
                 </button>
                 <button type="button" (click)="openApp('experience')">
                   <strong>Experience</strong>
-                  <span>My professional timeline at Moderna Tecnologia and current hands-on work.</span>
+                  <span>{{ getFinderDescription('experience') }}</span>
 
                 </button>
                 <button type="button" (click)="openApp('projects')">
                   <strong>Projects</strong>
-                  <span>Featured GitHub work and active product builds.</span>
+                  <span>{{ getFinderDescription('projects') }}</span>
                 </button>
                 <button type="button" (click)="openApp('courses')">
                   <strong>Courses</strong>
-                  <span>Recent certifications and technical training.</span>
+                  <span>{{ getFinderDescription('courses') }}</span>
                 </button>
               </div>
               }
@@ -345,7 +348,7 @@ Next milestones:
 
       @if (isBooting()) {
       <section class="boot-overlay" aria-label="Boot sequence">
-        <p class="boot-title">lacOs Startup</p>
+        <p class="boot-title">{{ getBootOverlayTitle() }}</p>
         <div class="boot-log">
           @for (line of bootLines; track $index) {
           @if ($index < bootVisibleLines()) { <p>{{ line }}</p>
@@ -355,13 +358,13 @@ Next milestones:
         <div class="boot-progress">
           <span [style.width.%]="(bootVisibleLines() / bootLines.length) * 100"></span>
         </div>
-        <button type="button" class="boot-skip" (click)="skipBootSequence()">Skip boot</button>
+        <button type="button" class="boot-skip" (click)="skipBootSequence()">{{ getBootSkipLabel() }}</button>
       </section>
       }
 
       @if (isFounderUnlockNoticeVisible()) {
       <section class="boot-overlay" aria-label="Founder secret unlocked notice">
-        <p class="boot-title">Founder Secret Unlocked</p>
+        <p class="boot-title">{{ getFounderUnlockTitle() }}</p>
         <div class="boot-log">
           @for (line of founderUnlockLines; track line) {
           <p>{{ line }}</p>
@@ -370,16 +373,16 @@ Next milestones:
         <div class="boot-progress">
           <span style="width: 100%"></span>
         </div>
-        <button type="button" class="boot-skip" (click)="closeFounderUnlockNotice()">Continue</button>
+        <button type="button" class="boot-skip" (click)="closeFounderUnlockNotice()">{{ getFounderContinueLabel() }}</button>
       </section>
       }
 
       @if (isMobileAccessBlocked()) {
       <section class="mobile-access-block" aria-label="Acesso restrito em mobile">
         <article class="mobile-error-modal" role="alertdialog" aria-labelledby="mobile-error-title">
-          <h2 id="mobile-error-title">[ERRO] Acesso bloqueado</h2>
-          <p>O projeto atualmente só funciona em dispositivos desktop para maior compatibilidade :(</p>
-          <p>acesse em um computador ou ative o modo desktop no seu navegador</p>
+          <h2 id="mobile-error-title">{{ getMobileBlockedTitle() }}</h2>
+          <p>{{ getMobileBlockedDescription() }}</p>
+          <p>{{ getMobileBlockedHint() }}</p>
         </article>
       </section>
       }
