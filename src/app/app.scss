@@ -94,8 +94,15 @@
   gap: 3px;
 }
 
+.language-switcher {
+  display: inline-flex;
+  gap: 2px;
+  margin-right: 8px;
+}
+
 .menu-item,
-.os-mark {
+.os-mark,
+.language-button {
   border: 0;
   background: transparent;
   color: var(--retro-text);
@@ -116,12 +123,15 @@
 
 .menu-item:hover,
 .os-mark:hover,
+.language-button:hover,
 .dock-item:hover {
   cursor: pointer;
 }
 
 .menu-item:active,
-.os-mark:active {
+.os-mark:active,
+.language-button.active,
+.language-button:active {
   color: #fff;
   background: var(--retro-select);
 }

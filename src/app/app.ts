@@ -197,6 +197,7 @@ interface SnakePosition {
 }
 
 type DesktopTheme = 'classic' | 'sunset' | 'grid' | 'founder';
+type AppLanguage = 'en-US' | 'pt-BR';
 
 @Component({
   selector: 'app-root',
@@ -205,11 +206,15 @@ type DesktopTheme = 'classic' | 'sunset' | 'grid' | 'founder';
   styleUrl: './app.scss'
 })
 export class App implements OnDestroy {
-  protected readonly menuItems = ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'];
+  protected readonly menuItemsByLanguage: Record<AppLanguage, string[]> = {
+    'en-US': ['Finder', 'File', 'Edit', 'View', 'Go', 'Window', 'Help'],
+    'pt-BR': ['Finder', 'Arquivo', 'Editar', 'Visualizar', 'Ir', 'Janela', 'Ajuda']
+  };
   private readonly pinnedRepoNames = ['pressum-core-service', 'fynansee-core', 'auto-trace'];
   private readonly dockStorageKey = 'lacos.dock.apps';
   private readonly desktopThemeStorageKey = 'lacos.desktop.theme';
   private readonly quizSecretStorageKey = 'lacos.quiz.secret.unlocked';
+  private readonly languageStorageKey = 'lacos.app.language';
   private readonly mobileLayoutMaxWidth = 900;
   private readonly cursorBoostClassName = 'cursor-boost';
   private readonly cursorBoostSpeedThreshold = 1800;
@@ -224,34 +229,22 @@ export class App implements OnDestroy {
     'refactoring.guru',
     'www.refactoring.guru'
   ]);
-  private readonly safariPresetHistory: SafariHistoryEntry[] = [
-    {
-      id: 'nodejs',
-      label: 'Node.js',
-      url: 'https://nodejs.org/en',
-      note: 'Site oficial do Node.js.'
-    },
-    {
-      id: 'npm',
-      label: 'npm',
-      url: 'https://www.npmjs.com/',
-      note: 'Gerenciador de pacotes do ecossistema Node.'
-    },
-    {
-      id: 'ddd-community',
-      label: 'DDD Community',
-      url: 'https://dddcommunity.org/',
-      note: 'Conteúdo sobre Domain-Driven Design.'
-    },
-    {
-      id: 'design-patterns',
-      label: 'Design Patterns',
-      url: 'https://refactoring.guru/design-patterns',
-      note: 'Catálogo prático de padrões de design.'
-    }
-  ];
+  private readonly safariPresetHistoryByLanguage: Record<AppLanguage, SafariHistoryEntry[]> = {
+    'en-US': [
+      { id: 'nodejs', label: 'Node.js', url: 'https://nodejs.org/en', note: 'Official Node.js website.' },
+      { id: 'npm', label: 'npm', url: 'https://www.npmjs.com/', note: 'Package manager for the Node ecosystem.' },
+      { id: 'ddd-community', label: 'DDD Community', url: 'https://dddcommunity.org/', note: 'Domain-Driven Design content and references.' },
+      { id: 'design-patterns', label: 'Design Patterns', url: 'https://refactoring.guru/design-patterns', note: 'A practical catalog of software design patterns.' }
+    ],
+    'pt-BR': [
+      { id: 'nodejs', label: 'Node.js', url: 'https://nodejs.org/en', note: 'Site oficial do Node.js.' },
+      { id: 'npm', label: 'npm', url: 'https://www.npmjs.com/', note: 'Gerenciador de pacotes do ecossistema Node.' },
+      { id: 'ddd-community', label: 'DDD Community', url: 'https://dddcommunity.org/', note: 'Conteúdo sobre Domain-Driven Design.' },
+      { id: 'design-patterns', label: 'Design Patterns', url: 'https://refactoring.guru/design-patterns', note: 'Catálogo prático de padrões de design.' }
+    ]
+  };
   private readonly safariAllowedUrlMap = new Map(
-    this.safariPresetHistory
+    this.safariPresetHistoryByLanguage['en-US']
       .map((entry) => {
         const normalizedUrl = normalizeBrowserUrl(entry.url);
         return normalizedUrl ? [normalizedUrl, entry] as const : null;
@@ -317,22 +310,24 @@ export class App implements OnDestroy {
     textviewer: { name: 'Text Viewer', code: 'TX', appId: 'textviewer' }
   };
   protected readonly aboutProfileName = 'Eduardo Lacerda';
-  protected readonly aboutProfileParagraphs = [
-    'I live in Campinas, São Paulo, Brazil. I am a software developer focused on building real-world products with strong engineering fundamentals.',
-    "I started my professional journey in technology in 2024. Today, I work mainly with TypeScript, Angular, Node.js, and NestJS, and I also have hands-on experience with React, .NET, and Python.",
-    'I have been at Moderna Tecnologia since February 3, 2025, first as a Full Stack Development Intern and, since August 2025, as a Software Developer.',
-    "I have a technician degree and I am preparing to pursue a bachelor's degree in Computer Science or Information Systems at USP or UNICAMP. I care deeply about software engineering practices such as Domain-Driven Design (DDD), Test-Driven Development (TDD), and maintainable architecture.",
-    'Outside software, I love cooking and learning history through food, finance, geopolitics, and economics. I also enjoy reading and listening to music.'
-  ];
+  private readonly aboutProfileParagraphsByLanguage: Record<AppLanguage, string[]> = {
+    'en-US': [
+      'I live in Campinas, São Paulo, Brazil. I am a software developer focused on building real-world products with strong engineering fundamentals.',
+      "I started my professional journey in technology in 2024. Today, I work mainly with TypeScript, Angular, Node.js, and NestJS, and I also have hands-on experience with React, .NET, and Python.",
+      'I have been at Moderna Tecnologia since February 3, 2025, first as a Full Stack Development Intern and, since August 2025, as a Software Developer.',
+      "I have a technician degree and I am preparing to pursue a bachelor's degree in Computer Science or Information Systems at USP or UNICAMP. I care deeply about software engineering practices such as Domain-Driven Design (DDD), Test-Driven Development (TDD), and maintainable architecture.",
+      'Outside software, I love cooking and learning history through food, finance, geopolitics, and economics. I also enjoy reading and listening to music.'
+    ],
+    'pt-BR': [
+      'Moro em Campinas, São Paulo, Brasil. Sou desenvolvedor de software com foco em construir produtos reais com fundamentos sólidos de engenharia.',
+      'Comecei minha jornada profissional em tecnologia em 2024. Hoje trabalho principalmente com TypeScript, Angular, Node.js e NestJS, e também tenho experiência prática com React, .NET e Python.',
+      'Estou na Moderna Tecnologia desde 3 de fevereiro de 2025, primeiro como estagiário de desenvolvimento full stack e, desde agosto de 2025, como desenvolvedor de software.',
+      'Tenho formação técnica e estou me preparando para cursar Ciência da Computação ou Sistemas de Informação na USP ou na UNICAMP. Dou muita importância a práticas de engenharia de software como DDD, TDD e arquitetura sustentável.',
+      'Fora de software, gosto de cozinhar e de aprender história por meio da comida, além de acompanhar finanças, geopolítica e economia. Também gosto de ler e ouvir música.'
+    ]
+  };
   protected readonly aboutProfileGithubUrl = 'https://github.com/lacerdaaa';
   protected readonly aboutProfileGithubLabel = 'github.com/lacerdaaa';
-  private readonly aboutMeFileText = [
-    this.aboutProfileName,
-    '',
-    ...this.aboutProfileParagraphs,
-    '',
-    `GitHub: ${this.aboutProfileGithubLabel}`
-  ].join('\n\n');
   private readonly aboutMeFileAttachments: FileAttachment[] = [
     { label: 'Angular', src: '/skills/angular.svg' },
     { label: 'TypeScript', src: '/skills/typescript.svg' },
@@ -345,57 +340,66 @@ export class App implements OnDestroy {
     { label: 'Jest', src: '/skills/jest.svg' }
   ];
 
-  protected readonly workspaceItems: WorkspaceItem[] = [
-    { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },
-    { kind: 'app', name: 'Experience', code: 'APP', appId: 'experience', column: 1, row: 2 },
-    { kind: 'app', name: 'Projects', code: 'APP', appId: 'projects', column: 1, row: 3 },
-    { kind: 'app', name: 'Courses', code: 'APP', appId: 'courses', column: 1, row: 4 },
-    { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 5 },
-    { kind: 'app', name: 'Books', code: 'APP', appId: 'books', column: 1, row: 6 },
-    { kind: 'app', name: 'Safari', code: 'APP', appId: 'safari', column: 2, row: 2 },
-    { kind: 'app', name: 'Quiz', code: 'APP', appId: 'quiz', column: 2, row: 3 },
-    {
-      kind: 'file',
-      name: 'about-me.txt',
-      code: 'TXT',
-      fileName: 'about-me.txt',
-      content: this.aboutMeFileText,
-      attachments: this.aboutMeFileAttachments,
-      column: 2,
-      row: 1
-    }
-  ];
+  private readonly booksByLanguage: Record<AppLanguage, BookItem[]> = {
+    'en-US': [
+      {
+        title: 'Learn Domain-Driven Design',
+        description: 'A practical and concise guide to modeling software around the domain, ubiquitous language, and design tactics that improve communication between teams and stakeholders.',
+        cover: '/ddd.jpg'
+      },
+      {
+        title: "Olhos d'água",
+        description: "In Olhos d'água, Conceição Evaristo centers the Afro-Brazilian population and addresses poverty and urban violence with directness and humanity.",
+        cover: '/olhos_dagua.svg'
+      },
+      {
+        title: 'Open Veins of Latin America',
+        description: 'A classic and incisive analysis of economic exploitation and the impacts of colonialism in Latin America, combining historical research and political critique.',
+        cover: '/veias_abertas.jpg'
+      },
+      {
+        title: 'Humanitarian Booklet',
+        description: 'A short yet dense text with reflections on solidarity, ethics, and social responsibility, useful for expanding critical and empathetic thinking.',
+        cover: '/opusculo.jpg'
+      },
+      {
+        title: 'Life Is Not Useful',
+        description: 'Reflective essays by Ailton Krenak on the relationship between society and nature, proposing collective ways of living and thinking grounded in care and sustainability.',
+        cover: '/vida_nao_e_util.jpg'
+      }
+    ],
+    'pt-BR': [
+      {
+        title: 'Aprenda Domain-Driven Design',
+        description: 'Guia prático e conciso para modelar software com foco no domínio, na linguagem ubíqua e em táticas de design que melhoram a comunicação entre equipes e stakeholders.',
+        cover: '/ddd.jpg'
+      },
+      {
+        title: "Olhos d'água",
+        description: "Em Olhos d'água, Conceição Evaristo ajusta o foco de seu interesse na população afro-brasileira abordando, sem meias palavras, a pobreza e a violência urbana que a acometem.",
+        cover: '/olhos_dagua.svg'
+      },
+      {
+        title: 'As Veias Abertas da América Latina',
+        description: 'Análise clássica e contundente sobre a exploração econômica e os impactos do colonialismo na América Latina, combinando pesquisa histórica e crítica política.',
+        cover: '/veias_abertas.jpg'
+      },
+      {
+        title: 'Opúsculo Humanitário',
+        description: 'Texto breve e denso com reflexões sobre solidariedade, ética e responsabilidade social, útil para ampliar repertório crítico e empático.',
+        cover: '/opusculo.jpg'
+      },
+      {
+        title: 'A Vida Não é Útil',
+        description: 'Ensaios reflexivos de Ailton Krenak sobre a relação entre sociedade e natureza, propondo modos de vida e pensamento coletivo que valorizam a sustentabilidade e o cuidado.',
+        cover: '/vida_nao_e_util.jpg'
+      }
+    ]
+  };
 
-  protected readonly books: BookItem[] = [
-    {
-      title: 'Aprenda Domain-Driven Design',
-      description: 'Guia prático e conciso para modelar software com foco no domínio, na linguagem ubíqua e em táticas de design que melhoram a comunicação entre equipes e stakeholders.',
-      cover: '/ddd.jpg'
-    },
-    {
-      title: "Olhos d'água",
-      description: "Em Olhos d'água, Conceição Evaristo ajusta o foco de seu interesse na população afro-brasileira abordando, sem meias palavras, a pobreza e a violência urbana que a acometem.",
-      cover: '/olhos_dagua.svg'
-    },
-    {
-      title: 'As Veias Abertas da América Latina',
-      description: 'Análise clássica e contundente sobre a exploração econômica e os impactos do colonialismo na América Latina, combinando pesquisa histórica e crítica política.',
-      cover: '/veias_abertas.jpg'
-    },
-    {
-      title: 'Opúsculo Humanitário',
-      description: 'Texto breve e denso com reflexões sobre solidariedade, ética e responsabilidade social, útil para ampliar repertório crítico e empático.',
-      cover: '/opusculo.jpg'
-    },
-    {
-      title: 'A Vida Não é Útil',
-      description: 'Ensaios reflexivos de Ailton Krenak sobre a relação entre sociedade e natureza, propondo modos de vida e pensamento coletivo que valorizam a sustentabilidade e o cuidado.',
-      cover: '/vida_nao_e_util.jpg'
-    }
-  ];
-
-  protected readonly experiences: ExperienceItem[] = [
-    {
+  private readonly experiencesByLanguage: Record<AppLanguage, ExperienceItem[]> = {
+    'en-US': [
+      {
       title: 'Software Developer',
       organization: 'Moderna Tecnologia',
       period: 'August 2025 - Present',
@@ -407,131 +411,269 @@ export class App implements OnDestroy {
         'Contributed to a 30% increase in operational performance across Customer Success, Logistics, Configuration, and Engineering through system modernization and an integrated web platform.'
       ]
     },
-    {
-      title: 'Full Stack Development Intern',
-      organization: 'Moderna Tecnologia',
-      period: 'February 3, 2025 - July 2025',
+      {
+        title: 'Full Stack Development Intern',
+        organization: 'Moderna Tecnologia',
+        period: 'February 3, 2025 - July 2025',
+        status: 'Previous role',
+        summary: 'Started my journey at Moderna Tecnologia as an on-site intern in Campinas, contributing to full-stack product delivery and building the foundation for my transition into a developer role.',
+        highlights: [
+          'Worked with Angular and Node.js in real business workflows.',
+          'Learned to operate in a professional software team with agile practices and version control.',
+          'Gained the experience that helped me grow into the next stage of my career.'
+        ]
+      }
+    ],
+    'pt-BR': [
+      {
+        title: 'Desenvolvedor de Software',
+        organization: 'Moderna Tecnologia',
+        period: 'agosto de 2025 - atual',
+        status: 'Cargo atual',
+        summary: 'Atuo como desenvolvedor full stack com foco principal em Angular e Node.js, construindo aplicações web escaláveis e ferramentas internas que aumentam a eficiência operacional da empresa.',
+        highlights: [
+          'Atuação em time multifuncional com Scrum e Kanban para entregas contínuas e iterativas.',
+          'Uso de Git, GitHub e GitHub Actions aplicando princípios de DevOps e GitOps para validação, deploy e monitoramento.',
+          'Contribuição para um aumento de 30% na performance operacional em Customer Success, Logística, Configuração e Engenharia por meio da modernização de sistemas e de uma plataforma web integrada.'
+        ]
+      },
+      {
+        title: 'Estagiário de Desenvolvimento Full Stack',
+        organization: 'Moderna Tecnologia',
+        period: '3 de fevereiro de 2025 - julho de 2025',
+        status: 'Cargo anterior',
+        summary: 'Comecei minha trajetória na Moderna Tecnologia como estagiário presencial em Campinas, contribuindo para entregas full stack e construindo a base da minha transição para o papel de desenvolvedor.',
+        highlights: [
+          'Trabalho com Angular e Node.js em fluxos reais de negócio.',
+          'Aprendizado de atuação em um time profissional com práticas ágeis e controle de versão.',
+          'Experiência que impulsionou meu crescimento para a próxima etapa da carreira.'
+        ]
+      }
+    ]
+  };
 
-      status: 'Previous role',
-      summary: 'Started my journey at Moderna Tecnologia as an on-site intern in Campinas, contributing to full-stack product delivery and building the foundation for my transition into a developer role.',
-      highlights: [
-        'Worked with Angular and Node.js in real business workflows.',
-        'Learned to operate in a professional software team with agile practices and version control.',
-        'Gained the experience that helped me grow into the next stage of my career.'
-      ]
-    }
-  ];
-
-  protected readonly courses: CourseItem[] = [
-    {
-      title: 'Testes Automatizados com Jest',
-      organization: 'Udemy',
-      logo: '/udemy_logo.jpeg',
-      issuedAt: 'out de 2025',
-      summary: 'Curso prático sobre testes unitários e de integração com Jest, com foco em qualidade e manutenção de código.',
-      skills: 'Jest · Automação de testes'
-    },
-    {
-      title: 'Pipelines CI/CD com GitHub Actions',
-      organization: 'Rocketseat',
-      logo: '/rocketseat_logo.jpeg',
-      issuedAt: 'set de 2025',
-      summary: 'Construção de pipelines de integração e entrega contínuas para automatizar validação, build e deploy.',
-      skills: 'Integração e entrega contínuas (CI/CD)',
-      credentialCode: '42a3f889-2cfd-4bd8-a271-a7f09dfa8593'
-    },
-    {
-      title: 'IAC com Terraform',
-      organization: 'Rocketseat',
-      logo: '/rocketseat_logo.jpeg',
-      issuedAt: 'mai de 2025',
-      summary: 'Fundamentos de infraestrutura como código com Terraform para provisionamento padronizado e escalável.',
-      skills: 'Infraestrutura como código (IaC) · Terraform',
-      credentialCode: 'd5939e53-0621-4770-9142-10d65a78b540'
-    },
-    {
-      title: 'Containers com Docker e Docker Compose',
-      organization: 'Rocketseat',
-      logo: '/rocketseat_logo.jpeg',
-      issuedAt: 'abr de 2025',
-      summary: 'Orquestração de ambientes de desenvolvimento e execução de aplicações em contêineres com Docker.',
-      skills: 'Docker · Docker Compose',
-      credentialCode: '47d26a8a-46e7-4d8c-9c11-226a2e6821e3'
-    },
-    {
-      title: 'Fundamentos da Cultura DevOps',
-      organization: 'Rocketseat',
-      logo: '/rocketseat_logo.jpeg',
-      issuedAt: 'abr de 2025',
-      summary: 'Princípios de colaboração, automação e entrega contínua para criar fluxos de engenharia mais confiáveis.',
-      skills: 'DevOps · Integração contínua',
-      credentialCode: 'c732204e-a6a9-4e86-b0ed-723ea0bdd0f4'
-    },
-    {
-      title: 'React: Software Architecture',
-      organization: 'LinkedIn',
-      logo: '/linkedin_logo.jpeg',
-      issuedAt: 'nov de 2024',
-      summary: 'Arquitetura de aplicações React com foco em escalabilidade, organização de componentes e separação de responsabilidades.',
-      skills: 'Arquitetura de software'
-    },
-    {
-      title: 'CSS: Variables and Fluid Layouts',
-      organization: 'LinkedIn',
-      logo: '/linkedin_logo.jpeg',
-      issuedAt: 'nov de 2024',
-      summary: 'Uso de variáveis CSS e técnicas de layouts fluidos para interfaces responsivas e consistentes.',
-      skills: 'CSS'
-    },
-    {
-      title: 'TypeScript Essential Training',
-      organization: 'LinkedIn',
-      logo: '/linkedin_logo.jpeg',
-      issuedAt: 'nov de 2024',
-      summary: 'Base sólida de TypeScript para tipagem estática, segurança em refatorações e produtividade no desenvolvimento.',
-      skills: 'TypeScript'
-    },
-    {
-      title: 'React: Design Patterns',
-      organization: 'LinkedIn',
-      logo: '/linkedin_logo.jpeg',
-      issuedAt: 'nov de 2024',
-      summary: 'Aplicação de padrões de projeto em React para reduzir acoplamento e melhorar reutilização de componentes.',
-      skills: 'Padrões de projeto de software'
-    },
-    {
-      title: 'Building Production-Ready React Apps: Setup to Deployment with Firebase',
-      organization: 'LinkedIn',
-      logo: '/linkedin_logo.jpeg',
-      issuedAt: 'nov de 2024',
-      summary: 'Configuração e entrega de aplicações React para produção com estratégia de deploy e serviços Firebase.',
-      skills: 'React.js · Aplicativos de página única'
-    },
-    {
-      title: 'Learning Next.js',
-      organization: 'LinkedIn',
-      logo: '/linkedin_logo.jpeg',
-      issuedAt: 'nov de 2024',
-      summary: 'Fundamentos de desenvolvimento web moderno com Next.js, SSR e estrutura de projetos orientada a performance.',
-      skills: 'Desenvolvimento de front-end · Desenvolvimento web'
-    },
-    {
-      title: 'Git e GitHub: Formação Básica',
-      organization: 'LinkedIn',
-      logo: '/linkedin_logo.jpeg',
-      issuedAt: 'nov de 2024',
-      summary: 'Fluxos essenciais de versionamento, colaboração e revisão de código com Git e GitHub.',
-      skills: 'GitHub · Desenvolvimento de software · Git'
-    },
-    {
-      title: 'GitHub Actions: Formação Básica',
-      organization: 'LinkedIn',
-      logo: '/linkedin_logo.jpeg',
-      issuedAt: 'nov de 2024',
-      summary: 'Automação de workflows de build, testes e entrega utilizando GitHub Actions.',
-      skills: 'Automação de TI · GitHub · Integração e entrega contínuas (CI/CD)'
-    }
-  ];
+  private readonly coursesByLanguage: Record<AppLanguage, CourseItem[]> = {
+    'en-US': [
+      {
+        title: 'Automated Testing with Jest',
+        organization: 'Udemy',
+        logo: '/udemy_logo.jpeg',
+        issuedAt: 'Oct 2025',
+        summary: 'Practical training on unit and integration testing with Jest, focused on code quality and maintainability.',
+        skills: 'Jest · Test automation'
+      },
+      {
+        title: 'CI/CD Pipelines with GitHub Actions',
+        organization: 'Rocketseat',
+        logo: '/rocketseat_logo.jpeg',
+        issuedAt: 'Sep 2025',
+        summary: 'Building continuous integration and delivery pipelines to automate validation, build, and deployment.',
+        skills: 'Continuous integration and delivery (CI/CD)',
+        credentialCode: '42a3f889-2cfd-4bd8-a271-a7f09dfa8593'
+      },
+      {
+        title: 'IaC with Terraform',
+        organization: 'Rocketseat',
+        logo: '/rocketseat_logo.jpeg',
+        issuedAt: 'May 2025',
+        summary: 'Infrastructure as code fundamentals with Terraform for standardized and scalable provisioning.',
+        skills: 'Infrastructure as code (IaC) · Terraform',
+        credentialCode: 'd5939e53-0621-4770-9142-10d65a78b540'
+      },
+      {
+        title: 'Containers with Docker and Docker Compose',
+        organization: 'Rocketseat',
+        logo: '/rocketseat_logo.jpeg',
+        issuedAt: 'Apr 2025',
+        summary: 'Orchestrating development environments and application runtime with Docker containers.',
+        skills: 'Docker · Docker Compose',
+        credentialCode: '47d26a8a-46e7-4d8c-9c11-226a2e6821e3'
+      },
+      {
+        title: 'DevOps Culture Fundamentals',
+        organization: 'Rocketseat',
+        logo: '/rocketseat_logo.jpeg',
+        issuedAt: 'Apr 2025',
+        summary: 'Principles of collaboration, automation, and continuous delivery for more reliable engineering workflows.',
+        skills: 'DevOps · Continuous integration',
+        credentialCode: 'c732204e-a6a9-4e86-b0ed-723ea0bdd0f4'
+      },
+      {
+        title: 'React: Software Architecture',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'Nov 2024',
+        summary: 'Architecting React applications for scalability, component organization, and separation of concerns.',
+        skills: 'Software architecture'
+      },
+      {
+        title: 'CSS: Variables and Fluid Layouts',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'Nov 2024',
+        summary: 'Using CSS variables and fluid layout techniques for responsive and consistent interfaces.',
+        skills: 'CSS'
+      },
+      {
+        title: 'TypeScript Essential Training',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'Nov 2024',
+        summary: 'Solid TypeScript foundations for static typing, safer refactoring, and better developer productivity.',
+        skills: 'TypeScript'
+      },
+      {
+        title: 'React: Design Patterns',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'Nov 2024',
+        summary: 'Applying design patterns in React to reduce coupling and improve component reuse.',
+        skills: 'Software design patterns'
+      },
+      {
+        title: 'Building Production-Ready React Apps: Setup to Deployment with Firebase',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'Nov 2024',
+        summary: 'Setting up and shipping React applications to production with a deployment strategy using Firebase.',
+        skills: 'React.js · Single-page applications'
+      },
+      {
+        title: 'Learning Next.js',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'Nov 2024',
+        summary: 'Modern web development fundamentals with Next.js, SSR, and performance-oriented project structure.',
+        skills: 'Front-end development · Web development'
+      },
+      {
+        title: 'Git and GitHub: Basic Training',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'Nov 2024',
+        summary: 'Essential version control, collaboration, and code review workflows with Git and GitHub.',
+        skills: 'GitHub · Software development · Git'
+      },
+      {
+        title: 'GitHub Actions: Basic Training',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'Nov 2024',
+        summary: 'Automating build, test, and delivery workflows with GitHub Actions.',
+        skills: 'IT automation · GitHub · Continuous integration and delivery (CI/CD)'
+      }
+    ],
+    'pt-BR': [
+      {
+        title: 'Testes Automatizados com Jest',
+        organization: 'Udemy',
+        logo: '/udemy_logo.jpeg',
+        issuedAt: 'out de 2025',
+        summary: 'Curso prático sobre testes unitários e de integração com Jest, com foco em qualidade e manutenção de código.',
+        skills: 'Jest · Automação de testes'
+      },
+      {
+        title: 'Pipelines CI/CD com GitHub Actions',
+        organization: 'Rocketseat',
+        logo: '/rocketseat_logo.jpeg',
+        issuedAt: 'set de 2025',
+        summary: 'Construção de pipelines de integração e entrega contínuas para automatizar validação, build e deploy.',
+        skills: 'Integração e entrega contínuas (CI/CD)',
+        credentialCode: '42a3f889-2cfd-4bd8-a271-a7f09dfa8593'
+      },
+      {
+        title: 'IAC com Terraform',
+        organization: 'Rocketseat',
+        logo: '/rocketseat_logo.jpeg',
+        issuedAt: 'mai de 2025',
+        summary: 'Fundamentos de infraestrutura como código com Terraform para provisionamento padronizado e escalável.',
+        skills: 'Infraestrutura como código (IaC) · Terraform',
+        credentialCode: 'd5939e53-0621-4770-9142-10d65a78b540'
+      },
+      {
+        title: 'Containers com Docker e Docker Compose',
+        organization: 'Rocketseat',
+        logo: '/rocketseat_logo.jpeg',
+        issuedAt: 'abr de 2025',
+        summary: 'Orquestração de ambientes de desenvolvimento e execução de aplicações em contêineres com Docker.',
+        skills: 'Docker · Docker Compose',
+        credentialCode: '47d26a8a-46e7-4d8c-9c11-226a2e6821e3'
+      },
+      {
+        title: 'Fundamentos da Cultura DevOps',
+        organization: 'Rocketseat',
+        logo: '/rocketseat_logo.jpeg',
+        issuedAt: 'abr de 2025',
+        summary: 'Princípios de colaboração, automação e entrega contínua para criar fluxos de engenharia mais confiáveis.',
+        skills: 'DevOps · Integração contínua',
+        credentialCode: 'c732204e-a6a9-4e86-b0ed-723ea0bdd0f4'
+      },
+      {
+        title: 'React: Software Architecture',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'nov de 2024',
+        summary: 'Arquitetura de aplicações React com foco em escalabilidade, organização de componentes e separação de responsabilidades.',
+        skills: 'Arquitetura de software'
+      },
+      {
+        title: 'CSS: Variables and Fluid Layouts',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'nov de 2024',
+        summary: 'Uso de variáveis CSS e técnicas de layouts fluidos para interfaces responsivas e consistentes.',
+        skills: 'CSS'
+      },
+      {
+        title: 'TypeScript Essential Training',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'nov de 2024',
+        summary: 'Base sólida de TypeScript para tipagem estática, segurança em refatorações e produtividade no desenvolvimento.',
+        skills: 'TypeScript'
+      },
+      {
+        title: 'React: Design Patterns',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'nov de 2024',
+        summary: 'Aplicação de padrões de projeto em React para reduzir acoplamento e melhorar reutilização de componentes.',
+        skills: 'Padrões de projeto de software'
+      },
+      {
+        title: 'Building Production-Ready React Apps: Setup to Deployment with Firebase',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'nov de 2024',
+        summary: 'Configuração e entrega de aplicações React para produção com estratégia de deploy e serviços Firebase.',
+        skills: 'React.js · Aplicativos de página única'
+      },
+      {
+        title: 'Learning Next.js',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'nov de 2024',
+        summary: 'Fundamentos de desenvolvimento web moderno com Next.js, SSR e estrutura de projetos orientada a performance.',
+        skills: 'Desenvolvimento de front-end · Desenvolvimento web'
+      },
+      {
+        title: 'Git e GitHub: Formação Básica',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'nov de 2024',
+        summary: 'Fluxos essenciais de versionamento, colaboração e revisão de código com Git e GitHub.',
+        skills: 'GitHub · Desenvolvimento de software · Git'
+      },
+      {
+        title: 'GitHub Actions: Formação Básica',
+        organization: 'LinkedIn',
+        logo: '/linkedin_logo.jpeg',
+        issuedAt: 'nov de 2024',
+        summary: 'Automação de workflows de build, testes e entrega utilizando GitHub Actions.',
+        skills: 'Automação de TI · GitHub · Integração e entrega contínuas (CI/CD)'
+      }
+    ]
+  };
 
   protected readonly bootLines = [
     'lacOs BIOS v0.84',
@@ -555,6 +697,7 @@ export class App implements OnDestroy {
   ];
   protected readonly dockAppIds = signal<AppId[]>([...this.defaultDockAppIds]);
   protected readonly desktopTheme = signal<DesktopTheme>('classic');
+  protected readonly currentLanguage = signal<AppLanguage>('en-US');
   protected readonly timeLabel = signal(this.formatTime());
   protected readonly terminalPrompt = 'eduardo@lacOs:~$';
   protected readonly terminalLines = signal<string[]>([
@@ -565,12 +708,12 @@ export class App implements OnDestroy {
   protected readonly terminalSnakeBoard = signal<string[] | null>(null);
   protected readonly terminalInput = signal('');
   protected readonly openedFileName = signal('about-me.txt');
-  protected readonly openedFileContent = signal(this.aboutMeFileText);
+  protected readonly openedFileContent = signal(this.getAboutMeFileText());
   protected readonly openedFileAttachments = signal<FileAttachment[]>([...this.aboutMeFileAttachments]);
   protected readonly githubProjects = signal<GithubProject[]>([]);
   protected readonly githubProjectsLoading = signal(false);
   protected readonly githubProjectsError = signal<string | null>(null);
-  protected readonly safariHistory = signal<SafariHistoryEntry[]>([...this.safariPresetHistory]);
+  protected readonly safariHistory = signal<SafariHistoryEntry[]>([...this.safariPresetHistoryByLanguage['en-US']]);
   protected readonly safariInput = signal('');
   protected readonly safariCurrentUrl = signal('');
   protected readonly safariFrameUrl = signal<SafeResourceUrl | null>(null);
@@ -627,6 +770,7 @@ export class App implements OnDestroy {
     this.restoreQuizSecretFromStorage();
     this.restoreDesktopThemeFromStorage();
     this.restoreDockFromStorage();
+    this.restoreLanguageFromStorage();
     this.initializeSafari();
     this.openApp('about');
     this.beginBootSequence();
@@ -832,15 +976,110 @@ export class App implements OnDestroy {
   protected getDockApps(): DockApp[] {
     return this.dockAppIds()
       .map((appId) => this.appRegistry[appId])
-      .filter((app): app is DockApp => !!app);
+      .filter((app): app is DockApp => !!app)
+      .map((app) => ({
+        ...app,
+        name: this.getLocalizedAppName(app.appId)
+      }));
+  }
+
+  protected get menuItems(): string[] {
+    return this.menuItemsByLanguage[this.currentLanguage()];
+  }
+
+  protected get aboutProfileParagraphs(): string[] {
+    return this.aboutProfileParagraphsByLanguage[this.currentLanguage()];
+  }
+
+  protected get workspaceItems(): WorkspaceItem[] {
+    return [
+      { kind: 'app', name: 'Finder', code: 'APP', appId: 'finder', column: 1, row: 1 },
+      { kind: 'app', name: this.currentLanguage() === 'pt-BR' ? 'Experiência' : 'Experience', code: 'APP', appId: 'experience', column: 1, row: 2 },
+      { kind: 'app', name: this.currentLanguage() === 'pt-BR' ? 'Projetos' : 'Projects', code: 'APP', appId: 'projects', column: 1, row: 3 },
+      { kind: 'app', name: this.currentLanguage() === 'pt-BR' ? 'Cursos' : 'Courses', code: 'APP', appId: 'courses', column: 1, row: 4 },
+      { kind: 'app', name: 'Terminal', code: 'APP', appId: 'terminal', column: 1, row: 5 },
+      { kind: 'app', name: this.currentLanguage() === 'pt-BR' ? 'Livros' : 'Books', code: 'APP', appId: 'books', column: 1, row: 6 },
+      { kind: 'app', name: 'Safari', code: 'APP', appId: 'safari', column: 2, row: 2 },
+      { kind: 'app', name: 'Quiz', code: 'APP', appId: 'quiz', column: 2, row: 3 },
+      {
+        kind: 'file',
+        name: 'about-me.txt',
+        code: 'TXT',
+        fileName: 'about-me.txt',
+        content: this.getAboutMeFileText(),
+        attachments: this.aboutMeFileAttachments,
+        column: 2,
+        row: 1
+      }
+    ];
+  }
+
+  protected get books(): BookItem[] {
+    return this.booksByLanguage[this.currentLanguage()];
+  }
+
+  protected get experiences(): ExperienceItem[] {
+    return this.experiencesByLanguage[this.currentLanguage()];
+  }
+
+  protected get courses(): CourseItem[] {
+    return this.coursesByLanguage[this.currentLanguage()];
+  }
+
+  protected setLanguage(language: AppLanguage): void {
+    this.currentLanguage.set(language);
+    this.safariHistory.set([...this.safariPresetHistoryByLanguage[language]]);
+    this.updateLocalizedOpenFileState();
+    this.persistLanguageToStorage();
+  }
+
+  protected isLanguageSelected(language: AppLanguage): boolean {
+    return this.currentLanguage() === language;
+  }
+
+  protected getLanguageLabel(language: AppLanguage): string {
+    return language === 'en-US' ? 'EN' : 'PT';
+  }
+
+  protected getLocalizedAppName(appId: AppId): string {
+    const labels: Record<AppLanguage, Record<AppId, string>> = {
+      'en-US': {
+        about: 'About',
+        books: 'Books',
+        courses: 'Courses',
+        experience: 'Experience',
+        finder: 'Finder',
+        notes: 'Notes',
+        projects: 'Projects',
+        quiz: 'Quiz',
+        safari: 'Safari',
+        terminal: 'Terminal',
+        textviewer: 'Text Viewer'
+      },
+      'pt-BR': {
+        about: 'Sobre',
+        books: 'Livros',
+        courses: 'Cursos',
+        experience: 'Experiência',
+        finder: 'Finder',
+        notes: 'Notas',
+        projects: 'Projetos',
+        quiz: 'Quiz',
+        safari: 'Safari',
+        terminal: 'Terminal',
+        textviewer: 'Leitor de Texto'
+      }
+    };
+
+    return labels[this.currentLanguage()][appId];
   }
 
   protected openPageContextMenu(event: MouseEvent): void {
     event.preventDefault();
     this.openContextMenuAt(event.clientX, event.clientY, null, null, [
-      { id: 'open-terminal', label: 'Abrir Terminal' },
-      { id: 'themes', label: 'Temas >' },
-      { id: 'reset-dock', label: 'Restaurar dock padrão' }
+      { id: 'open-terminal', label: this.currentLanguage() === 'pt-BR' ? 'Abrir Terminal' : 'Open Terminal' },
+      { id: 'themes', label: this.currentLanguage() === 'pt-BR' ? 'Temas >' : 'Themes >' },
+      { id: 'reset-dock', label: this.currentLanguage() === 'pt-BR' ? 'Restaurar dock padrão' : 'Restore default dock' }
     ]);
   }
 
@@ -850,8 +1089,8 @@ export class App implements OnDestroy {
 
     const canUnpin = this.dockAppIds().length > 1;
     this.openContextMenuAt(event.clientX, event.clientY, appId, null, [
-      { id: 'open', label: 'Abrir app' },
-      { id: 'unpin', label: 'Remover da dock', danger: true, disabled: !canUnpin }
+      { id: 'open', label: this.currentLanguage() === 'pt-BR' ? 'Abrir app' : 'Open app' },
+      { id: 'unpin', label: this.currentLanguage() === 'pt-BR' ? 'Remover da dock' : 'Remove from dock', danger: true, disabled: !canUnpin }
     ]);
   }
 
@@ -861,15 +1100,15 @@ export class App implements OnDestroy {
 
     if (item.kind === 'file') {
       this.openContextMenuAt(event.clientX, event.clientY, null, item.fileName, [
-        { id: 'open-file', label: 'Abrir arquivo' }
+        { id: 'open-file', label: this.currentLanguage() === 'pt-BR' ? 'Abrir arquivo' : 'Open file' }
       ]);
       return;
     }
 
     const pinned = this.isPinnedInDock(item.appId);
     this.openContextMenuAt(event.clientX, event.clientY, item.appId, null, [
-      { id: 'open', label: 'Abrir app' },
-      { id: pinned ? 'unpin' : 'pin', label: pinned ? 'Remover da dock' : 'Fixar na dock' }
+      { id: 'open', label: this.currentLanguage() === 'pt-BR' ? 'Abrir app' : 'Open app' },
+      { id: pinned ? 'unpin' : 'pin', label: pinned ? 'Remover da dock' : (this.currentLanguage() === 'pt-BR' ? 'Fixar na dock' : 'Pin to dock') }
     ]);
   }
 
@@ -879,15 +1118,15 @@ export class App implements OnDestroy {
 
     if (!this.canPinToDock(appId)) {
       this.openContextMenuAt(event.clientX, event.clientY, appId, null, [
-        { id: 'open', label: 'Trazer para frente' }
+        { id: 'open', label: this.currentLanguage() === 'pt-BR' ? 'Trazer para frente' : 'Bring to front' }
       ]);
       return;
     }
 
     const pinned = this.isPinnedInDock(appId);
     this.openContextMenuAt(event.clientX, event.clientY, appId, null, [
-      { id: 'open', label: 'Trazer para frente' },
-      { id: pinned ? 'unpin' : 'pin', label: pinned ? 'Remover da dock' : 'Fixar na dock' }
+      { id: 'open', label: this.currentLanguage() === 'pt-BR' ? 'Trazer para frente' : 'Bring to front' },
+      { id: pinned ? 'unpin' : 'pin', label: pinned ? 'Remover da dock' : (this.currentLanguage() === 'pt-BR' ? 'Fixar na dock' : 'Pin to dock') }
     ]);
   }
 
@@ -1058,18 +1297,22 @@ export class App implements OnDestroy {
     return updatedAt.slice(0, 10);
   }
 
+  protected getCurrentLanguage(): AppLanguage {
+    return this.currentLanguage();
+  }
+
   protected getWindowContentTitle(appId: AppId): string {
     switch (appId) {
       case 'about':
-        return 'about me';
+        return this.currentLanguage() === 'pt-BR' ? 'sobre mim' : 'about me';
       case 'projects':
-        return 'Featured Projects';
+        return this.currentLanguage() === 'pt-BR' ? 'Projetos em Destaque' : 'Featured Projects';
       case 'books':
-        return 'Books';
+        return this.currentLanguage() === 'pt-BR' ? 'Livros' : 'Books';
       case 'courses':
-        return 'Courses';
+        return this.currentLanguage() === 'pt-BR' ? 'Cursos' : 'Courses';
       case 'experience':
-        return 'Experience';
+        return this.currentLanguage() === 'pt-BR' ? 'Experiência' : 'Experience';
       case 'quiz':
         return 'Quiz';
       case 'safari':
@@ -1077,7 +1320,7 @@ export class App implements OnDestroy {
       case 'terminal':
         return 'Terminal';
       case 'notes':
-        return 'Notes';
+        return this.currentLanguage() === 'pt-BR' ? 'Notas' : 'Notes';
       case 'finder':
         return 'Finder';
       case 'textviewer':
@@ -1118,6 +1361,132 @@ export class App implements OnDestroy {
 
   protected submitSafariNavigation(): void {
     this.navigateSafariTo(this.safariInput());
+  }
+
+  protected getBootOverlayTitle(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Inicialização do lacOs' : 'lacOs Startup';
+  }
+
+  protected getBootSkipLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Pular boot' : 'Skip boot';
+  }
+
+  protected getFounderUnlockTitle(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Segredo Founder Desbloqueado' : 'Founder Secret Unlocked';
+  }
+
+  protected getFounderContinueLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Continuar' : 'Continue';
+  }
+
+  protected getProjectsMetaLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Dados ao vivo de' : 'Live data from';
+  }
+
+  protected getProjectsLoadingLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Carregando repositórios do GitHub...' : 'Loading repositories from GitHub...';
+  }
+
+  protected getProjectsEmptyLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Nenhum repositório disponível no momento.' : 'No repositories available right now.';
+  }
+
+  protected getProjectsUpdatedPrefix(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Atualizado' : 'Updated';
+  }
+
+  protected getProjectsStarsLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Estrelas' : 'Stars';
+  }
+
+  protected getProjectsPinnedLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Fixado' : 'Pinned';
+  }
+
+  protected getCoursesIssuedLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Verificação emitida em' : 'Issued';
+  }
+
+  protected getCoursesSkillsLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Competências' : 'Skills';
+  }
+
+  protected getCoursesCredentialLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Código da credencial' : 'Credential code';
+  }
+
+  protected getSafariPlaceholder(): string {
+    return this.currentLanguage() === 'pt-BR'
+      ? 'Use uma URL do histórico permitido'
+      : 'Use a URL from the allowed history';
+  }
+
+  protected getSafariNewTabLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Nova aba' : 'New tab';
+  }
+
+  protected getSafariHistoryLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Histórico permitido' : 'Allowed history';
+  }
+
+  protected getSafariUnavailableLabel(): string {
+    return this.currentLanguage() === 'pt-BR'
+      ? 'Visualização interna indisponível para este domínio.'
+      : 'Internal preview is unavailable for this domain.';
+  }
+
+  protected getSafariOpenExternalLabel(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Abrir página em nova aba' : 'Open page in a new tab';
+  }
+
+  protected getFinderDescription(key: 'intro' | 'profile' | 'experience' | 'projects' | 'courses'): string {
+    const copy = {
+      'en-US': {
+        intro: 'Recruiter mode: open the most important parts of my portfolio from this desktop hub.',
+        profile: 'Who I am, where I am, and what I am building.',
+        experience: 'My professional timeline at Moderna Tecnologia and current hands-on work.',
+        projects: 'Featured GitHub work and active product builds.',
+        courses: 'Recent certifications and technical training.'
+      },
+      'pt-BR': {
+        intro: 'Modo recrutador: abra as partes mais importantes do meu portfólio a partir deste desktop.',
+        profile: 'Quem eu sou, onde estou e o que estou construindo.',
+        experience: 'Minha linha do tempo profissional na Moderna Tecnologia e trabalho atual.',
+        projects: 'Projetos em destaque no GitHub e produtos em desenvolvimento.',
+        courses: 'Certificações recentes e formação técnica.'
+      }
+    } satisfies Record<AppLanguage, Record<'intro' | 'profile' | 'experience' | 'projects' | 'courses', string>>;
+    return copy[this.currentLanguage()][key];
+  }
+
+  protected getNotesContent(): string {
+    return this.currentLanguage() === 'pt-BR'
+      ? `Este é um app de notas temporário.\n\nPróximos passos:\n- Persistir estado dos apps\n- Evoluir o parser de comandos do terminal\n- Adicionar páginas e rotas para projetos`
+      : `This is a placeholder Notes app.\n\nNext milestones:\n- Persist app state\n- Expand the terminal command parser\n- Add project pages and routing`;
+  }
+
+  protected getTerminalPlaceholder(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'Digite um comando' : 'Type a command';
+  }
+
+  protected getMobileBlockedTitle(): string {
+    return this.currentLanguage() === 'pt-BR' ? '[ERRO] Acesso bloqueado' : '[ERROR] Access blocked';
+  }
+
+  protected getMobileBlockedDescription(): string {
+    return this.currentLanguage() === 'pt-BR'
+      ? 'O projeto atualmente só funciona em dispositivos desktop para maior compatibilidade :('
+      : 'This project currently works only on desktop devices for better compatibility :(';
+  }
+
+  protected getMobileBlockedHint(): string {
+    return this.currentLanguage() === 'pt-BR'
+      ? 'acesse em um computador ou ative o modo desktop no seu navegador'
+      : 'open it on a computer or enable desktop mode in your browser';
+  }
+
+  protected getAboutFileName(): string {
+    return this.currentLanguage() === 'pt-BR' ? 'sobre mim' : 'about me';
   }
 
   protected openSafariHistoryEntry(entryUrl: string): void {
@@ -1343,9 +1712,11 @@ export class App implements OnDestroy {
     this.terminalGuessTarget = Math.floor(Math.random() * 20) + 1;
     this.terminalGuessAttempts = 0;
     this.appendTerminalLines([
-      'Guess game iniciado.',
-      `Adivinhe um numero de 1 a 20 em ${this.terminalGuessMaxAttempts} tentativas.`,
-      'Digite um numero ou "desisto".'
+      this.currentLanguage() === 'pt-BR' ? 'Guess game iniciado.' : 'Guess game started.',
+      this.currentLanguage() === 'pt-BR'
+        ? `Adivinhe um numero de 1 a 20 em ${this.terminalGuessMaxAttempts} tentativas.`
+        : `Guess a number from 1 to 20 in ${this.terminalGuessMaxAttempts} attempts.`,
+      this.currentLanguage() === 'pt-BR' ? 'Digite um numero ou "desisto".' : 'Type a number or "quit".'
     ]);
   }
 
@@ -1642,7 +2013,7 @@ export class App implements OnDestroy {
   }
 
   private initializeSafari(): void {
-    const firstEntry = this.safariPresetHistory[0];
+    const firstEntry = this.safariPresetHistoryByLanguage[this.currentLanguage()][0];
     if (!firstEntry) {
       return;
     }
@@ -1654,14 +2025,14 @@ export class App implements OnDestroy {
     const normalizedUrl = normalizeBrowserUrl(rawUrl);
     if (!normalizedUrl) {
       this.safariFrameBlockedReason.set(null);
-      this.safariError.set('Digite uma URL valida em formato http(s).');
+      this.safariError.set(this.currentLanguage() === 'pt-BR' ? 'Digite uma URL valida em formato http(s).' : 'Enter a valid URL using http(s).');
       return;
     }
 
     const allowedEntry = this.safariAllowedUrlMap.get(normalizedUrl);
     if (!allowedEntry) {
       this.safariFrameBlockedReason.set(null);
-      this.safariError.set('Por seguranca, o Safari virtual abre apenas URLs do historico permitido.');
+      this.safariError.set(this.currentLanguage() === 'pt-BR' ? 'Por seguranca, o Safari virtual abre apenas URLs do historico permitido.' : 'For safety, the virtual Safari only opens URLs from the allowed history.');
       return;
     }
 
@@ -1672,7 +2043,9 @@ export class App implements OnDestroy {
     if (this.isSafariFrameBlockedByHost(allowedEntry.url)) {
       this.safariFrameUrl.set(null);
       this.safariFrameBlockedReason.set(
-        'Este site bloqueia visualizacao em iframe por seguranca. Use "Nova aba".'
+        this.currentLanguage() === 'pt-BR'
+          ? 'Este site bloqueia visualizacao em iframe por seguranca. Use "Nova aba".'
+          : 'This site blocks iframe previews for security reasons. Use "New tab".'
       );
       return;
     }
@@ -1829,15 +2202,15 @@ export class App implements OnDestroy {
     const marker = this.desktopTheme() === theme ? '[x]' : '[ ]';
     switch (theme) {
       case 'classic':
-        return `${marker} Tema classico`;
+        return `${marker} ${this.currentLanguage() === 'pt-BR' ? 'Tema clássico' : 'Classic theme'}`;
       case 'sunset':
-        return `${marker} Tema sunset`;
+        return `${marker} ${this.currentLanguage() === 'pt-BR' ? 'Tema sunset' : 'Sunset theme'}`;
       case 'grid':
-        return `${marker} Tema grid`;
+        return `${marker} ${this.currentLanguage() === 'pt-BR' ? 'Tema grid' : 'Grid theme'}`;
       case 'founder':
-        return `${marker} Tema founder`;
+        return `${marker} ${this.currentLanguage() === 'pt-BR' ? 'Tema founder' : 'Founder theme'}`;
       default:
-        return `${marker} Tema`;
+        return `${marker} ${this.currentLanguage() === 'pt-BR' ? 'Tema' : 'Theme'}`;
     }
   }
 
@@ -1917,6 +2290,44 @@ export class App implements OnDestroy {
     }
   }
 
+  private getAboutMeFileText(): string {
+    return [
+      this.aboutProfileName,
+      '',
+      ...this.aboutProfileParagraphs,
+      '',
+      `GitHub: ${this.aboutProfileGithubLabel}`
+    ].join('\n\n');
+  }
+
+  private updateLocalizedOpenFileState(): void {
+    if (!this.isAboutMeFileOpen()) {
+      return;
+    }
+
+    this.openedFileContent.set(this.getAboutMeFileText());
+    this.openedFileAttachments.set([...this.aboutMeFileAttachments]);
+  }
+
+  private persistLanguageToStorage(): void {
+    try {
+      localStorage.setItem(this.languageStorageKey, this.currentLanguage());
+    } catch {
+      // Ignore storage errors in private mode or blocked storage environments.
+    }
+  }
+
+  private restoreLanguageFromStorage(): void {
+    try {
+      const raw = localStorage.getItem(this.languageStorageKey);
+      if (raw === 'en-US' || raw === 'pt-BR') {
+        this.currentLanguage.set(raw);
+      }
+    } catch {
+      // Ignore malformed local storage payloads and keep defaults.
+    }
+  }
+
   private openAppFromTerminal(rawTarget: string): void {
     const target = rawTarget.toLowerCase();
     const appId = this.terminalAppAliases[target];
@@ -1984,7 +2395,7 @@ export class App implements OnDestroy {
         .map((repo) => ({
           id: repo.id,
           name: repo.name,
-          description: repo.description ?? 'No description provided yet.',
+          description: repo.description ?? (this.currentLanguage() === 'pt-BR' ? 'Descrição ainda não informada.' : 'No description provided yet.'),
           href: repo.html_url,
           pinned: pinnedOrder.has(repo.name),
           stars: repo.stargazers_count,
@@ -1995,7 +2406,7 @@ export class App implements OnDestroy {
       this.githubProjects.set(normalized);
       this.githubProjectsLoaded = true;
     } catch {
-      this.githubProjectsError.set('Could not load repositories from GitHub right now.');
+      this.githubProjectsError.set(this.currentLanguage() === 'pt-BR' ? 'Não foi possível carregar os repositórios do GitHub agora.' : 'Could not load repositories from GitHub right now.');
     } finally {
       this.githubProjectsLoading.set(false);
     }
