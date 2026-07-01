@@ -314,14 +314,14 @@ export class App implements OnDestroy {
     'en-US': [
       'I live in Campinas, São Paulo, Brazil. I am a software developer focused on building real-world products with strong engineering fundamentals.',
       "I started my professional journey in technology in 2024. Today, I work mainly with TypeScript, Angular, Node.js, and NestJS, and I also have hands-on experience with React, .NET, and Python.",
-      'I have been at Moderna Tecnologia since February 3, 2025, first as a Full Stack Development Intern and, since August 2025, as a Software Developer.',
+      'In April 2026, I joined Thoughtworks as an Associate Developer, part of the 95th batch of Thoughtworks University, the company\'s global immersive training program. I work remotely from Chicago, Illinois, as a Consulting Developer. Previously, I was at Moderna Tecnologia from February 2025 to March 2026, growing from intern to Software Developer.',
       "I have a technician degree and I am preparing to pursue a bachelor's degree in Computer Science or Information Systems at USP or UNICAMP. I care deeply about software engineering practices such as Domain-Driven Design (DDD), Test-Driven Development (TDD), and maintainable architecture.",
       'Outside software, I love cooking and learning history through food, finance, geopolitics, and economics. I also enjoy reading and listening to music.'
     ],
     'pt-BR': [
       'Moro em Campinas, São Paulo, Brasil. Sou desenvolvedor de software com foco em construir produtos reais com fundamentos sólidos de engenharia.',
       'Comecei minha jornada profissional em tecnologia em 2024. Hoje trabalho principalmente com TypeScript, Angular, Node.js e NestJS, e também tenho experiência prática com React, .NET e Python.',
-      'Estou na Moderna Tecnologia desde 3 de fevereiro de 2025, primeiro como estagiário de desenvolvimento full stack e, desde agosto de 2025, como desenvolvedor de software.',
+      'Em abril de 2026, ingressei na Thoughtworks como Associate Developer, fazendo parte da 95ª turma da Thoughtworks University, o programa global de treinamento imersivo da empresa. Atuo remotamente de Chicago, Illinois, como Consulting Developer. Antes, estive na Moderna Tecnologia de fevereiro de 2025 a março de 2026, evoluindo de estagiário a desenvolvedor de software.',
       'Tenho formação técnica e estou me preparando para cursar Ciência da Computação ou Sistemas de Informação na USP ou na UNICAMP. Dou muita importância a práticas de engenharia de software como DDD, TDD e arquitetura sustentável.',
       'Fora de software, gosto de cozinhar e de aprender história por meio da comida, além de acompanhar finanças, geopolítica e economia. Também gosto de ler e ouvir música.'
     ]
@@ -400,17 +400,29 @@ export class App implements OnDestroy {
   private readonly experiencesByLanguage: Record<AppLanguage, ExperienceItem[]> = {
     'en-US': [
       {
-      title: 'Software Developer',
-      organization: 'Moderna Tecnologia',
-      period: 'August 2025 - Present',
-      status: 'Current role',
-      summary: 'Working as a Full-Stack Developer focused primarily on Angular and Node.js, building scalable web applications and internal tools that improve operational efficiency across the company.',
-      highlights: [
-        'Collaborating in a cross-functional team using Scrum and Kanban for continuous and iterative delivery.',
-        'Using Git, GitHub, and GitHub Actions while applying DevOps and GitOps principles for validation, deployment, and monitoring.',
-        'Contributed to a 30% increase in operational performance across Customer Success, Logistics, Configuration, and Engineering through system modernization and an integrated web platform.'
-      ]
-    },
+        title: 'Associate Developer',
+        organization: 'Thoughtworks',
+        period: 'April 2026 - Present',
+        status: 'Current role',
+        summary: 'Joined as part of the 95th batch of Thoughtworks University, the company\'s global immersive training program for new Thoughtworkers. Working as a Consulting Developer, collaborating in client engagements while strengthening skills in software engineering, agile delivery, distributed systems, and cross-functional teamwork in a global environment.',
+        highlights: [
+          'Selected as part of the 95th batch of Thoughtworks University, the company\'s global immersive training program for new Thoughtworkers.',
+          'Working as a Consulting Developer in client engagements.',
+          'Strengthening skills in software engineering, agile delivery, distributed systems, and cross-functional teamwork in a global environment.'
+        ]
+      },
+      {
+        title: 'Software Developer',
+        organization: 'Moderna Tecnologia',
+        period: 'August 2025 - March 2026',
+        status: 'Previous role',
+        summary: 'Worked as a Full-Stack Developer focused primarily on Angular and Node.js, building scalable web applications and internal tools that improved operational efficiency across the company.',
+        highlights: [
+          'Collaborated in a cross-functional team using Scrum and Kanban for continuous and iterative delivery.',
+          'Used Git, GitHub, and GitHub Actions while applying DevOps and GitOps principles for validation, deployment, and monitoring.',
+          'Contributed to a 30% increase in operational performance across Customer Success, Logistics, Configuration, and Engineering through system modernization and an integrated web platform.'
+        ]
+      },
       {
         title: 'Full Stack Development Intern',
         organization: 'Moderna Tecnologia',
@@ -426,11 +438,23 @@ export class App implements OnDestroy {
     ],
     'pt-BR': [
       {
+        title: 'Associate Developer',
+        organization: 'Thoughtworks',
+        period: 'abril de 2026 - atual',
+        status: 'Cargo atual',
+        summary: 'Selecionado para a 95ª turma da Thoughtworks University, o programa global de treinamento imersivo para novos Thoughtworkers. Atuando como Consulting Developer, colaborando em projetos de clientes enquanto fortaleço habilidades em engenharia de software, entrega ágil, sistemas distribuídos e trabalho em equipes globais multidisciplinares.',
+        highlights: [
+          'Selecionado para a 95ª turma da Thoughtworks University, o programa global de treinamento imersivo para novos Thoughtworkers.',
+          'Atuando como Consulting Developer em projetos de clientes.',
+          'Fortalecendo habilidades em engenharia de software, entrega ágil, sistemas distribuídos e trabalho em equipes globais multidisciplinares.'
+        ]
+      },
+      {
         title: 'Desenvolvedor de Software',
         organization: 'Moderna Tecnologia',
-        period: 'agosto de 2025 - atual',
-        status: 'Cargo atual',
-        summary: 'Atuo como desenvolvedor full stack com foco principal em Angular e Node.js, construindo aplicações web escaláveis e ferramentas internas que aumentam a eficiência operacional da empresa.',
+        period: 'agosto de 2025 - março de 2026',
+        status: 'Cargo anterior',
+        summary: 'Atuei como desenvolvedor full stack com foco principal em Angular e Node.js, construindo aplicações web escaláveis e ferramentas internas que aumentam a eficiência operacional da empresa.',
         highlights: [
           'Atuação em time multifuncional com Scrum e Kanban para entregas contínuas e iterativas.',
           'Uso de Git, GitHub e GitHub Actions aplicando princípios de DevOps e GitOps para validação, deploy e monitoramento.',
@@ -454,6 +478,14 @@ export class App implements OnDestroy {
 
   private readonly coursesByLanguage: Record<AppLanguage, CourseItem[]> = {
     'en-US': [
+      {
+        title: 'AWS Certified Cloud Practitioner (CLF-C02) – 2025',
+        organization: 'Udemy',
+        logo: '/udemy_logo.jpeg',
+        issuedAt: 'Jul 2026',
+        summary: 'Preparation course for the AWS Certified Cloud Practitioner (CLF-C02) exam, covering core AWS services, cloud concepts, security, pricing, and support models.',
+        skills: 'AWS · Cloud computing'
+      },
       {
         title: 'Automated Testing with Jest',
         organization: 'Udemy',
@@ -564,6 +596,14 @@ export class App implements OnDestroy {
       }
     ],
     'pt-BR': [
+      {
+        title: 'AWS Certified Cloud Practitioner (CLF-C02) – 2025',
+        organization: 'Udemy',
+        logo: '/udemy_logo.jpeg',
+        issuedAt: 'jul de 2026',
+        summary: 'Curso preparatório para o exame AWS Certified Cloud Practitioner (CLF-C02), cobrindo serviços core da AWS, conceitos de nuvem, segurança, precificação e modelos de suporte.',
+        skills: 'AWS · Computação em nuvem'
+      },
       {
         title: 'Testes Automatizados com Jest',
         organization: 'Udemy',
@@ -1444,14 +1484,14 @@ export class App implements OnDestroy {
       'en-US': {
         intro: 'Recruiter mode: open the most important parts of my portfolio from this desktop hub.',
         profile: 'Who I am, where I am, and what I am building.',
-        experience: 'My professional timeline at Moderna Tecnologia and current hands-on work.',
+        experience: 'My professional journey from Moderna Tecnologia to Thoughtworks and current consulting work.',
         projects: 'Featured GitHub work and active product builds.',
         courses: 'Recent certifications and technical training.'
       },
       'pt-BR': {
         intro: 'Modo recrutador: abra as partes mais importantes do meu portfólio a partir deste desktop.',
         profile: 'Quem eu sou, onde estou e o que estou construindo.',
-        experience: 'Minha linha do tempo profissional na Moderna Tecnologia e trabalho atual.',
+        experience: 'Minha trajetória profissional da Moderna Tecnologia à Thoughtworks e trabalho atual de consultoria.',
         projects: 'Projetos em destaque no GitHub e produtos em desenvolvimento.',
         courses: 'Certificações recentes e formação técnica.'
       }
@@ -1600,7 +1640,7 @@ export class App implements OnDestroy {
       case 'experience':
         this.openApp('experience');
         this.appendTerminalLines([
-          'Experience.app opened with your professional timeline at Moderna Tecnologia.'
+          'Experience.app opened with your professional timeline at Thoughtworks and Moderna Tecnologia.'
 
         ]);
         return;

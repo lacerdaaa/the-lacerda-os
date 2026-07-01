@@ -32,9 +32,9 @@ export class AboutQuizComponent {
     },
     {
       prompt: 'Qual é o meu cargo atualmente?',
-      options: ['Desenvolvedor front-end', 'Desenvolvedor back-end', 'Desenvolvedor full stack', 'QA engineer'],
+      options: ['Desenvolvedor front-end', 'Desenvolvedor back-end', 'Consultor', 'QA engineer'],
       correctIndex: 2,
-      successMessage: 'Isso aí. Atualmente atuo como desenvolvedor full stack.'
+      successMessage: 'Isso aí. Atualmente atuo como consultor.'
     },
     {
       prompt: 'Há quanto tempo atuo na área de tecnologia?',
@@ -75,8 +75,8 @@ export class AboutQuizComponent {
     {
       prompt: 'Qual é o meu anime favorito?',
       options: ['Naruto', 'Koe no Katachi', 'Attack on Titan', 'One Piece'],
-      correctIndex: 1,
-      successMessage: 'Perfeito. Meu anime favorito é Koe no Katachi.'
+      correctIndex: 3,
+      successMessage: 'Perfeito. Meu anime favorito é One Piece.'
     }
   ];
 
