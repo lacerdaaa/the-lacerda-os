@@ -278,6 +278,30 @@
               }
               }
 
+              @case ('blog') {
+              <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
+              <p class="projects-meta">
+                medium.com/<a href="https://medium.com/@edulacerdaaa" target="_blank" rel="noopener">@edulacerdaaa</a>
+              </p>
+
+              @if (blogLoading()) {
+              <p class="projects-status">{{ currentLanguage() === 'pt-BR' ? 'Carregando posts...' : 'Loading posts...' }}</p>
+              } @else if (blogError()) {
+              <p class="projects-status projects-status-error">{{ blogError() }}</p>
+              } @else if (blogPosts().length === 0) {
+              <p class="projects-status">{{ currentLanguage() === 'pt-BR' ? 'Nenhum post encontrado.' : 'No posts found.' }}</p>
+              } @else {
+              <div class="blog-list">
+                @for (post of blogPosts(); track post.link) {
+                <a class="blog-post-card" [href]="post.link" target="_blank" rel="noopener">
+                  <h2>{{ post.title }}</h2>
+                  <span>{{ formatBlogDate(post.pubDate) }}</span>
+                </a>
+                }
+              </div>
+              }
+              }
+
               @case ('finder') {
               <h1>{{ getWindowContentTitle(windowState.appId) }}</h1>
               <p>{{ getFinderDescription('intro') }}</p>
@@ -298,6 +322,10 @@
                 <button type="button" (click)="openApp('courses')">
                   <strong>Courses</strong>
                   <span>{{ getFinderDescription('courses') }}</span>
+                </button>
+                <button type="button" (click)="openApp('blog')">
+                  <strong>Blog</strong>
+                  <span>{{ getFinderDescription('blog') }}</span>
                 </button>
               </div>
               }

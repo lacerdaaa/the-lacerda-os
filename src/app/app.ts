@@ -2,7 +2,7 @@ import { Component, HostListener, OnDestroy, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AboutQuizComponent } from './about-quiz/about-quiz.component';
 
-type AppId = 'about' | 'projects' | 'books' | 'courses' | 'experience' | 'quiz' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari';
+type AppId = 'about' | 'projects' | 'books' | 'courses' | 'experience' | 'quiz' | 'terminal' | 'notes' | 'finder' | 'textviewer' | 'safari' | 'blog';
 
 function normalizeBrowserUrl(rawUrl: string): string | null {
   const trimmed = rawUrl.trim();
@@ -87,6 +87,12 @@ interface BookItem {
   title: string;
   description: string;
   cover: string;
+}
+
+interface BlogPost {
+  title: string;
+  link: string;
+  pubDate: string;
 }
 
 interface CourseItem {
@@ -252,7 +258,7 @@ export class App implements OnDestroy {
       .filter((entry): entry is readonly [string, SafariHistoryEntry] => entry !== null)
   );
   private readonly terminalVirtualPath = '/Users/eduardo/Desktop';
-  private readonly terminalOpenableApps: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'experience', 'quiz', 'about', 'textviewer'];
+  private readonly terminalOpenableApps: AppId[] = ['finder', 'safari', 'notes', 'terminal', 'projects', 'books', 'courses', 'experience', 'quiz', 'about', 'textviewer', 'blog'];
   private readonly terminalOpenableAppLabel = this.terminalOpenableApps.join('|');
   private readonly terminalCommandNames = [
     'help',
@@ -275,6 +281,7 @@ export class App implements OnDestroy {
     'placar',
     'snake',
     'snake-score',
+    'blog',
     'history',
     'neofetch',
     'clear'
@@ -291,7 +298,8 @@ export class App implements OnDestroy {
     safari: 'safari',
     about: 'about',
     textviewer: 'textviewer',
-    text: 'textviewer'
+    text: 'textviewer',
+    blog: 'blog'
   };
   private readonly defaultDockAppIds: AppId[] = ['about', 'terminal', 'quiz', 'safari'];
   private readonly windowDefaultHeightBoost = 36;
@@ -307,7 +315,8 @@ export class App implements OnDestroy {
     experience: { name: 'Experience', code: 'EX', appId: 'experience' },
     quiz: { name: 'Quiz', code: 'QZ', appId: 'quiz' },
     about: { name: 'About', code: 'AB', appId: 'about' },
-    textviewer: { name: 'Text Viewer', code: 'TX', appId: 'textviewer' }
+    textviewer: { name: 'Text Viewer', code: 'TX', appId: 'textviewer' },
+    blog: { name: 'Blog', code: 'BL', appId: 'blog' }
   };
   protected readonly aboutProfileName = 'Eduardo Lacerda';
   private readonly aboutProfileParagraphsByLanguage: Record<AppLanguage, string[]> = {
@@ -753,6 +762,10 @@ export class App implements OnDestroy {
   protected readonly githubProjects = signal<GithubProject[]>([]);
   protected readonly githubProjectsLoading = signal(false);
   protected readonly githubProjectsError = signal<string | null>(null);
+  protected readonly blogPosts = signal<BlogPost[]>([]);
+  protected readonly blogLoading = signal(false);
+  protected readonly blogError = signal<string | null>(null);
+  private blogPostsLoaded = false;
   protected readonly safariHistory = signal<SafariHistoryEntry[]>([...this.safariPresetHistoryByLanguage['en-US']]);
   protected readonly safariInput = signal('');
   protected readonly safariCurrentUrl = signal('');
@@ -826,6 +839,10 @@ export class App implements OnDestroy {
   protected openApp(appId: AppId): void {
     if (appId === 'projects') {
       void this.loadGithubProjects();
+    }
+
+    if (appId === 'blog') {
+      void this.loadBlogPosts();
     }
 
     const current = this.windows();
@@ -1041,6 +1058,7 @@ export class App implements OnDestroy {
       { kind: 'app', name: this.currentLanguage() === 'pt-BR' ? 'Livros' : 'Books', code: 'APP', appId: 'books', column: 1, row: 6 },
       { kind: 'app', name: 'Safari', code: 'APP', appId: 'safari', column: 2, row: 2 },
       { kind: 'app', name: 'Quiz', code: 'APP', appId: 'quiz', column: 2, row: 3 },
+      { kind: 'app', name: 'Blog', code: 'APP', appId: 'blog', column: 2, row: 4 },
       {
         kind: 'file',
         name: 'about-me.txt',
@@ -1085,6 +1103,7 @@ export class App implements OnDestroy {
     const labels: Record<AppLanguage, Record<AppId, string>> = {
       'en-US': {
         about: 'About',
+        blog: 'Blog',
         books: 'Books',
         courses: 'Courses',
         experience: 'Experience',
@@ -1098,6 +1117,7 @@ export class App implements OnDestroy {
       },
       'pt-BR': {
         about: 'Sobre',
+        blog: 'Blog',
         books: 'Livros',
         courses: 'Cursos',
         experience: 'Experiência',
@@ -1365,6 +1385,8 @@ export class App implements OnDestroy {
         return 'Finder';
       case 'textviewer':
         return 'Text Viewer';
+      case 'blog':
+        return this.currentLanguage() === 'pt-BR' ? 'Blog' : 'Blog';
       default:
         return 'App';
     }
@@ -1479,23 +1501,25 @@ export class App implements OnDestroy {
     return this.currentLanguage() === 'pt-BR' ? 'Abrir página em nova aba' : 'Open page in a new tab';
   }
 
-  protected getFinderDescription(key: 'intro' | 'profile' | 'experience' | 'projects' | 'courses'): string {
+  protected getFinderDescription(key: 'intro' | 'profile' | 'experience' | 'projects' | 'courses' | 'blog'): string {
     const copy = {
       'en-US': {
         intro: 'Recruiter mode: open the most important parts of my portfolio from this desktop hub.',
         profile: 'Who I am, where I am, and what I am building.',
         experience: 'My professional journey from Moderna Tecnologia to Thoughtworks and current consulting work.',
         projects: 'Featured GitHub work and active product builds.',
-        courses: 'Recent certifications and technical training.'
+        courses: 'Recent certifications and technical training.',
+        blog: 'Articles and writing published on Medium.'
       },
       'pt-BR': {
         intro: 'Modo recrutador: abra as partes mais importantes do meu portfólio a partir deste desktop.',
         profile: 'Quem eu sou, onde estou e o que estou construindo.',
         experience: 'Minha trajetória profissional da Moderna Tecnologia à Thoughtworks e trabalho atual de consultoria.',
         projects: 'Projetos em destaque no GitHub e produtos em desenvolvimento.',
-        courses: 'Certificações recentes e formação técnica.'
+        courses: 'Certificações recentes e formação técnica.',
+        blog: 'Artigos e textos publicados no Medium.'
       }
-    } satisfies Record<AppLanguage, Record<'intro' | 'profile' | 'experience' | 'projects' | 'courses', string>>;
+    } satisfies Record<AppLanguage, Record<'intro' | 'profile' | 'experience' | 'projects' | 'courses' | 'blog', string>>;
     return copy[this.currentLanguage()][key];
   }
 
@@ -1654,6 +1678,12 @@ export class App implements OnDestroy {
         this.openApp('safari');
         this.appendTerminalLines([
           'Safari.app opened with URL whitelist from search history.'
+        ]);
+        return;
+      case 'blog':
+        this.openApp('blog');
+        this.appendTerminalLines([
+          'Blog.app opened. Fetching posts from medium.com/@edulacerdaaa.'
         ]);
         return;
       case 'ls':
@@ -2452,6 +2482,64 @@ export class App implements OnDestroy {
     }
   }
 
+  private async loadBlogPosts(): Promise<void> {
+    if (this.blogPostsLoaded || this.blogLoading()) {
+      return;
+    }
+
+    this.blogLoading.set(true);
+    this.blogError.set(null);
+
+    try {
+      const response = await fetch('/api/medium-feed');
+      if (!response.ok) {
+        throw new Error(`Feed returned ${response.status}`);
+      }
+
+      const xml = await response.text();
+      const posts = this.parseMediumFeed(xml);
+      this.blogPosts.set(posts);
+      this.blogPostsLoaded = true;
+    } catch {
+      this.blogError.set(
+        this.currentLanguage() === 'pt-BR'
+          ? 'Não foi possível carregar os posts do Medium agora.'
+          : 'Could not load Medium posts right now.'
+      );
+    } finally {
+      this.blogLoading.set(false);
+    }
+  }
+
+  private parseMediumFeed(xml: string): BlogPost[] {
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    return Array.from(doc.querySelectorAll('item'))
+      .slice(0, 10)
+      .map((item) => {
+        const getText = (tag: string) =>
+          item.getElementsByTagName(tag)[0]?.textContent?.trim() ?? '';
+
+        return {
+          title: getText('title'),
+          link: getText('link'),
+          pubDate: getText('pubDate')
+        };
+      })
+      .filter((post) => post.title && post.link);
+  }
+
+  protected formatBlogDate(pubDate: string): string {
+    if (!pubDate) {
+      return '';
+    }
+
+    return new Intl.DateTimeFormat(this.currentLanguage(), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }).format(new Date(pubDate));
+  }
+
   private appendTerminalLines(lines: string[]): void {
     this.terminalLines.update((history) => {
       const nextHistory = [...history, ...lines];
@@ -2738,6 +2826,8 @@ export class App implements OnDestroy {
           return { width: 620, height: 380 };
         case 'textviewer':
           return { width: 600, height: 400 };
+        case 'blog':
+          return { width: 640, height: 400 };
         default:
           return { width: 520, height: 330 };
       }
@@ -2770,6 +2860,8 @@ export class App implements OnDestroy {
           return { width: 460, height: 280 };
         case 'textviewer':
           return { width: 400, height: 250 };
+        case 'blog':
+          return { width: 460, height: 280 };
         default:
           return { width: 400, height: 240 };
       }
@@ -2805,6 +2897,8 @@ export class App implements OnDestroy {
         return 'Finder.app';
       case 'textviewer':
         return 'Text Viewer.app';
+      case 'blog':
+        return 'Blog.app';
       default:
         return 'App';
     }
