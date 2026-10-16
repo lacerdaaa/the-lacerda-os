@@ -1,0 +1,36 @@
+<nav class="menus">
+  @for (menu of menus(); track menu.id; let last = $last) {
+    <div class="menu-title-wrap">
+      <button
+        type="button"
+        class="menu-title"
+        role="menuitem"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="openMenuId() === menu.id"
+        [class.open]="openMenuId() === menu.id"
+        [class.strong]="menu.strong"
+        [class.logo]="menu.logo"
+        [attr.aria-label]="menu.label"
+        (click)="toggleMenu(menu.id, $event)"
+        (mouseenter)="hoverMenu(menu.id)"
+      >
+        @if (menu.logo) {
+          <span class="logo-mark" aria-hidden="true"></span>
+        } @else {
+          {{ menu.label }}
+        }
+      </button>
+      @if (openMenuId() === menu.id) {
+        <app-menu class="dropdown" [items]="menu.items" [flipSubmenus]="last && !viewport.isCompact()" (done)="closeMenus()" />
+      }
+    </div>
+  }
+</nav>
+
+<div class="status">
+  <div class="language-switcher" role="group" [attr.aria-label]="copy().language">
+    <button type="button" [class.active]="language() === 'en-US'" [attr.aria-pressed]="language() === 'en-US'" (click)="setLanguage('en-US', $event)">EN</button>
+    <button type="button" [class.active]="language() === 'pt-BR'" [attr.aria-pressed]="language() === 'pt-BR'" (click)="setLanguage('pt-BR', $event)">PT</button>
+  </div>
+  <time class="clock">{{ clock() }}</time>
+</div>
