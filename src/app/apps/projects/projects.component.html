@@ -1,0 +1,49 @@
+<h1 class="page-title">{{ copy().title }}</h1>
+<p class="page-meta">
+  {{ copy().liveFrom }}
+  <a [href]="profile.githubUrl" target="_blank" rel="noopener">{{ profile.githubLabel }}</a>
+</p>
+
+@switch (github.state()) {
+  @case ('error') {
+    <div class="status-box error" role="alert">
+      <span>{{ copy().error }}</span>
+      <button type="button" class="push-button" (click)="github.load(true)">{{ copy().retry }}</button>
+      <a class="push-button" [href]="profile.githubUrl" target="_blank" rel="noopener">{{ copy().openGithub }}</a>
+    </div>
+  }
+  @case ('ready') {
+    @if (github.projects().length === 0) {
+      <p class="status-box">{{ copy().empty }}</p>
+    } @else {
+      <div class="grid">
+        @for (project of github.projects(); track project.id) {
+          <article class="card project">
+            <a class="project-link" [href]="project.href" target="_blank" rel="noopener">
+              <h2>
+                @if (project.pinned) {
+                  <span class="pin" [title]="copy().pinned">★</span>
+                }
+                {{ project.name }}
+              </h2>
+              <p>{{ project.description ?? copy().noDescription }}</p>
+            </a>
+            <footer>
+              @if (project.language) {
+                <span class="tag">{{ project.language }}</span>
+              }
+              <span>☆ {{ project.stars }}</span>
+              <span>{{ copy().updated }} {{ formatDate(project.updatedAt) }}</span>
+              @if (project.homepage) {
+                <a [href]="project.homepage" target="_blank" rel="noopener">{{ copy().demo }} ↗</a>
+              }
+            </footer>
+          </article>
+        }
+      </div>
+    }
+  }
+  @default {
+    <p class="status-box"><span class="blinking-dots">{{ copy().loading }}</span></p>
+  }
+}
