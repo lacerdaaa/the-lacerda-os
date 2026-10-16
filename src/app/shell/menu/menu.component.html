@@ -1,0 +1,31 @@
+@for (item of items(); track $index; let index = $index) {
+  @if (isSeparator(item)) {
+    <div class="menu-separator" role="separator"></div>
+  } @else {
+    <div class="menu-entry" (mouseenter)="onEnter(index, item)">
+      <button
+        type="button"
+        class="menu-item"
+        role="menuitem"
+        [class.danger]="item.danger"
+        [class.open]="openSubmenu() === index"
+        [disabled]="item.disabled"
+        [attr.aria-haspopup]="item.submenu ? 'menu' : null"
+        [attr.aria-checked]="item.checked ?? null"
+        (click)="onSelect(index, item)"
+      >
+        <span class="menu-check" aria-hidden="true">{{ item.checked ? '✓' : '' }}</span>
+        <span class="menu-label">{{ item.label }}</span>
+        @if (item.submenu) {
+          <span class="menu-hint" aria-hidden="true">▸</span>
+        } @else if (item.hint) {
+          <span class="menu-hint">{{ item.hint }}</span>
+        }
+      </button>
+
+      @if (item.submenu && openSubmenu() === index) {
+        <app-menu class="submenu" [class.flip]="flipSubmenus()" [items]="item.submenu" [flipSubmenus]="flipSubmenus()" (done)="done.emit()" />
+      }
+    </div>
+  }
+}
