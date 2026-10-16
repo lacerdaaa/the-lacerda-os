@@ -1,0 +1,53 @@
+@use 'retro' as *;
+
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  background: #fff8b8;
+}
+
+textarea {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  resize: none;
+  border: 0;
+  padding: 10px 14px;
+  background:
+    linear-gradient(#fff8b8, #fff8b8) top / 100% 8px no-repeat,
+    repeating-linear-gradient(#fff8b8 0 21px, #e8d877 21px 22px);
+  background-attachment: local;
+  color: #2b2410;
+  font-family: $font-text;
+  font-size: 16px;
+  line-height: 22px;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+footer {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border-top: 1px solid #c9b64e;
+  background: #f4e98a;
+  font-size: 11px;
+  color: #5a4c12;
+}
+
+.push-button {
+  min-height: 20px;
+  font-size: 11px;
+}
+
+@media (min-width: 761px) {
+  textarea {
+    font-size: 13px;
+  }
+}
