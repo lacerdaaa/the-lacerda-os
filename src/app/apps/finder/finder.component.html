@@ -1,0 +1,21 @@
+<header class="info-bar">
+  <span>{{ itemCount() }}</span>
+  <span>Macintosh HD</span>
+</header>
+<p class="intro">{{ copy().intro }}</p>
+
+<div class="list" role="list">
+  <div class="list-head" aria-hidden="true">
+    <span>{{ copy().name }}</span>
+    <span>{{ copy().kind }}</span>
+  </div>
+  @for (entry of entries(); track entry.key) {
+    <button type="button" class="row" role="listitem" (click)="entry.open()">
+      <span class="name">
+        <app-icon [icon]="entry.icon" [size]="20" />
+        {{ entry.name }}
+      </span>
+      <span class="description">{{ entry.description }}</span>
+    </button>
+  }
+</div>

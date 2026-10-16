@@ -1,0 +1,95 @@
+@use 'retro' as *;
+
+:host {
+  display: block;
+}
+
+.info-bar {
+  margin: -14px -16px 0;
+  padding: 3px 10px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #8a8a8a;
+  background: #ededed;
+  font-family: $font-ui;
+  font-size: 11px;
+}
+
+.intro {
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+.list {
+  @include bevel-in;
+  display: grid;
+}
+
+.list-head,
+.row {
+  display: grid;
+  grid-template-columns: minmax(130px, 34%) 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 8px;
+}
+
+.list-head {
+  border-bottom: 1px solid #8a8a8a;
+  background: linear-gradient(#f4f4f4, #d9d9d9);
+  font-family: $font-ui;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.row {
+  border: 0;
+  border-bottom: 1px solid #ececec;
+  background: transparent;
+  color: #000;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+
+  &:nth-child(odd) {
+    background: #f7f7fb;
+  }
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
+    background: var(--select);
+    color: var(--select-text);
+
+    .description {
+      color: #dcdcff;
+    }
+  }
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.description {
+  color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+  .list-head {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 8px;
+  }
+
+  .description {
+    padding-left: 28px;
+  }
+}
