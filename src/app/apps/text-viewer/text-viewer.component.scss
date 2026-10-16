@@ -1,0 +1,47 @@
+@use 'retro' as *;
+
+:host {
+  display: block;
+}
+
+.document {
+  margin: 0;
+  max-width: 68ch;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: $font-mono;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.attachments {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid #d0d0d0;
+
+  h2 {
+    @include section-heading;
+    font-size: 12px;
+  }
+}
+
+.grid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 6px;
+}
+
+.attachment {
+  padding: 8px 4px 6px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  font-size: 11px;
+
+  img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+}
