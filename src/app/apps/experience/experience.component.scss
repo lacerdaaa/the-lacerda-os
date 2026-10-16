@@ -1,0 +1,81 @@
+@use 'retro' as *;
+
+:host {
+  display: block;
+}
+
+.timeline {
+  margin: 14px 0 0;
+  padding: 0 0 0 18px;
+  list-style: none;
+  border-left: 2px solid #8a8a8a;
+  display: grid;
+  gap: 12px;
+
+  > li {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -25px;
+      top: 12px;
+      width: 10px;
+      height: 10px;
+      border: 1px solid #000;
+      background: #fff;
+    }
+
+    &.current::before {
+      background: #2e9a4a;
+    }
+  }
+}
+
+.role {
+  @include bevel-out(var(--card));
+  padding: 10px 12px;
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  p {
+    margin: 6px 0 0;
+    font-size: 12px;
+  }
+
+  ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-size: 12px;
+  }
+}
+
+.meta {
+  margin-top: 2px !important;
+  color: var(--text-muted);
+}
+
+.badge {
+  flex: none;
+  padding: 1px 6px;
+  border: 1px solid #000;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.current .badge {
+  background: #d4f0d9;
+}
