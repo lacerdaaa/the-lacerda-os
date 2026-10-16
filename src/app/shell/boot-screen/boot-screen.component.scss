@@ -1,0 +1,118 @@
+@use 'retro' as *;
+
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  background: repeating-conic-gradient(#9c9c9c 0 25%, #b4b4b4 0 50%) 0 0 / 2px 2px;
+  font-family: $font-ui;
+  user-select: none;
+  animation: fade-in 200ms ease-out;
+}
+
+.happy-mac {
+  width: 64px;
+  height: 80px;
+  animation: fade-in 300ms ease-out;
+}
+
+.welcome {
+  @include bevel-out(var(--platinum), #000);
+  width: min(360px, calc(100% - 32px));
+  padding: 20px 24px 22px;
+  outline: 1px solid #000;
+  box-shadow:
+    inset 1px 1px 0 var(--platinum-hi),
+    inset -1px -1px 0 var(--platinum-lo),
+    3px 3px 0 rgba(0, 0, 0, 0.4);
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+  animation: welcome-in 220ms ease-out;
+
+  h1 {
+    margin: 4px 0 0;
+    font-size: 20px;
+    letter-spacing: 0.01em;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 45% 45%;
+  background: linear-gradient(180deg, #5dbb4c 0 18%, #f3c53b 18% 34%, #f08a2c 34% 50%, #d9433a 50% 66%, #9a4aa8 66% 82%, #3a8fd9 82% 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), 2px 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.bar {
+  width: 100%;
+  height: 12px;
+  margin-top: 8px;
+  border: 1px solid #000;
+  background: #fff;
+
+  span {
+    display: block;
+    height: 100%;
+    background: repeating-linear-gradient(90deg, #4f4fd1 0 8px, #3a3ab0 8px 10px);
+    border-right: 1px solid #000;
+  }
+}
+
+.parade {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  app-icon {
+    animation: fade-in 160ms ease-out;
+  }
+}
+
+.skip {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  margin: 0;
+  font-size: 10px;
+  color: #3a3a3a;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes welcome-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (max-width: 760px) {
+  .parade {
+    right: 16px;
+    bottom: 36px;
+  }
+
+  .skip {
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+}
