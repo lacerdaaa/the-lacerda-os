@@ -12,47 +12,51 @@ npm test           # run tests with Vitest via Angular CLI
 
 To run a single test file:
 ```bash
-npx ng test --include="**/app.spec.ts"
+npx ng test --include="**/terminal.service.spec.ts"
 ```
 
 ## Architecture
 
-This is a single-page Angular 21 app that simulates a macOS-style desktop ("lacOs"). There is **no routing** — the entire app lives in one component tree rooted at `App` (`src/app/app.ts`).
+Single-page Angular 21 app (standalone, zoneless, signals, OnPush) that simulates a Mac OS 8 "Platinum" desktop called lacOs. There is **no routing**.
 
-### Component structure
-
-- **`App`** (`src/app/app.ts`) — the only stateful component. Contains all business logic, all content data, and all window/dock/desktop management. ~1 200+ lines.
-- **`AboutQuizComponent`** (`src/app/about-quiz/`) — the only extracted sub-component. Hosts the personal quiz and emits `secretUnlocked` when the user answers all questions correctly with no mistakes. The parent listens to this event to unlock the `founder` desktop theme.
-
-### Window system
-
-Each "app" is identified by the `AppId` union type. Opening an app creates a `WindowState` entry in the `windows` signal. Windows are draggable, resizable, minimizable, and maximizable — all managed by `dragState` / `resizeState` private fields and pointer event handlers.
+```
+src/app/
+  app.ts            root: menu bar + desktop + overlays (boot screen, context menu, alerts)
+  core/             state and domain logic, no UI
+    apps.ts               AppId union + APPS registry (names, icons, default/min sizes, dockable)
+    window-manager.service.ts   windows signal: open/focus/close/minimize/zoom/shade/move/resize
+    desktop.service.ts    theme, dock, founder secret, boot state (persisted)
+    shell.service.ts      high-level commands + menu builders shared by menu bar, dock, icons, terminal
+    i18n.ts               AppLanguage, Localized<T>, I18nService (pick / copy dictionaries)
+    menu.ts               MenuItem model + ContextMenuService
+    viewport.service.ts   isCompact (≤ 760px): full-screen windows, single tap
+    storage.ts            never-throwing localStorage helpers
+  data/             personal content (profile, books, experience, courses, bookmarks, files, desktop layout)
+  shell/            OS chrome components (menu-bar, desktop, window-frame, dock, menu, boot-screen, alert-dialog, app-icon)
+  apps/             one folder per app (about, finder, projects, blog, books, courses, experience, safari, terminal, notes, quiz, text-viewer)
+src/styles/_retro.scss   shared Platinum mixins (`@use 'retro' as *;` works from any component)
+```
 
 ### Adding a new app
 
-1. Add the id to the `AppId` union type.
-2. Add an entry to `appRegistry`.
-3. Handle it in `app.html` inside the `@for (windowState of windows())` block.
-4. Optionally add it to `defaultDockAppIds` or `workspaceItems`.
+1. Add the id to `AppId` and an entry to `APPS` in `core/apps.ts` (add an icon case in `shell/app-icon`).
+2. Create the component in `apps/<name>/`.
+3. Render it in the `@switch` of `shell/desktop/desktop.component.html` (add to `FLUSH_APPS` if it should fill the window edge to edge).
+4. Optionally list it in `LAUNCHABLE_APPS` (Go menu / Finder), `DESKTOP_ITEMS`, `DEFAULT_DOCK_APPS` and the terminal `APP_ALIASES`.
 
-### Content data pattern
+### Content and translations
 
-All personal content (books, experience, courses, bio paragraphs) is declared as `private readonly` class fields in `App`, keyed by `AppLanguage` (`'en-US' | 'pt-BR'`). The active language is a signal (`currentLanguage`). To update personal data, edit the corresponding `*ByLanguage` record directly in `app.ts`.
+Personal content lives in `src/app/data/*.ts` as `Localized<T>` records (`'en-US' | 'pt-BR'`). UI strings live next to their component as `COPY` dictionaries consumed with `i18n.copy(COPY)`; shell-wide strings are in `shell/shell.copy.ts`.
 
 ### External data
 
-GitHub projects are the only live-fetched data (`loadGithubProjects`), pulled from the public GitHub API. Everything else is static.
-
-### Safari (in-app browser)
-
-The in-app Safari window renders URLs in an iframe. Two lists control what renders:
-- `safariIframeBlockedHosts` — domains that refuse to be iframed (always shows an error).
-- `safariAllowedUrlMap` / `safariPresetHistoryByLanguage` — preset bookmarks shown in the history panel.
+- Projects: GitHub public API (`apps/projects/github.service.ts`).
+- Blog: `/api/medium-feed` (Vercel edge function in `api/`), with a public RSS-to-JSON fallback for local dev.
 
 ### Storage
 
-`localStorage` keys are all prefixed with `lacos.` (e.g. `lacos.dock.apps`, `lacos.desktop.theme`, `lacos.app.language`, `lacos.quiz.secret.unlocked`).
+`localStorage` keys are prefixed with `lacos.`: `lacos.dock.apps`, `lacos.desktop.theme`, `lacos.app.language`, `lacos.quiz.secret.unlocked`, `lacos.notes`.
 
 ### Secret / Easter egg
 
-Completing the quiz (`AboutQuizComponent`) with zero wrong answers emits `secretUnlocked`, which sets a localStorage flag and unlocks the `founder` desktop theme via a boot animation.
+Answering every Quiz question right on the first try emits `secretUnlocked`; the desktop calls `DesktopService.unlockFounderSecret()`, which unlocks the `founder` theme, shows an alert and enables `boot --founder` in the terminal.
