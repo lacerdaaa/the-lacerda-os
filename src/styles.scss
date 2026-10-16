@@ -1,8 +1,25 @@
-* {
+@use 'retro' as *;
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 :root {
+  // Platinum palette
+  --platinum: #c9c9c9;
+  --platinum-hi: #e8e8e8;
+  --platinum-lo: #8a8a8a;
+  --platinum-dark: #404040;
+  --card: #efefef;
+  --card-hover: #e4e4ec;
+  --select: #2a2a9c;
+  --select-text: #fff;
+  --link: #1a1aa6;
+  --text-muted: #4a4a4a;
+  --danger: #8b0000;
+
   --cursor-retro-default: url('/cursors/retro-default.svg') 1 1, auto;
   --cursor-retro-default-boost: url('/cursors/retro-default-boost.svg') 1 1, auto;
   --cursor-retro-default-active: var(--cursor-retro-default);
@@ -17,12 +34,16 @@ body {
   width: 100%;
   height: 100%;
   margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
-  font-family: 'Chicago', 'Charcoal', 'Geneva', 'MS Sans Serif', 'Tahoma', sans-serif;
-  background: #181818;
-  image-rendering: crisp-edges;
+  font-family: $font-ui;
+  background: #141414;
+  color: #000;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body,
@@ -35,9 +56,10 @@ body.cursor-boost {
 }
 
 a,
+a *,
 button,
-[role='button'],
-.resize-handle {
+button *,
+[role='button'] {
   cursor: var(--cursor-retro-pointer);
 }
 
@@ -48,17 +70,105 @@ select,
   cursor: var(--cursor-retro-text);
 }
 
-.window-titlebar {
-  cursor: var(--cursor-retro-move);
+button {
+  font-family: inherit;
 }
 
-.resize-handle {
-  cursor: var(--cursor-retro-nwse);
+::selection {
+  background: #c6c6ff;
+  color: #000;
 }
 
-app-root .desktop-shell[data-theme='founder'] {
-  --desktop-shell-bg:
-    linear-gradient(180deg, #2b2313 0%, #1b140a 100%);
-  --desktop-layer-bg:
-    repeating-linear-gradient(45deg, #5c4c20 0 10px, #4b3c16 10px 20px);
+// Platinum scrollbars
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #9d9d9d #e2e2e2;
+}
+
+::-webkit-scrollbar {
+  width: 15px;
+  height: 15px;
+}
+
+::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(#d6d6d6 0 25%, #ececec 0 50%) 0 0 / 2px 2px;
+  border-left: 1px solid #a0a0a0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c0dd;
+  border: 1px solid #262626;
+  box-shadow: inset 1px 1px 0 #e6e6ff, inset -1px -1px 0 #8080a8;
+}
+
+::-webkit-scrollbar-corner {
+  background: #d6d6d6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+// Shared building blocks for app windows (kept global so every app looks the same).
+.page-title {
+  @include section-heading;
+}
+
+.page-meta {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+
+  a {
+    color: var(--link);
+  }
+}
+
+.status-box {
+  @include bevel-in(#f4f4f4);
+  margin-top: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+
+  &.error {
+    color: var(--danger);
+  }
+}
+
+.push-button {
+  @include push-button;
+}
+
+.card {
+  @include card;
+}
+
+.blinking-dots::after {
+  content: '';
+  animation: dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75% {
+    content: '...';
+  }
 }
