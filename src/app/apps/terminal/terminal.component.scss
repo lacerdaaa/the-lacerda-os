@@ -1,0 +1,160 @@
+@use 'retro' as *;
+
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.terminal {
+  --phosphor: #74ff9a;
+
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(ellipse at center, #051c0b 0%, #010a03 100%);
+  color: var(--phosphor);
+  font-family: $font-mono;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow: hidden;
+
+  // CRT scanlines
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+    z-index: 2;
+  }
+}
+
+.status-line {
+  flex: none;
+  height: 22px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  border-bottom: 1px solid #0d4220;
+  background: linear-gradient(180deg, #03270f, #011606);
+}
+
+.output {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px 12px 6px;
+  scrollbar-color: #1f6b38 #021006;
+
+  p {
+    margin: 0 0 2px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-shadow: 0 0 6px rgba(116, 255, 154, 0.35);
+  }
+}
+
+.snake-board {
+  margin: 6px 0;
+  padding: 6px 8px;
+  width: fit-content;
+  font: inherit;
+  line-height: 1.15;
+  border: 1px solid #1a6b34;
+  background: rgba(0, 24, 8, 0.75);
+  text-shadow: 0 0 6px rgba(116, 255, 154, 0.5);
+}
+
+.dpad {
+  position: absolute;
+  right: 12px;
+  bottom: 48px;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(3, 34px);
+  grid-template-rows: repeat(2, 34px);
+  gap: 4px;
+
+  button {
+    border: 1px solid var(--phosphor);
+    border-radius: 4px;
+    background: rgba(0, 40, 14, 0.85);
+    color: var(--phosphor);
+    font-size: 13px;
+
+    &:active {
+      background: var(--phosphor);
+      color: #021006;
+    }
+  }
+
+  .dpad-up {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .dpad-left {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .dpad-down {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .dpad-right {
+    grid-column: 3;
+    grid-row: 2;
+  }
+}
+
+.prompt {
+  flex: none;
+  position: relative;
+  z-index: 3;
+  padding: 6px 12px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #0d4220;
+  background: #010d04;
+
+  label {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--phosphor);
+    caret-color: var(--phosphor);
+    font: inherit;
+    font-size: 16px; // avoids iOS zoom on focus
+    line-height: 22px;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: #2f8f4c;
+    }
+  }
+}
+
+@media (min-width: 761px) {
+  .prompt input {
+    font-size: 12px;
+  }
+}
