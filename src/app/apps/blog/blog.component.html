@@ -1,0 +1,38 @@
+<h1 class="page-title">{{ copy().title }}</h1>
+<p class="page-meta">
+  {{ copy().subtitle }}
+  <a [href]="profile.mediumUrl" target="_blank" rel="noopener">{{ profile.mediumLabel }}</a>
+</p>
+
+@switch (blog.state()) {
+  @case ('error') {
+    <div class="status-box error" role="alert">
+      <span>{{ copy().error }}</span>
+      <button type="button" class="push-button" (click)="blog.load(true)">{{ copy().retry }}</button>
+      <a class="push-button" [href]="profile.mediumUrl" target="_blank" rel="noopener">{{ copy().openMedium }}</a>
+    </div>
+  }
+  @case ('ready') {
+    @if (blog.posts().length === 0) {
+      <p class="status-box">{{ copy().empty }}</p>
+    } @else {
+      <ol class="posts">
+        @for (post of blog.posts(); track post.link) {
+          <li>
+            <a class="card post" [href]="post.link" target="_blank" rel="noopener">
+              <time>{{ formatDate(post.pubDate) }}</time>
+              <h2>{{ post.title }}</h2>
+              @if (post.excerpt) {
+                <p>{{ post.excerpt }}</p>
+              }
+              <span class="read">{{ copy().read }} ↗</span>
+            </a>
+          </li>
+        }
+      </ol>
+    }
+  }
+  @default {
+    <p class="status-box"><span class="blinking-dots">{{ copy().loading }}</span></p>
+  }
+}

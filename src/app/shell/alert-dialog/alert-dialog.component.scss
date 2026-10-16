@@ -1,0 +1,71 @@
+@use 'retro' as *;
+
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 8000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.alert {
+  @include bevel-out(var(--platinum), #000);
+  width: min(420px, 100%);
+  padding: 16px 18px 14px;
+  outline: 1px solid #000;
+  box-shadow:
+    inset 1px 1px 0 var(--platinum-hi),
+    inset -1px -1px 0 var(--platinum-lo),
+    3px 3px 0 rgba(0, 0, 0, 0.45);
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  animation: alert-in 180ms ease-out;
+}
+
+.badge {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #000;
+  border-radius: 50%;
+  background: #f3c53b;
+  font-family: $font-ui;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+p {
+  margin: 6px 0 0;
+  font-family: $font-text;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+// The default button carries the thick Mac ring.
+.default {
+  min-width: 72px;
+  box-shadow: 0 0 0 2px var(--platinum), 0 0 0 4px #000;
+  border-radius: 5px;
+}
+
+@keyframes alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}

@@ -1,0 +1,128 @@
+@use 'retro' as *;
+
+:host {
+  position: relative;
+  z-index: 3000;
+  height: 24px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 0 8px;
+  background: linear-gradient(180deg, #f4f4f4 0%, #dcdcdc 100%);
+  border-bottom: 1px solid #000;
+  font-size: 12px;
+  user-select: none;
+}
+
+.menus,
+.status {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.menu-title-wrap {
+  position: relative;
+  display: flex;
+}
+
+.menu-title {
+  border: 0;
+  padding: 0 9px;
+  background: transparent;
+  color: #000;
+  font: inherit;
+  white-space: nowrap;
+
+  &.strong {
+    font-weight: 700;
+  }
+
+  &.open,
+  &:focus-visible {
+    outline: none;
+    background: var(--select);
+    color: var(--select-text);
+  }
+}
+
+// lacOs "apple": a tiny rainbow loop, the system menu.
+.logo-mark {
+  display: block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50% 50% 45% 45%;
+  background: linear-gradient(180deg, #5dbb4c 0 18%, #f3c53b 18% 34%, #f08a2c 34% 50%, #d9433a 50% 66%, #9a4aa8 66% 82%, #3a8fd9 82% 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55);
+}
+
+.menu-title.open .logo-mark {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+
+.status {
+  gap: 10px;
+  align-items: center;
+}
+
+.language-switcher {
+  display: inline-flex;
+  border: 1px solid #000;
+  border-radius: 3px;
+  overflow: hidden;
+
+  button {
+    border: 0;
+    padding: 1px 6px;
+    background: #f4f4f4;
+    color: #000;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+
+    & + button {
+      border-left: 1px solid #000;
+    }
+
+    &.active {
+      background: #000;
+      color: #fff;
+    }
+  }
+}
+
+.clock {
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+@media (max-width: 760px) {
+  :host {
+    height: 32px;
+    padding: 0 6px;
+    font-size: 14px;
+  }
+
+  .menu-title-wrap {
+    position: static;
+  }
+
+  .menu-title.strong {
+    max-width: 44vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dropdown {
+    left: 4px;
+    right: 4px;
+    max-height: calc(100dvh - 120px);
+    overflow-y: auto;
+  }
+}

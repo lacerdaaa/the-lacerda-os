@@ -1,0 +1,97 @@
+@use 'retro' as *;
+
+:host {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  z-index: 2500;
+  max-width: calc(100% - 16px);
+  transform: translateX(-50%);
+}
+
+.dock {
+  @include bevel-out(var(--platinum), #000);
+  display: flex;
+  gap: 2px;
+  padding: 4px 6px 6px;
+  outline: 1px solid #000;
+  box-shadow:
+    inset 1px 1px 0 var(--platinum-hi),
+    inset -1px -1px 0 var(--platinum-lo),
+    2px 2px 0 rgba(0, 0, 0, 0.35);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dock-item {
+  position: relative;
+  flex: none;
+  width: 64px;
+  padding: 4px 2px 6px;
+  border: 1px solid transparent;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  background: transparent;
+  color: #000;
+  font: inherit;
+  transition: transform 120ms ease;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    border-color: var(--platinum-lo) #fff #fff var(--platinum-lo);
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 1px dotted #000;
+  }
+
+  // Running indicator, like the dot under open apps on a Mac dock.
+  &.running::after {
+    content: '';
+    position: absolute;
+    bottom: 1px;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    transform: translateX(-50%);
+    background: #000;
+  }
+
+  &.minimized::after {
+    background: transparent;
+    border: 1px solid #000;
+  }
+
+  &.active .label {
+    font-weight: 700;
+  }
+}
+
+.label {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 760px) {
+  :host {
+    bottom: 6px;
+  }
+
+  .dock-item {
+    width: 56px;
+  }
+
+  .label {
+    display: none;
+  }
+}

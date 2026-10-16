@@ -1,0 +1,108 @@
+@use 'retro' as *;
+
+:host {
+  display: block;
+}
+
+.profile {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.avatar {
+  @include bevel-out(#2a2a9c, #000);
+  flex: none;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: $font-ui;
+  font-size: 24px;
+  font-weight: 700;
+  box-shadow: inset 2px 2px 0 #6a6ae0, inset -2px -2px 0 #15155e;
+}
+
+h1 {
+  @include section-heading;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.name {
+  margin: 2px 0 0;
+  font-family: $font-ui;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.meta {
+  margin: 2px 0 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.button {
+  @include push-button;
+  min-height: 22px;
+  padding: 1px 10px;
+  font-size: 11px;
+}
+
+.copy {
+  margin: 10px 0 0;
+  max-width: 64ch;
+}
+
+.skills {
+  margin-top: 16px;
+
+  h2 {
+    @include section-heading;
+    font-size: 12px;
+  }
+
+  ul {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 6px;
+  }
+
+  li {
+    @include bevel-out(var(--card));
+    padding: 8px 4px 6px;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+  }
+}
+
+.tip {
+  margin: 14px 0 0;
+  padding: 6px 8px;
+  border: 1px dashed #9a9a9a;
+  background: #fffbe0;
+  font-size: 12px;
+}

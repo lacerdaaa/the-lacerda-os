@@ -1,0 +1,41 @@
+<header
+  class="titlebar"
+  (pointerdown)="startDrag($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="endPointerSession()"
+  (pointercancel)="endPointerSession()"
+  (dblclick)="toggleShade($event)"
+  (contextmenu)="openTitleMenu($event)"
+>
+  <button type="button" class="box close-box" [attr.aria-label]="copy().closeBox" [title]="copy().closeBox" (click)="close()"></button>
+  <span class="stripes" aria-hidden="true"></span>
+  <h2 class="title">{{ title() }}</h2>
+  <span class="stripes" aria-hidden="true"></span>
+  @if (!viewport.isCompact()) {
+    <button
+      type="button"
+      class="box zoom-box"
+      [attr.aria-label]="window().maximized ? copy().restoreBox : copy().zoomBox"
+      [title]="window().maximized ? copy().restoreBox : copy().zoomBox"
+      (click)="toggleMaximize()"
+    ></button>
+  }
+  <button type="button" class="box minimize-box" [attr.aria-label]="copy().minimizeBox" [title]="copy().minimizeBox" (click)="minimize()"></button>
+</header>
+
+<div class="body" [class.flush]="flush()" [hidden]="window().shaded">
+  <ng-content />
+</div>
+
+@if (!window().maximized && !window().shaded && !viewport.isCompact()) {
+  <button
+    type="button"
+    class="grow-box"
+    tabindex="-1"
+    [attr.aria-label]="copy().resize"
+    (pointerdown)="startResize($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="endPointerSession()"
+    (pointercancel)="endPointerSession()"
+  ></button>
+}

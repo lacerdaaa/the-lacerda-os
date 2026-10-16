@@ -1,0 +1,32 @@
+<header class="profile">
+  <div class="avatar" aria-hidden="true">{{ initials }}</div>
+  <div class="identity">
+    <h1>{{ copy().heading }}</h1>
+    <p class="name">{{ profile.name }}</p>
+    <p class="meta">{{ role() }} · {{ location() }}</p>
+    <nav class="links">
+      <a class="button" [href]="profile.githubUrl" target="_blank" rel="noopener">GitHub</a>
+      <a class="button" [href]="profile.mediumUrl" target="_blank" rel="noopener">Medium</a>
+      <button type="button" class="button" (click)="shell.openApp('experience')">{{ copy().experience }}</button>
+      <button type="button" class="button" (click)="shell.openApp('projects')">{{ copy().projects }}</button>
+    </nav>
+  </div>
+</header>
+
+@for (paragraph of paragraphs(); track $index) {
+  <p class="copy">{{ paragraph }}</p>
+}
+
+<section class="skills" [attr.aria-label]="copy().skills">
+  <h2>{{ copy().skills }}</h2>
+  <ul>
+    @for (skill of skills; track skill.label) {
+      <li>
+        <img [src]="skill.src" [alt]="" loading="lazy" />
+        <span>{{ skill.label }}</span>
+      </li>
+    }
+  </ul>
+</section>
+
+<p class="tip">{{ copy().tip }}</p>

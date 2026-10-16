@@ -1,0 +1,41 @@
+@use 'retro' as *;
+
+:host {
+  display: block;
+}
+
+.grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 8px;
+}
+
+.book {
+  @include bevel-out(var(--card));
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  gap: 10px;
+  align-items: start;
+
+  img {
+    width: 62px;
+    height: 88px;
+    object-fit: cover;
+    border: 1px solid #000;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}

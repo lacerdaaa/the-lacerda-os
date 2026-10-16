@@ -1,0 +1,42 @@
+<header class="quiz-header">
+  <h1 class="page-title">{{ copy().title }}</h1>
+  <span class="progress" role="status">{{ progressLabel() }}</span>
+  <button type="button" class="push-button" (click)="reset()">{{ copy().reset }}</button>
+</header>
+
+<div class="meter" aria-hidden="true">
+  <span [style.width.%]="(solvedCount() / answers().length) * 100"></span>
+</div>
+
+@if (finished()) {
+  <p class="result" [class.perfect]="totalMistakes() === 0" role="status">{{ resultLabel() }}</p>
+}
+
+<ol class="questions">
+  @for (question of questions(); track $index; let questionIndex = $index) {
+    <li class="question" [class.solved]="answers()[questionIndex].solved">
+      <h2>{{ questionIndex + 1 }}. {{ question.prompt }}</h2>
+      <div class="options">
+        @for (option of question.options; track $index; let optionIndex = $index) {
+          <button
+            type="button"
+            class="option"
+            [class.selected]="answers()[questionIndex].selectedIndex === optionIndex"
+            [class.correct]="answers()[questionIndex].solved && question.correctIndex === optionIndex"
+            [class.wrong]="!answers()[questionIndex].solved && answers()[questionIndex].selectedIndex === optionIndex"
+            [disabled]="answers()[questionIndex].solved && question.correctIndex !== optionIndex"
+            (click)="answer(questionIndex, optionIndex)"
+          >
+            {{ option }}
+          </button>
+        }
+      </div>
+      <p class="meta">
+        <span>{{ mistakesLabel(questionIndex) }}</span>
+        @if (feedback(questionIndex)) {
+          <span class="feedback">{{ feedback(questionIndex) }}</span>
+        }
+      </p>
+    </li>
+  }
+</ol>

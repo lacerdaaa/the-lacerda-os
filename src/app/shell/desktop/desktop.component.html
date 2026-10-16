@@ -1,0 +1,39 @@
+<ul class="icons" role="list">
+  @for (item of items; track $index) {
+    <li [style.grid-column]="viewport.isCompact() ? null : item.column" [style.grid-row]="viewport.isCompact() ? null : item.row">
+      <button
+        type="button"
+        class="icon"
+        [class.selected]="selectedItem() === item"
+        (pointerdown)="rememberPointer($event)"
+        (click)="onItemClick(item, $event)"
+        (dblclick)="open(item)"
+        (contextmenu)="openItemMenu(item, $event)"
+      >
+        <app-icon [icon]="iconFor(item)" [size]="viewport.isCompact() ? 44 : 36" />
+        <span class="label">{{ shell.desktopItemName(item) }}</span>
+      </button>
+    </li>
+  }
+</ul>
+
+@for (window of windows.windows(); track window.id) {
+  <app-window-frame [window]="window" [flush]="isFlush(window.appId)" (click)="$event.stopPropagation()" (contextmenu)="$event.stopPropagation()">
+    @switch (window.appId) {
+      @case ('about') { <app-about /> }
+      @case ('finder') { <app-finder /> }
+      @case ('experience') { <app-experience /> }
+      @case ('projects') { <app-projects /> }
+      @case ('courses') { <app-courses /> }
+      @case ('books') { <app-books /> }
+      @case ('blog') { <app-blog /> }
+      @case ('safari') { <app-safari /> }
+      @case ('terminal') { <app-terminal /> }
+      @case ('notes') { <app-notes /> }
+      @case ('quiz') { <app-quiz (secretUnlocked)="onSecretUnlocked()" /> }
+      @case ('textviewer') { <app-text-viewer /> }
+    }
+  </app-window-frame>
+}
+
+<app-dock (click)="$event.stopPropagation()" />

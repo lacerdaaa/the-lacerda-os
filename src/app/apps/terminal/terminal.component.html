@@ -1,0 +1,42 @@
+<section class="terminal" role="region" aria-label="Terminal" (click)="focusInput()">
+  <div class="status-line" aria-hidden="true">
+    <span>{{ copy().statusSession }}</span>
+    <span>9600 baud</span>
+  </div>
+
+  <div class="output" #output aria-live="polite">
+    @for (line of terminal.lines(); track $index) {
+      <p>{{ line }}</p>
+    }
+    @if (terminal.snakeBoard(); as board) {
+      <pre class="snake-board" aria-label="Snake">{{ board.join('\n') }}</pre>
+    }
+  </div>
+
+  @if (terminal.snakeBoard()) {
+    <div class="dpad" aria-label="Snake controls">
+      @for (control of directions; track control.direction) {
+        <button type="button" [class]="'dpad-' + control.direction" [attr.aria-label]="control.direction" (click)="terminal.steerSnake(control.direction)">
+          {{ control.label }}
+        </button>
+      }
+    </div>
+  }
+
+  <form class="prompt" (submit)="$event.preventDefault(); terminal.submit()">
+    <label for="terminal-command">{{ prompt }}</label>
+    <input
+      #inputField
+      id="terminal-command"
+      type="text"
+      enterkeyhint="send"
+      autocapitalize="off"
+      autocomplete="off"
+      spellcheck="false"
+      [value]="terminal.input()"
+      [placeholder]="copy().placeholder"
+      (input)="onInput($event)"
+      (keydown)="terminal.handleKey($event)"
+    />
+  </form>
+</section>

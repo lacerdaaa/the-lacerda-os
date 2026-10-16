@@ -1,0 +1,85 @@
+// Shared Mac OS 8 "Platinum" building blocks. Import with `@use '<relative>/styles/retro' as *;`.
+
+$font-ui: 'Chicago', 'ChicagoFLF', 'Charcoal', 'Geneva', 'Helvetica Neue', Arial, sans-serif;
+$font-text: 'Geneva', 'Helvetica Neue', Arial, sans-serif;
+$font-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
+
+// Raised surface: light top/left, dark bottom/right.
+@mixin bevel-out($bg: var(--platinum), $dark: var(--platinum-dark)) {
+  background: $bg;
+  border: 1px solid;
+  border-color: #fff $dark $dark #fff;
+  box-shadow: inset 1px 1px 0 var(--platinum-hi), inset -1px -1px 0 var(--platinum-lo);
+}
+
+// Sunken surface: wells, text fields, list boxes.
+@mixin bevel-in($bg: #fff) {
+  background: $bg;
+  border: 1px solid;
+  border-color: var(--platinum-lo) #fff #fff var(--platinum-lo);
+  box-shadow: inset 1px 1px 0 var(--platinum-dark);
+}
+
+// Classic push button with rounded corners and pressed state.
+@mixin push-button {
+  @include bevel-out;
+  min-height: 24px;
+  padding: 2px 12px;
+  border-radius: 4px;
+  border-color: #fff #4a4a4a #4a4a4a #fff;
+  outline: 1px solid #262626;
+  outline-offset: -1px;
+  color: #000;
+  font: inherit;
+  font-size: 12px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &:active:not(:disabled) {
+    background: var(--platinum-lo);
+    color: #fff;
+    border-color: #4a4a4a #fff #fff #4a4a4a;
+    box-shadow: none;
+  }
+
+  &:disabled {
+    color: var(--platinum-lo);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--select);
+  }
+}
+
+// Clickable raised card that presses in when activated.
+@mixin card {
+  @include bevel-out(var(--card));
+  color: #000;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+
+  &:hover {
+    background: var(--card-hover);
+  }
+
+  &:active {
+    border-color: var(--platinum-dark) #fff #fff var(--platinum-dark);
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--select);
+    outline-offset: 1px;
+  }
+}
+
+@mixin section-heading {
+  margin: 0;
+  font-family: $font-ui;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}

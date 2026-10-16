@@ -1,0 +1,81 @@
+<section class="safari" role="region" aria-label="Safari">
+  <form class="toolbar" (submit)="$event.preventDefault(); submitAddress()">
+    <div class="nav-buttons">
+      <button type="button" [disabled]="!canGoBack()" [attr.aria-label]="copy().back" [title]="copy().back" (click)="back()">◀</button>
+      <button type="button" [disabled]="!canGoForward()" [attr.aria-label]="copy().forward" [title]="copy().forward" (click)="forward()">▶</button>
+      <button type="button" [attr.aria-label]="copy().home" [title]="copy().home" (click)="showFavorites()">⌂</button>
+    </div>
+    <label class="address">
+      <span class="visually-hidden">{{ copy().address }}</span>
+      <input
+        type="text"
+        inputmode="url"
+        enterkeyhint="go"
+        autocapitalize="off"
+        autocomplete="off"
+        spellcheck="false"
+        [value]="address()"
+        [placeholder]="copy().placeholder"
+        (input)="onAddressInput($event)"
+      />
+    </label>
+    <button type="submit" class="push-button go">{{ copy().go }}</button>
+    @if (currentUrl()) {
+      <a class="push-button new-tab" [href]="currentUrl()" target="_blank" rel="noopener" [title]="copy().newTab">↗</a>
+    }
+  </form>
+
+  @if (error()) {
+    <p class="banner error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="body">
+    <aside class="sidebar" [attr.aria-label]="copy().bookmarks">
+      <h2>{{ copy().bookmarks }}</h2>
+      @for (bookmark of bookmarks; track bookmark.id) {
+        <button type="button" [class.active]="isCurrent(bookmark)" (click)="open(bookmark)">
+          <strong>{{ bookmark.label }}</strong>
+          <span>{{ hostOf(bookmark.url) }}</span>
+        </button>
+      }
+    </aside>
+
+    <div class="viewport">
+      @switch (page().kind) {
+        @case ('favorites') {
+          <div class="favorites">
+            <h1>{{ copy().favoritesTitle }}</h1>
+            <p>{{ copy().favoritesHint }}</p>
+            <div class="tiles">
+              @for (bookmark of bookmarks; track bookmark.id) {
+                <button type="button" class="card tile" (click)="open(bookmark)">
+                  <span class="monogram" aria-hidden="true">{{ bookmark.label[0] }}</span>
+                  <strong>{{ bookmark.label }}</strong>
+                  <span>{{ note(bookmark) }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+        @default {
+          @if (frameUrl(); as url) {
+            <iframe
+              class="frame"
+              [src]="url"
+              title="Safari"
+              referrerpolicy="no-referrer"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+            ></iframe>
+          } @else {
+            <div class="preview">
+              <span class="monogram large" aria-hidden="true">{{ hostOf(currentUrl())[0] }}</span>
+              <h1>{{ hostOf(currentUrl()) }}</h1>
+              <p>{{ page().kind === 'external' ? copy().external : copy().blocked }}</p>
+              <a class="push-button" [href]="currentUrl()" target="_blank" rel="noopener">{{ copy().newTab }} ↗</a>
+            </div>
+          }
+        }
+      }
+    </div>
+  </div>
+</section>

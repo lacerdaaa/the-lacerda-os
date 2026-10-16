@@ -1,0 +1,99 @@
+@use 'retro' as *;
+
+:host {
+  @include bevel-out(var(--platinum-hi), #000);
+  display: grid;
+  min-width: 200px;
+  padding: 3px 0;
+  font-family: $font-ui;
+  font-size: 12px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+  animation: menu-in 90ms ease-out;
+}
+
+.menu-entry {
+  position: relative;
+}
+
+.menu-item {
+  width: 100%;
+  min-height: 22px;
+  padding: 3px 14px 3px 4px;
+  border: 0;
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  color: #000;
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+
+  &:hover:not(:disabled),
+  &.open,
+  &:focus-visible {
+    outline: none;
+    background: var(--select);
+    color: var(--select-text);
+  }
+
+  &:disabled {
+    color: #8f8f8f;
+  }
+
+  &.danger:not(:hover) {
+    color: var(--danger);
+  }
+}
+
+.menu-check {
+  text-align: center;
+  font-size: 11px;
+}
+
+.menu-hint {
+  padding-left: 18px;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.menu-separator {
+  height: 1px;
+  margin: 3px 1px;
+  background: var(--platinum-lo);
+  box-shadow: 0 1px 0 #fff;
+}
+
+.submenu {
+  position: absolute;
+  top: -4px;
+  left: calc(100% - 4px);
+  z-index: 1;
+
+  &.flip {
+    left: auto;
+    right: calc(100% - 4px);
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .menu-item {
+    min-height: 34px;
+    font-size: 14px;
+  }
+
+  // On phones submenus open inline, below their parent item.
+  .submenu,
+  .submenu.flip {
+    position: static;
+    margin: 0 6px 4px 18px;
+    box-shadow: none;
+  }
+}
